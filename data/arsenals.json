@@ -1,0 +1,35 @@
+{
+  "asOf": "2026-01",
+  "publishedAt": "2026-06-08",
+  "source": {
+    "name": "SIPRI Yearbook 2026, World nuclear forces (January 2026)",
+    "url": "https://www.sipri.org/sites/default/files/WNF%202026%20PR%20FRE.pdf",
+    "license": "SIPRI press release table, cited with attribution"
+  },
+  "definitions": {
+    "deployed": "Warheads on missiles or at bases with operational forces.",
+    "stored": "Warheads in storage or reserve that would need some preparation before deployment.",
+    "militaryStockpile": "Deployed plus centrally stored warheads that could potentially be deployed.",
+    "retired": "Warheads removed from the military stockpile, not yet dismantled.",
+    "totalInventory": "Military stockpile plus retired warheads."
+  },
+  "notes": [
+    "All estimates are approximate. SIPRI revises its figures every year as new information appears.",
+    "New START expired in February 2026 with no replacement treaty; Russia and the US no longer publish aggregate strategic force data under it.",
+    "North Korea: fissile material for up to 90 warheads may exist, but SIPRI estimates about 60 assembled.",
+    "France's total-inventory jump (290 to 370) is a data fix: retired warheads were previously unknown, not a build-up.",
+    "Russia's military-stockpile increase is largely a reassessment of non-strategic (tactical) warheads."
+  ],
+  "countries": [
+    { "iso3": "USA", "name": "United States", "deployed": 1770, "stored": 1930, "stockpile": 3700, "retired": 1342, "inventory": 5042, "centroid": [-98.6, 39.8] },
+    { "iso3": "RUS", "name": "Russia", "deployed": 1796, "stored": 2604, "stockpile": 4400, "retired": 1020, "inventory": 5420, "centroid": [90.0, 61.5] },
+    { "iso3": "GBR", "name": "United Kingdom", "deployed": 120, "stored": 105, "stockpile": 225, "retired": 0, "inventory": 225, "centroid": [-2.5, 54.0] },
+    { "iso3": "FRA", "name": "France", "deployed": 280, "stored": 10, "stockpile": 290, "retired": 80, "inventory": 370, "centroid": [2.4, 46.6] },
+    { "iso3": "CHN", "name": "China", "deployed": 34, "stored": 586, "stockpile": 620, "retired": 0, "inventory": 620, "centroid": [103.0, 35.0] },
+    { "iso3": "IND", "name": "India", "deployed": 12, "stored": 178, "stockpile": 190, "retired": 0, "inventory": 190, "centroid": [79.0, 22.5] },
+    { "iso3": "PAK", "name": "Pakistan", "deployed": 0, "stored": 170, "stockpile": 170, "retired": 0, "inventory": 170, "centroid": [69.5, 30.0] },
+    { "iso3": "PRK", "name": "North Korea", "deployed": 0, "stored": 60, "stockpile": 60, "retired": 0, "inventory": 60, "centroid": [127.2, 40.1] },
+    { "iso3": "ISR", "name": "Israel", "deployed": 0, "stored": 90, "stockpile": 90, "retired": 0, "inventory": 90, "centroid": [35.0, 31.4] }
+  ],
+  "totals": { "deployed": 4012, "stored": 5733, "stockpile": 9745, "retired": 2442, "inventory": 12187 }
+}

@@ -1,0 +1,65 @@
+{
+  "_comment": "Hand-maintained values for annual sources. Update when the source publishes; reviewBy says when to check again.",
+  "counters": [
+    {
+      "id": "doomsday-clock",
+      "label": "Doomsday Clock",
+      "domain": "nuclear",
+      "value": "85 s",
+      "numeric": 85,
+      "unit": "to midnight",
+      "tone": "high",
+      "trendLabel": "4 s closer than 2025 (89 s); closest ever",
+      "trend": "up",
+      "note": "A symbolic setting by the Bulletin's Science and Security Board, not a measurement or a probability.",
+      "asOf": "2026-01-27",
+      "reviewBy": "2027-01-31",
+      "cadence": "annual (January)",
+      "source": {
+        "name": "Bulletin of the Atomic Scientists",
+        "url": "https://thebulletin.org/doomsday-clock/",
+        "license": "Cited with attribution"
+      },
+      "href": "/nuclear"
+    },
+    {
+      "id": "warheads",
+      "label": "Nuclear warheads",
+      "domain": "nuclear",
+      "value": "12,187",
+      "numeric": 12187,
+      "unit": "total inventory",
+      "tone": "elevated",
+      "trendLabel": "9,745 military stockpile · 4,012 deployed. Was 12,241 a year earlier",
+      "trend": "down",
+      "note": "New START expired in February 2026 with no replacement. Inventory is shrinking only because retired warheads are being dismantled; usable stockpiles are growing.",
+      "asOf": "2026-01",
+      "reviewBy": "2027-06-30",
+      "cadence": "annual (June)",
+      "source": {
+        "name": "SIPRI Yearbook 2026",
+        "url": "https://www.sipri.org/sites/default/files/WNF%202026%20PR%20FRE.pdf",
+        "license": "Cited with attribution"
+      },
+      "href": "/nuclear"
+    },
+    {
+      "id": "overshoot-day",
+      "label": "Earth Overshoot Day",
+      "domain": "climate",
+      "value": "Jul 30",
+      "unit": "2026",
+      "tone": "elevated",
+      "trendLabel": "Humanity used a year of renewable resources by this date",
+      "note": "Modelled estimate by Global Footprint Network and York University.",
+      "asOf": "2026-06-05",
+      "reviewBy": "2027-06-30",
+      "cadence": "annual (June)",
+      "source": {
+        "name": "Global Footprint Network",
+        "url": "https://footprintnetwork.org/2026/06/05/announcement-earth-overshoot-day-2026-falls-on-july-30/",
+        "license": "Cited with attribution"
+      }
+    }
+  ]
+}

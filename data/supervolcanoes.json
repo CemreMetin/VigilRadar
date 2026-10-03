@@ -1,0 +1,17 @@
+{
+  "_comment": "Watchlist of supereruption-capable calderas. Years since last super-eruption are rounded literature values; they are NOT a countdown (see methodology).",
+  "volcanoes": [
+    { "id": "yellowstone", "name": "Yellowstone", "country": "USA", "lat": 44.43, "lon": -110.67,
+      "lastSuperEruption": { "name": "Lava Creek Tuff", "yearsAgo": 631000, "vei": "8" } },
+    { "id": "campi-flegrei", "name": "Campi Flegrei", "country": "ITA", "lat": 40.83, "lon": 14.14,
+      "lastSuperEruption": { "name": "Campanian Ignimbrite", "yearsAgo": 39000, "vei": "7" } },
+    { "id": "long-valley", "name": "Long Valley Caldera", "country": "USA", "lat": 37.7, "lon": -118.87,
+      "lastSuperEruption": { "name": "Bishop Tuff", "yearsAgo": 767000, "vei": "7+" } },
+    { "id": "taupo", "name": "Taupō", "country": "NZL", "lat": -38.82, "lon": 176.0,
+      "lastSuperEruption": { "name": "Ōruanui eruption", "yearsAgo": 25500, "vei": "8" } },
+    { "id": "toba", "name": "Toba", "country": "IDN", "lat": 2.68, "lon": 98.88,
+      "lastSuperEruption": { "name": "Youngest Toba Tuff", "yearsAgo": 74000, "vei": "8" } },
+    { "id": "aira", "name": "Aira Caldera (Sakurajima)", "country": "JPN", "lat": 31.58, "lon": 130.66,
+      "lastSuperEruption": { "name": "Ito pyroclastic flow", "yearsAgo": 30000, "vei": "7" } }
+  ]
+}

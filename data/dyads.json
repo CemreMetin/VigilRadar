@@ -1,0 +1,17 @@
+{
+  "_comment": "Tracked country pairs: nuclear-armed state(s) with strained relations or direct confrontation. Order within a pair does not matter. Add pairs here; the worker computes tension from GDELT.",
+  "pairs": [
+    { "a": "USA", "b": "RUS", "label": "United States – Russia", "note": "New START expired Feb 2026 with no replacement (SIPRI)." },
+    { "a": "USA", "b": "CHN", "label": "United States – China" },
+    { "a": "RUS", "b": "GBR", "label": "Russia – United Kingdom" },
+    { "a": "RUS", "b": "FRA", "label": "Russia – France" },
+    { "a": "RUS", "b": "UKR", "label": "Russia – Ukraine", "note": "Nuclear-armed state in a direct war." },
+    { "a": "IND", "b": "PAK", "label": "India – Pakistan", "note": "Both nuclear-armed; SIPRI 2026 cites the outbreak of conflict between them." },
+    { "a": "IND", "b": "CHN", "label": "India – China" },
+    { "a": "PRK", "b": "USA", "label": "North Korea – United States" },
+    { "a": "PRK", "b": "KOR", "label": "North Korea – South Korea" },
+    { "a": "PRK", "b": "JPN", "label": "North Korea – Japan" },
+    { "a": "ISR", "b": "IRN", "label": "Israel – Iran", "note": "Israel is an undeclared nuclear state; Iran is a threshold state, not a nuclear-armed one." },
+    { "a": "USA", "b": "IRN", "label": "United States – Iran" }
+  ]
+}

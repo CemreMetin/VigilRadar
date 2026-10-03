@@ -1,0 +1,21 @@
+import type { Metadata } from "next";
+import SiteNav from "@/components/SiteNav";
+import TrajectoryView from "@/components/TrajectoryView";
+import { Page } from "@/components/ui";
+
+export const metadata: Metadata = {
+  title: "Trajectory · Monitoring",
+  description:
+    "Observed warming and CO2, IPCC scenarios to 2100, and expert estimates of existential risk, each marked as observation, projection or judgement.",
+};
+
+export default function TrajectoryPage() {
+  return (
+    <>
+      <SiteNav />
+      <Page>
+        <TrajectoryView />
+      </Page>
+    </>
+  );
+}

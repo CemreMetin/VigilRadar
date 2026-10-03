@@ -1,0 +1,51 @@
+# TEMPLATE (untested): keeps the site's data fresh and deploys the static export.
+# Not active: the project is not in a git repository yet. To use it, put this file at
+# .github/workflows/data.yml in a GitHub repo and add a deploy step for your host
+# (Cloudflare Pages: cloudflare/wrangler-action; Vercel/Netlify have their own actions).
+# No secrets are needed to build. Add ACLED/UCDP keys only if you add those feeds.
+name: refresh data and deploy
+
+on:
+  schedule:
+    - cron: "*/15 * * * *" # fast feeds every 15 minutes (quakes, Kp, WHO, asteroids, volcanoes, counters)
+    - cron: "40 5 * * *" # full run daily (adds GDELT and World Bank)
+  workflow_dispatch:
+
+concurrency:
+  group: data
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # GDELT daily aggregates are cached so a normal run downloads only the missing day (~7 MB)
+      - uses: actions/cache@v4
+        with:
+          path: .cache/gdelt
+          key: gdelt-${{ github.run_id }}
+          restore-keys: gdelt-
+
+      - name: Fast data refresh
+        if: github.event.schedule != '40 5 * * *'
+        run: npm run data:fast
+      - name: Full data refresh
+        if: github.event.schedule == '40 5 * * *' || github.event_name == 'workflow_dispatch'
+        run: npm run data
+
+      - run: npm run build # static export to out/
+
+      # Deploy step goes here, for example:
+      # - uses: cloudflare/wrangler-action@v3
+      #   with:
+      #     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      #     accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      #     command: pages deploy out --project-name=monitoring

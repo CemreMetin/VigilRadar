@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/* Hacker analysis room palette (SPEC §8). Green is reserved for "safe / action". */
+:root {
+  --bg: #050505;
+  --panel: rgba(10, 15, 20, 0.82);
+  --panel-solid: #0a0f14;
+  --line: rgba(0, 229, 255, 0.16);
+  --line-strong: rgba(0, 229, 255, 0.4);
+  --fg: #d7e2ea;
+  --fg-dim: #7d8c97;
+
+  --threat: #ff003c;
+  --conflict: #ff6a00;
+  --bio: #b026ff;
+  --accent: #00e5ff;
+  --safe: #00ff41;
+  --geo: #ffb000;
+  --space: #c9d1ff;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-solid: var(--panel-solid);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-dim: var(--fg-dim);
+  --color-threat: var(--threat);
+  --color-conflict: var(--conflict);
+  --color-bio: var(--bio);
+  --color-accent: var(--accent);
+  --color-safe: var(--safe);
+  --color-geo: var(--geo);
+  --color-space: var(--space);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono-face);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 14px;
+}
+
+.mono {
+  font-family: var(--font-mono-face), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+
+.label {
+  font-family: var(--font-mono-face), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+/* Thin scrollbars for the data panels */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* Focus ring: visible for keyboard users on every interactive element */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Single, calm pulse used only for the "live" dot; disabled for reduced motion */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.live-dot { animation: live-pulse 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
+}
+
+/* MapLibre popup restyle */
+.maplibregl-popup-content {
+  background: var(--panel-solid) !important;
+  color: var(--fg) !important;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px !important;
+  padding: 10px 12px !important;
+  font-size: 12px;
+  box-shadow: 0 0 0 1px #000, 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-right .maplibregl-popup-tip { border-bottom-color: var(--line-strong) !important; }
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip { border-top-color: var(--line-strong) !important; }
+.maplibregl-popup-close-button { color: var(--fg-dim) !important; }
+.maplibregl-ctrl-attrib { background: rgba(5, 5, 5, 0.7) !important; }
+.maplibregl-ctrl-attrib a { color: var(--fg-dim) !important; }
+
+/* Print: checklists and guides should print as plain black on white */
+@media print {
+  html, body { background: #fff !important; color: #000 !important; height: auto !important; }
+  .no-print { display: none !important; }
+  .panel, .label, .mono { color: #000 !important; background: transparent !important; border-color: #999 !important; }
+  a { color: #000 !important; text-decoration: underline; }
+  * { box-shadow: none !important; }
+  [class*="text-dim"], [class*="text-safe"], [class*="text-accent"] { color: #222 !important; }
+  [class*="border-line"], [class*="divide-line"] > * { border-color: #aaa !important; }
+  [class*="opacity-45"] { opacity: 1 !important; }
+}
