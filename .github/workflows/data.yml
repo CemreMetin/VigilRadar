@@ -1,0 +1,78 @@
+# Refreshes the data, builds the static site and deploys it to Cloudflare Pages.
+#
+# Runs on every push to main, every 30 minutes, and on demand. Nothing is committed back to the repo:
+# fresh data only lives in the deployed site, so the git history stays clean.
+#
+# Deploying needs two repository secrets (Settings > Secrets and variables > Actions):
+#   CLOUDFLARE_API_TOKEN    a token with "Cloudflare Pages: Edit" permission
+#   CLOUDFLARE_ACCOUNT_ID   your account id (Workers & Pages overview, right-hand side)
+# Without them the workflow still builds and tests the site; it just skips the deploy step.
+name: data and deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "7,37 * * * *" # twice an hour, off the busy :00 and :30 marks
+  workflow_dispatch:
+
+# Only one run at a time; a newer run waits instead of cancelling a deploy half way
+concurrency:
+  group: data-and-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PROJECT: monitoring # the Cloudflare Pages project name (becomes monitoring.pages.dev)
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # GDELT daily aggregates are cached, so a normal run downloads only the missing day (about 7 MB).
+      # The very first run downloads 30 days and takes a few minutes.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/gdelt
+          key: gdelt-${{ github.run_id }}
+          restore-keys: gdelt-
+
+      # Always the full refresh: with the cache above the slow feeds are cheap, and it avoids the
+      # fast mode carrying over stale values from the committed copy of the data.
+      - name: Refresh data
+        run: npm run data
+
+      - name: Lint and type-check
+        run: |
+          npx tsc --noEmit
+          npm run lint
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Create the Pages project (first run only)
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        continue-on-error: true
+        run: npx wrangler pages project create "$PROJECT" --production-branch=main
+
+      - name: Deploy to Cloudflare Pages
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npx wrangler pages deploy out --project-name="$PROJECT" --branch=main --commit-dirty=true
+
+      - name: Note when deploy was skipped
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: echo "CLOUDFLARE_API_TOKEN is not set, so the site was built but not deployed."
