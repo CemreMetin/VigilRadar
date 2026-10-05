@@ -21,7 +21,13 @@ export type MapData = {
   dyads: DyadLine[];
   /** lines from the selected entity to what it is linked to (Connections) */
   connections: { id: string; from: [number, number]; to: [number, number] }[];
+  /** geomagnetic latitude lines and submarine cables (solar scenario) */
+  geomag: { type: "FeatureCollection"; features: unknown[] } | null;
+  cables: { type: "FeatureCollection"; features: unknown[] } | null;
 };
+
+/** Where the camera should go when the scenario changes. `key` identifies the scenario. */
+export type Camera = { center: [number, number]; zoom: number; key: string };
 
 type Props = {
   data: MapData;
@@ -29,6 +35,7 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   globe: boolean;
+  camera?: Camera;
 };
 
 type FC = { type: "FeatureCollection"; features: unknown[] };
@@ -53,6 +60,8 @@ function buildSources(d: MapData): Record<string, FC> {
     cells: fc(d.cells.map((c) => point(c.lon, c.lat, { id: `cell:${c.lat},${c.lon}`, n: c.n }))),
     dyads: fc(d.dyads.map((x) => arcFeature(x.from, x.to, { id: x.id, tension: x.tension ?? 0 }))),
     connections: fc(d.connections.map((c) => arcFeature(c.from, c.to, { id: c.id }))),
+    gm: d.geomag ?? fc([]),
+    cables: d.cables ?? fc([]),
   };
 }
 
@@ -93,7 +102,7 @@ const CLICKABLE = [
   "dyads",
 ];
 
-export default function MapView({ data, entities, selectedId, onSelect, globe }: Props) {
+export default function MapView({ data, entities, selectedId, onSelect, globe, camera }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const readyRef = useRef(false);
@@ -102,11 +111,11 @@ export default function MapView({ data, entities, selectedId, onSelect, globe }:
   const applyDataRef = useRef<() => void>(() => {});
   const applyArsenalsRef = useRef<() => void>(() => {});
   const applySelectionRef = useRef<() => void>(() => {});
-  const latest = useRef({ data, entities, selectedId, onSelect, globe });
+  const latest = useRef({ data, entities, selectedId, onSelect, globe, camera });
   // Keep map callbacks pointed at current props. Declared first so it runs before the
   // other effects in the same commit.
   useEffect(() => {
-    latest.current = { data, entities, selectedId, onSelect, globe };
+    latest.current = { data, entities, selectedId, onSelect, globe, camera };
   });
 
   // init once
@@ -118,11 +127,12 @@ export default function MapView({ data, entities, selectedId, onSelect, globe }:
       if (disposed || !el.current) return;
       ml.setWorkerUrl("/vendor/maplibre-gl-worker.mjs");
       const narrow = el.current.clientWidth < 700;
+      const cam = latest.current.camera;
       map = new ml.Map({
         container: el.current,
         style: STYLE_URL,
-        center: [15, 20],
-        zoom: narrow ? 0.3 : 1.6,
+        center: cam?.center ?? [15, 20],
+        zoom: cam ? (narrow ? Math.max(0.3, cam.zoom - 1.3) : cam.zoom) : narrow ? 0.3 : 1.6,
         minZoom: 0.5,
         maxZoom: 9,
         attributionControl: { compact: true },
@@ -139,6 +149,23 @@ export default function MapView({ data, entities, selectedId, onSelect, globe }:
         map.addSource("selected", { type: "geojson", data: fc([]) as never });
 
         // ---- layers, bottom to top
+        map.addLayer({
+          id: "cables-lines", type: "line", source: "cables",
+          paint: {
+            "line-color": ["case", ["==", ["get", "hi"], 1], "#00e5ff", "#4a6a78"],
+            "line-width": ["case", ["==", ["get", "hi"], 1], 1.1, 0.6],
+            "line-opacity": 0.75,
+          },
+        });
+        map.addLayer({
+          id: "gm-lines", type: "line", source: "gm",
+          paint: {
+            "line-color": ["match", ["get", "deg"], 60, "#ff003c", "#ffb000"],
+            "line-width": 1.8,
+            "line-dasharray": [3, 2],
+            "line-opacity": 0.9,
+          },
+        });
         map.addLayer({
           id: "cells-halo", type: "circle", source: "cells",
           paint: {
@@ -334,7 +361,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe }:
   const { quakes, plants, volcanoes, outbreaks, cells, dyads, connections, arsenals } = data;
   useEffect(() => {
     applyDataRef.current();
-  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections]);
+  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables]);
 
   useEffect(() => {
     applyArsenalsRef.current();
@@ -343,6 +370,21 @@ export default function MapView({ data, entities, selectedId, onSelect, globe }:
   useEffect(() => {
     applySelectionRef.current();
   }, [selectedId, entities]);
+
+  // scenario change: fly the camera to that scenario's preset view
+  const camKey = camera?.key;
+  const firstCam = useRef(true);
+  useEffect(() => {
+    const map = mapRef.current;
+    const cam = latest.current.camera;
+    if (firstCam.current) {
+      firstCam.current = false;
+      return; // the initial view is set when the map is created
+    }
+    if (!map || !readyRef.current || !cam) return;
+    const narrow = (el.current?.clientWidth ?? 800) < 700;
+    map.flyTo({ center: cam.center, zoom: narrow ? Math.max(0.3, cam.zoom - 1.3) : cam.zoom, duration: 1400, essential: false });
+  }, [camKey]);
 
   // projection toggle
   useEffect(() => {

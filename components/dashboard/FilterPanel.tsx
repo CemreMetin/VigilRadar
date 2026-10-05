@@ -1,8 +1,7 @@
 "use client";
 
-import type { CSSProperties } from "react";
-import { DOMAINS } from "@/lib/domains";
-import type { DomainId } from "@/lib/types";
+import type { CSSProperties, ReactNode } from "react";
+import { LAYER_INFO, type LayerId, type Mode } from "@/lib/lenses";
 
 type Option<T> = { value: T; label: string };
 
@@ -34,70 +33,67 @@ function Segmented<T extends string | number>({
   );
 }
 
-const Heading = ({ children }: { children: React.ReactNode }) => (
-  <p className="label mb-2 mt-6 first:mt-0">{children}</p>
+const Heading = ({ children }: { children: ReactNode }) => (
+  <p className="label caret mb-2 mt-6 first:mt-0">{children}</p>
 );
 
 /**
- * Left panel: map layers and filters. Layers are toggle buttons (bordered, with an explicit ON/OFF),
- * so it is obvious they can be clicked. Domains with no map layer are shown as muted, borderless
- * text: they are information, not controls.
+ * Left panel = micro control: which details of THIS scenario do I want on the map?
+ * It holds only the layers that belong to the active scenario, their filters, and the view options.
+ * It never switches scenarios (that is the top bar's job).
  */
 export default function FilterPanel({
-  enabled,
+  mode,
+  layersOn,
   onToggle,
-  quakeFilters,
   range,
   onRange,
   minMag,
   onMinMag,
+  globe,
+  onGlobe,
   showConnections,
   onConnections,
   legend,
 }: {
-  enabled: Set<DomainId>;
-  onToggle: (id: DomainId) => void;
-  quakeFilters: boolean;
+  mode: Mode;
+  layersOn: Set<LayerId>;
+  onToggle: (id: LayerId) => void;
   range: "24h" | "7d";
   onRange: (v: "24h" | "7d") => void;
   minMag: number;
   onMinMag: (v: number) => void;
+  globe: boolean;
+  onGlobe: (v: boolean) => void;
   showConnections: boolean;
   onConnections: (v: boolean) => void;
-  legend: React.ReactNode;
+  legend: ReactNode;
 }) {
+  const hasQuakes = mode.layers.includes("quakes");
   return (
-    <div className="p-3">
-      <Heading>Map layers</Heading>
-      <ul className="space-y-1.5">
-        {DOMAINS.map((d) => {
-          const on = enabled.has(d.id);
-          if (!d.live) {
-            return (
-              <li key={d.id} className="px-2.5 py-1.5">
-                <span className="flex items-center gap-2 text-[13px] text-dim">
-                  <span className="inline-block h-2 w-2 shrink-0 opacity-60" style={{ background: d.color }} aria-hidden />
-                  {d.label}
-                  {d.metrics && <span className="label ml-auto">metrics only</span>}
-                </span>
-              </li>
-            );
-          }
+    <div className="p-3" key={mode.id}>
+      <p className="mono text-[11px] font-bold tracking-wider" style={{ color: mode.color }}>
+        {`${mode.title.toUpperCase()} // LAYERS`}
+      </p>
+      <ul className="readout-in mt-3 space-y-1.5">
+        {mode.layers.map((id) => {
+          const info = LAYER_INFO[id];
+          const on = layersOn.has(id);
           return (
-            <li key={d.id}>
+            <li key={id}>
               <button
                 type="button"
                 aria-pressed={on}
-                onClick={() => onToggle(d.id)}
-                style={{ "--c": d.color } as CSSProperties}
-                className="card-btn flex w-full items-center gap-2 px-2.5 py-1.5 text-left"
+                onClick={() => onToggle(id)}
+                style={{ "--c": info.color } as CSSProperties}
+                className="card-btn toggle-row relative flex w-full items-center gap-2 overflow-hidden px-2.5 py-1.5 text-left"
               >
-                <span className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: on ? d.color : "transparent", border: `1px solid ${d.color}` }} aria-hidden />
+                <span className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: on ? info.color : "transparent", border: `1px solid ${info.color}` }} aria-hidden />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[13px] font-bold">{d.label}</span>
-                  <span className="block truncate text-[11px] font-light text-dim">{d.blurb}</span>
+                  <span className="block text-[13px] font-bold">{info.label}</span>
+                  <span className="block truncate text-[11px] font-light text-dim">{info.blurb}</span>
                 </span>
-                <span className="mono shrink-0 text-[10px] font-bold" style={{ color: on ? d.color : "var(--fg-dim)" }}>
+                <span className="mono shrink-0 text-[10px] font-bold" style={{ color: on ? info.color : "var(--fg-dim)" }}>
                   {on ? "ON" : "OFF"}
                 </span>
               </button>
@@ -106,9 +102,9 @@ export default function FilterPanel({
         })}
       </ul>
 
-      {quakeFilters && (
+      {hasQuakes && (
         <>
-          <Heading>Quakes: time</Heading>
+          <Heading>Quake filter: time</Heading>
           <Segmented
             label="Quake time range"
             value={range}
@@ -118,7 +114,7 @@ export default function FilterPanel({
               { value: "7d", label: "7d" },
             ]}
           />
-          <Heading>Quakes: magnitude</Heading>
+          <Heading>Quake filter: magnitude</Heading>
           <Segmented
             label="Minimum magnitude"
             value={minMag}
@@ -131,12 +127,21 @@ export default function FilterPanel({
         </>
       )}
 
-      <Heading>Connections</Heading>
+      <Heading>View</Heading>
+      <Segmented
+        label="Map projection"
+        value={globe ? "3D" : "2D"}
+        onChange={(v) => onGlobe(v === "3D")}
+        options={[
+          { value: "2D", label: "2D MAP" },
+          { value: "3D", label: "3D GLOBE" },
+        ]}
+      />
       <button
         type="button"
         aria-pressed={showConnections}
         onClick={() => onConnections(!showConnections)}
-        className="btn flex w-full items-center justify-between px-2.5 py-1.5 text-left"
+        className="btn mt-1.5 flex w-full items-center justify-between px-2.5 py-1.5 text-left"
       >
         <span className="text-[13px] font-bold">Draw links for selection</span>
         <span className="mono text-[10px] font-bold">{showConnections ? "ON" : "OFF"}</span>
