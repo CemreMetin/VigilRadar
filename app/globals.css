@@ -55,10 +55,45 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Flat, sharp surfaces: solid fill and a 1px border. No blur, no shadow, no glow. */
 .panel {
-  background: var(--panel);
+  background: var(--panel-solid);
   border: 1px solid var(--line);
-  backdrop-filter: blur(6px);
+}
+
+/* Interactive things (buttons, toggles, cards) share one look: a solid 1px border that is clearly
+   brighter than the static dividers, and a visible fill + brighter border on hover.
+   Static text stays muted (text-dim). Set --c on the element to tint a button with its own colour. */
+.btn,
+.card-btn {
+  --c: var(--accent);
+  --tint: transparent;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+  /* solid base so nothing from the map shows through; the tint is layered on top of it */
+  background-color: var(--panel-solid);
+  background-image: linear-gradient(var(--tint), var(--tint));
+  color: var(--fg);
+  cursor: pointer;
+  transition: none;
+}
+.btn:hover,
+.card-btn:hover {
+  --tint: color-mix(in srgb, var(--c) 16%, transparent);
+  border-color: var(--c);
+}
+.btn[aria-pressed="true"],
+.btn[aria-selected="true"],
+.card-btn[aria-pressed="true"] {
+  --tint: color-mix(in srgb, var(--c) 22%, transparent);
+  border-color: var(--c);
+}
+.btn[aria-pressed="true"],
+.btn[aria-selected="true"] {
+  color: var(--c);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .label {
@@ -100,7 +135,7 @@ body {
   border-radius: 2px !important;
   padding: 10px 12px !important;
   font-size: 12px;
-  box-shadow: 0 0 0 1px #000, 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: none !important;
 }
 .maplibregl-popup-anchor-top .maplibregl-popup-tip,
 .maplibregl-popup-anchor-top-left .maplibregl-popup-tip,

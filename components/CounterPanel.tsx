@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DOMAIN_BY_ID } from "@/lib/domains";
 import type { Counter, Tone } from "@/lib/types";
 
@@ -38,8 +38,21 @@ function fmtAsOf(asOf: string): string {
   return asOf.length > 10 ? asOf.slice(0, 16).replace("T", " ") + " UTC" : asOf;
 }
 
-export default function CounterPanel({ counters, today }: { counters: Counter[]; today: string }) {
+export default function CounterPanel({
+  counters,
+  today,
+  focusId,
+}: {
+  counters: Counter[];
+  today: string;
+  /** open this metric (used when a scenario card is selected) */
+  focusId?: string | null;
+}) {
   const [open, setOpen] = useState<string | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (focusId) setOpen(focusId);
+  }, [focusId]);
 
   if (counters.length === 0) {
     return <p className="p-4 text-xs text-dim">No metrics loaded. Run npm run data.</p>;
@@ -58,7 +71,7 @@ export default function CounterPanel({ counters, today }: { counters: Counter[];
               type="button"
               aria-expanded={isOpen}
               onClick={() => setOpen(isOpen ? null : c.id)}
-              className="flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-accent/5"
+              className="flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-accent/10"
             >
               <span className="mt-1 inline-block h-2 w-2 shrink-0" style={{ background: dom.color }} aria-hidden />
               <span className="min-w-0 flex-1">
@@ -85,6 +98,9 @@ export default function CounterPanel({ counters, today }: { counters: Counter[];
                 )}
               </span>
               {c.history && <Sparkline values={c.history} color={dom.color} />}
+              <span className="mono mt-0.5 shrink-0 text-xs font-bold text-accent" aria-hidden>
+                {isOpen ? "−" : "+"}
+              </span>
               <span className="sr-only">Status: {TONE_LABEL[tone]}</span>
             </button>
 
@@ -93,8 +109,8 @@ export default function CounterPanel({ counters, today }: { counters: Counter[];
                 {c.note && <p className="text-fg/90">{c.note}</p>}
                 {c.rows && (
                   <ul className="mono mt-2 divide-y divide-line border border-line">
-                    {c.rows.map((r) => (
-                      <li key={r.label} className="flex items-baseline justify-between gap-3 px-2 py-1">
+                    {c.rows.map((r, i) => (
+                      <li key={`${i}-${r.label}`} className="flex items-baseline justify-between gap-3 px-2 py-1">
                         <span className="min-w-0 truncate text-[11px] text-dim" title={r.label}>
                           {r.label}
                         </span>
