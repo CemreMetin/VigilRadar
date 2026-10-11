@@ -77,7 +77,8 @@ export default function CounterPanel({
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
                   <span className="label">{c.label}</span>
-                  {c.manual && <span className="label text-dim/70">manual</span>}
+                  {c.manual && <span className="label opacity-60">manual</span>}
+                  {tone !== "normal" && <span className="mono text-[10px] font-bold" style={{ color: TONE_COLOR[tone] }}>{TONE_LABEL[tone].toUpperCase()}</span>}
                   {reviewDue && <span className="label text-geo">review due</span>}
                 </span>
                 <span className="mt-0.5 flex items-baseline gap-2">
@@ -86,16 +87,6 @@ export default function CounterPanel({
                   </span>
                   {c.unit && <span className="mono text-[11px] text-dim">{c.unit}</span>}
                 </span>
-                {c.trendLabel && (
-                  <span className="mt-1 block text-[11px] leading-snug text-dim">
-                    {c.trend && (
-                      <span className="mono mr-1" aria-hidden>
-                        {TREND_ARROW[c.trend]}
-                      </span>
-                    )}
-                    {c.trendLabel}
-                  </span>
-                )}
               </span>
               {c.history && <Sparkline values={c.history} color={dom.color} />}
               <span className="mono mt-0.5 shrink-0 text-xs font-bold text-accent" aria-hidden>
@@ -106,7 +97,14 @@ export default function CounterPanel({
 
             {isOpen && (
               <div className="border-t border-line bg-bg/60 px-3 py-3 text-xs leading-relaxed">
-                {c.note && <p className="text-fg/90">{c.note}</p>}
+                {c.trendLabel && (
+                  <p className="mb-2 text-[11px] leading-snug text-fg">
+                    {c.trend && <span className="mono mr-1" aria-hidden>{TREND_ARROW[c.trend]}</span>}
+                    {c.trendLabel}
+                  </p>
+                )}
+                {c.basis && <p className="mb-2 text-[11px] font-light leading-snug text-dim">How the status is set: {c.basis}</p>}
+                {c.note && <p className="font-light text-dim">{c.note}</p>}
                 {c.rows && (
                   <ul className="mono mt-2 divide-y divide-line border border-line">
                     {c.rows.map((r, i) => (

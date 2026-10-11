@@ -24,6 +24,7 @@ import CounterPanel from "./CounterPanel";
 import DashboardLayout from "./dashboard/DashboardLayout";
 import FilterPanel from "./dashboard/FilterPanel";
 import HubCard from "./dashboard/HubCard";
+import { Section } from "./dashboard/parts";
 import MapHud from "./dashboard/MapHud";
 import Readout from "./dashboard/Readout";
 import StatusBar from "./dashboard/StatusBar";
@@ -31,6 +32,7 @@ import TopBar from "./dashboard/TopBar";
 import LinksPanel, { linksFor } from "./LinksPanel";
 import FreshnessTable from "./FreshnessTable";
 import ViewControls from "./dashboard/ViewControls";
+import type { MiniPoint } from "./dashboard/MiniContext";
 import MapView, { type MapControls, type MapData } from "./MapView";
 
 type Range = "24h" | "7d";
@@ -293,6 +295,32 @@ export default function Dashboard() {
     [layersOn, tideFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
   );
 
+  // left panel: live counts per layer, and every drawn point for the mini context map
+  const counts: Partial<Record<LayerId, number>> = {
+    quakes: quakesFiltered.length,
+    volcanoes: world?.volcanoes.length,
+    arsenals: arsenals.countries.length,
+    plants: plants.length || undefined,
+    dyads: dyads.length,
+    outbreaks: outbreakGroups.length,
+    conflict: cells.length || undefined,
+    cables: cables?.features.length,
+    tide: tideFile?.stations.length,
+  };
+  const miniPoints = useMemo<MiniPoint[]>(() => {
+    const out: MiniPoint[] = [];
+    for (const e of mapData.quakes) out.push({ lon: e.lon, lat: e.lat, color: LAYER_INFO.quakes.color });
+    for (const x of mapData.plants) out.push({ lon: x.lon, lat: x.lat, color: LAYER_INFO.plants.color });
+    for (const x of mapData.arsenals) out.push({ lon: x.centroid[0], lat: x.centroid[1], color: LAYER_INFO.arsenals.color });
+    for (const x of mapData.volcanoes) out.push({ lon: x.lon, lat: x.lat, color: LAYER_INFO.volcanoes.color });
+    for (const x of mapData.outbreaks) out.push({ lon: x.lon, lat: x.lat, color: LAYER_INFO.outbreaks.color });
+    for (const x of mapData.cells) out.push({ lon: x.lon, lat: x.lat, color: LAYER_INFO.conflict.color });
+    for (const f of (mapData.tide?.features ?? []) as { geometry: { coordinates: [number, number] } }[]) {
+      out.push({ lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], color: LAYER_INFO.tide.color });
+    }
+    return out;
+  }, [mapData]);
+
   const liveFeeds = world?.feeds.filter((f) => f.ok && !isStale(f.fetchedAt, nowMs)).length ?? 0;
   const totalFeeds = world?.feeds.length ?? 0;
   const dataStale = world ? isStale(world.generatedAt, nowMs) : false;
@@ -387,11 +415,19 @@ export default function Dashboard() {
             SIGNAL {signal.label}
           </span>
         </div>
-        <p className="readout-in mt-1.5 text-[11px] font-light leading-relaxed text-dim">{signal.basis}</p>
-        <p className="readout-in mt-1 text-[11px] font-light leading-relaxed text-dim">{mode.blurb}</p>
-        <Link href={mode.page} style={{ "--c": mode.color } as React.CSSProperties} className="btn mono mt-2 inline-block px-2.5 py-1 text-[11px] font-bold">
-          {mode.pageLabel} →
-        </Link>
+        {/* the one figure that matters, then everything else behind a disclosure */}
+        <p className="mono readout-in mt-1.5 text-lg font-bold leading-tight" style={{ color: SIGNAL_COLOR[signal.level] }}>
+          {mode.stat(world)}
+        </p>
+      </div>
+      <div className="shrink-0">
+        <Section title="About this reading">
+          <p className="text-[11px] font-light leading-relaxed text-dim">{signal.basis}</p>
+          <p className="mt-1.5 text-[11px] font-light leading-relaxed text-dim">{mode.blurb}</p>
+          <Link href={mode.page} style={{ "--c": mode.color } as React.CSSProperties} className="btn mono mt-2 inline-block px-2.5 py-1 text-[11px] font-bold">
+            {mode.pageLabel} →
+          </Link>
+        </Section>
       </div>
 
       <div className="flex shrink-0 border-b border-line" role="tablist" aria-label="Right panel view">
@@ -418,7 +454,7 @@ export default function Dashboard() {
           <>
             <CounterPanel counters={orderedCounters} today={today} focusId={mode.counterIds[0] ?? null} />
             <p className="px-3 py-3 text-[11px] font-light leading-relaxed text-dim">
-              Tap a metric for its source, date and caveats. &quot;manual&quot; values come from annual publications and are updated by hand.
+              Open a metric for its trend, source, date and caveats.
             </p>
           </>
         )}
@@ -438,6 +474,12 @@ export default function Dashboard() {
           mode={mode}
           layersOn={layersOn}
           onToggle={toggleLayer}
+          onAllLayers={(on) => setLayersOn(new Set(on ? mode.layers : []))}
+          counts={counts}
+          points={miniPoints}
+          selected={selected}
+          onFly={(lon, lat) => controlsRef.current?.flyTo(lon, lat)}
+          onClearSelection={() => select(null)}
           range={range}
           onRange={setRange}
           minMag={minMag}

@@ -4,7 +4,7 @@ import { arsenals } from "@/lib/arsenals";
 import { relTime } from "@/lib/format";
 import type { Mode } from "@/lib/lenses";
 import type { AsteroidsFile, Counter, MonitorEvent, TideGaugesFile, WorldState } from "@/lib/types";
-import { AiBioReadout, AsteroidReadout, IceReadout } from "./ExtraReadouts";
+import { AsteroidReadout, IceReadout } from "./ExtraReadouts";
 import { Bar, Big, Section } from "./parts";
 
 /**
@@ -122,7 +122,7 @@ export default function Readout({
           <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} color="var(--bio)" sub={`${countries.size} countries`} />
           <Big label="VOLCANOES ABOVE BASELINE" value={`${up}/${world.volcanoes.length}`} color={up ? "var(--threat)" : "var(--fg)"} />
         </div>
-        <Section title="Recent earthquakes">
+        <Section open title="Recent earthquakes">
           <QuakeList quakes={quakes} now={now} selectedId={selectedId} onSelect={onSelect} />
         </Section>
       </>
@@ -148,7 +148,7 @@ export default function Readout({
           </div>
           <p className="mono mt-1 text-[10px] font-light text-dim">Taller bar = closer to midnight. Source: Bulletin of the Atomic Scientists.</p>
         </Section>
-        <Section title="Tension between pairs (media coverage, 0-100)">
+        <Section open title="Tension between pairs (media coverage, 0-100)">
           <ul>
             {dyads.map((d) => (
               <li key={d.label} className="border-b border-line/50 pb-1.5 last:border-0">
@@ -181,7 +181,7 @@ export default function Readout({
           <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} color="var(--bio)" />
           <Big label="COUNTRIES · 120D" value={String(countries.size)} color="var(--bio)" sub="named in a report" />
         </div>
-        <Section title="Latest WHO reports">
+        <Section open title="Latest WHO reports">
           <ul className="divide-y divide-line border border-line">
             {latest.map((e) => (
               <li key={e.id}>
@@ -202,7 +202,7 @@ export default function Readout({
   if (mode.id === "volcano") {
     return (
       <>
-        <Section title="Supervolcano watchlist">
+        <Section open title="Supervolcano watchlist">
           <ul className="divide-y divide-line border border-line">
             {world.volcanoes.map((v) => {
               const col = v.level === "elevated" ? "var(--threat)" : v.level === "normal" ? "var(--safe)" : "var(--fg-dim)";
@@ -239,7 +239,7 @@ export default function Readout({
           <Big label="CONFLICT REPORTS · 7D" value={news?.value ?? "–"} color="var(--conflict)" sub={news?.trendLabel} />
           <Big label="CHOKEPOINTS LOW" value={choke?.value ?? "–"} color="var(--geo)" sub="of tracked straits and canals" />
         </div>
-        <Section title="Most-reported countries (armed conflict, 7 d)">
+        <Section open title="Most-reported countries (armed conflict, 7 d)">
           <ul>
             {rows.map((r) => (
               <Bar key={r.label} label={r.label} value={n(r.v)} pct={(r.v / max) * 100} color="var(--conflict)" />
@@ -260,7 +260,6 @@ export default function Readout({
     );
   }
 
-  if (mode.id === "aibio") return <AiBioReadout world={world} />;
   if (mode.id === "ice") return <IceReadout world={world} tide={tide} />;
   if (mode.id === "asteroid") return <AsteroidReadout world={world} file={asteroids} />;
 
@@ -268,7 +267,7 @@ export default function Readout({
   const kp = c("kp");
   return (
     <>
-      <Section title="Geomagnetic activity">{kp ? <KpGauge counter={kp} /> : <p className="text-xs text-dim">Kp unavailable.</p>}</Section>
+      <Section open title="Geomagnetic activity">{kp ? <KpGauge counter={kp} /> : <p className="text-xs text-dim">Kp unavailable.</p>}</Section>
       <Section title="Why it matters">
         <p className="text-[12px] font-light leading-relaxed text-dim">
           Storms induce currents in long power lines and pipelines, strongest near the magnetic poles. The amber and red lines on the map are 50° and

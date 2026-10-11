@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import SiteNav from "@/components/SiteNav";
 import TrajectoryView from "@/components/TrajectoryView";
-import { Page } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Trajectory · Monitoring",
@@ -13,9 +12,7 @@ export default function TrajectoryPage() {
   return (
     <>
       <SiteNav />
-      <Page>
-        <TrajectoryView />
-      </Page>
+      <TrajectoryView />
     </>
   );
 }

@@ -29,7 +29,7 @@ export type MapData = {
 };
 
 /** Imperative controls for the on-map view buttons (bottom right). */
-export type MapControls = { zoomIn: () => void; zoomOut: () => void; reset: () => void };
+export type MapControls = { zoomIn: () => void; zoomOut: () => void; reset: () => void; flyTo: (lon: number, lat: number) => void };
 
 /** Where the camera should go when the scenario changes. `key` identifies the scenario. */
 export type Camera = { center: [number, number]; zoom: number; key: string };
@@ -158,6 +158,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           zoomIn: () => map?.zoomIn({ duration: 300 }),
           zoomOut: () => map?.zoomOut({ duration: 300 }),
           reset: () => map?.flyTo({ ...home(), duration: 900 }),
+          flyTo: (lon, lat) => map?.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 2.5), duration: 900 }),
         };
       }
 

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import CountryView from "@/components/CountryView";
 import SiteNav from "@/components/SiteNav";
-import { Page } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Countries · Monitoring",
@@ -12,9 +11,7 @@ export default function CountryPage() {
   return (
     <>
       <SiteNav />
-      <Page wide>
-        <CountryView />
-      </Page>
+      <CountryView />
     </>
   );
 }

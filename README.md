@@ -49,7 +49,7 @@ Theme: an underground analysis room. Ultra-dark, flat, monospace.
 
 The map view uses three strict zones around a full-window map, read top-left to bottom-right:
 
-1. Top bar: macro context. Mutually exclusive scenario tabs (Overview, Nuclear, Bio, Volcano, Conflict, Solar, AI & Bio, Ice & Sea, Asteroid; keys 1 to 9).
+1. Top bar: macro context. Mutually exclusive scenario tabs (Overview, Nuclear, Bio, Volcano, Conflict, Solar, Ice & Sea, Asteroid; keys 1 to 8).
 2. Left panel: micro control. Only the map layers of the active scenario, their filters and view options. It never switches scenarios.
 3. Right panel: analysis and action. Read-only readouts, metrics and links, plus the survival card. It holds no map controls.
 
@@ -61,7 +61,7 @@ A status line at the bottom reports system state in plain terms (`UPLINK NOMINAL
 Layers, each fed by the data pipeline: earthquakes (USGS), supervolcano watchlist, nuclear arsenals and power plants, tension arcs between country pairs, WHO outbreak reports, armed-conflict coverage, geomagnetic latitude bands and submarine cables. Selecting any object draws great-circle lines to what it is linked to, and the right panel lists the links.
 
 ### Scenario top bar
-Nine exclusive tabs, each with a live statistic (for example the Doomsday Clock reading or the number of watchlist volcanoes above baseline). A signal chip (`NOMINAL`, `ELEVATED`, `CRITICAL`, or `NO LIVE GAUGE` for AI & Bio, where nothing is measured) is derived from the status of the scenario's live metrics, with its basis printed beneath it. It is a reading, not a forecast.
+Eight exclusive tabs, each with a live statistic (for example the Doomsday Clock reading or the number of watchlist volcanoes above baseline). A signal chip (`NOMINAL`, `ELEVATED`, `CRITICAL`) is derived from the status of the scenario's live metrics, with its basis printed beneath it. It is a reading, not a forecast.
 
 ### Context-aware layer panel
 Layers on offer depend on the scenario, for example arsenals, plants and tension pairs for Nuclear, or geomagnetic bands and cables for Solar. Quake time and magnitude filters appear only when the quake layer exists.
@@ -195,8 +195,8 @@ Licence note: the submarine-cable dataset is CC BY-NC-SA 3.0, so the project is 
 
 - Ice & Sea tab: NOAA satellite sea level and NSIDC sea-ice extent are live feeds; glacier (GlaMBIE) and ice-sheet (IMBIE) losses are published figures; 655 PSMSL tide gauges are a map layer (relative sea level, which includes land motion). Observed trends only.
 - Asteroid tab: close approaches in Earth-Moon distances from NASA JPL, with the Sentry table counts (`public/data/asteroids.json`). It has no map layer.
-- AI & Bio tab: published expert estimates with sources; no gauge, no probabilities of its own.
 - Tension pairs carry a `basis` and a one-sentence `why` (`data/dyads.json`); politically contestable pairs are marked `sensitive` and starred.
 - Data freshness: every feed reports its newest observation time, latency and fetch time (`FeedStatus.dataAsOf`, `maxAgeHours`). The table is behind the Freshness button on the map and on /sources.
-- Wiki layout (`components/WikiShell.tsx`): Survive, Methodology, Sources and scenario pages show one section at a time with a sidebar; the section is in the URL as `?tab=`.
+- Wiki layout (`components/WikiShell.tsx`): every informational page (Survive, Methodology, Sources, Nuclear, Health, Supervolcanoes, Trajectory, Countries, Links and the scenario pages) shows one section at a time with a sidebar; the section is in the URL as `?tab=`.
 - Map view and camera controls are at the bottom right of the map; the left layer panel is a glass overlay.
+- Progressive disclosure: the right panel shows the signal chip and one headline figure; basis, caveats, sources and secondary readouts sit in collapsible sections (`Section` in `components/dashboard/parts.tsx`). The left panel is the control centre: layers with live counts, quick filters, a mini context map, the selection card and the legend.

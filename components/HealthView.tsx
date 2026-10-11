@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useJson } from "@/lib/useJson";
 import type { WorldState } from "@/lib/types";
-import { Card, Ext, H1, H2, KindTag, Lead, Loading } from "./ui";
+import { Card, Ext, KindTag, Loading } from "./ui";
+import WikiShell, { type WikiSection } from "./WikiShell";
 import CounterPanel from "./CounterPanel";
 
 export default function HealthView() {
@@ -14,21 +15,15 @@ export default function HealthView() {
   const unique = [...new Map(reports.map((e) => [e.id.split(":").slice(0, 2).join(":"), e])).values()];
   const counter = data?.counters.filter((c) => c.id === "outbreaks") ?? [];
 
-  return (
-    <>
-      <H1 color="var(--bio)">Health</H1>
-      <Lead>
-        The World Health Organization publishes a Disease Outbreak News (DON) report when it judges an event worth international
-        attention. This page lists the recent ones. It is a window onto what WHO is flagging, not a count of every outbreak in the world.
-      </Lead>
-
+  const sections: WikiSection[] = [
+    { id: "reports", label: "Recent reports", group: "WHO", content: (<>
       {loading || error ? <Loading error={error} /> : (
         <>
-          <div className="mt-6 border border-line">
+          <div className="mt-3 border border-line">
             <CounterPanel counters={counter} today={new Date().toISOString().slice(0, 10)} />
           </div>
 
-          <H2>Recent reports (last 120 days)</H2>
+          <p className="label mt-6">Last 120 days</p>
           <KindTag kind="observed" />
           <ul className="mt-3 divide-y divide-line border border-line">
             {unique.length === 0 && <li className="p-3 text-sm text-dim">No reports in this window.</li>}
@@ -47,7 +42,8 @@ export default function HealthView() {
         </>
       )}
 
-      <H2>How to read this</H2>
+    </>) },
+    { id: "read", label: "How to read this", group: "Context", content: (<>
       <Card className="mt-3">
         <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed">
           <li>A report means WHO thinks an event matters internationally. Many outbreaks are never published here, and one outbreak can produce several reports.</li>
@@ -57,7 +53,8 @@ export default function HealthView() {
         </ul>
       </Card>
 
-      <H2>Other outbreak sources</H2>
+    </>) },
+    { id: "sources", label: "Other sources", group: "Context", content: (<>
       <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
         <li><Ext href="https://www.ecdc.europa.eu/en/threats-and-outbreaks">ECDC: threats and outbreaks</Ext> <span className="text-dim">· Europe</span></li>
         <li><Ext href="https://wahis.woah.org/">WOAH WAHIS</Ext> <span className="text-dim">· animal diseases, including avian influenza</span></li>
@@ -66,6 +63,15 @@ export default function HealthView() {
       <p className="mt-6 text-sm">
         What a fast-spreading new pathogen could do: <Link href="/scenarios/pandemic-x" className="text-accent hover:underline">Pandemic X explorer →</Link>
       </p>
-    </>
+    </>) },
+  ];
+  return (
+    <WikiShell
+      title="Health"
+      accent="var(--bio)"
+      intro={<>The World Health Organization publishes a Disease Outbreak News (DON) report when it judges an event worth international
+        attention. This page lists the recent ones. It is a window onto what WHO is flagging, not a count of every outbreak in the world.</>}
+      sections={sections}
+    />
   );
 }

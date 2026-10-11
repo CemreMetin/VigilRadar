@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import HealthView from "@/components/HealthView";
 import SiteNav from "@/components/SiteNav";
-import { Page } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Health · Monitoring",
@@ -12,9 +11,7 @@ export default function HealthPage() {
   return (
     <>
       <SiteNav />
-      <Page>
-        <HealthView />
-      </Page>
+      <HealthView />
     </>
   );
 }

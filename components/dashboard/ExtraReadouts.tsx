@@ -1,11 +1,9 @@
 "use client";
 
-import { ref } from "@/data/references";
-import { SCENARIO_BY_ID } from "@/data/scenarios";
 import type { AsteroidsFile, Counter, TideGaugesFile, WorldState } from "@/lib/types";
 import { Bar, Big, Section } from "./parts";
 
-/** Readouts for the AI & Bio, Ice & Sea and Asteroid tabs. Published figures and observations only. */
+/** Readouts for the Ice & Sea and Asteroid tabs. Published figures and observations only. */
 
 const c = (w: WorldState, id: string) => w.counters.find((x) => x.id === id);
 
@@ -42,40 +40,6 @@ function Published({ counter }: { counter: Counter | undefined }) {
   );
 }
 
-export function AiBioReadout({ world }: { world: WorldState }) {
-  const rows = ["engineered-pandemic", "ai-risk"].flatMap((id) => SCENARIO_BY_ID[id].estimates.map((e) => ({ id, ...e })));
-  const who = c(world, "outbreaks");
-  return (
-    <>
-      <Section title="Why there is no gauge">
-        <p className="text-[12px] font-light leading-relaxed text-dim">
-          Nothing is measured here. These risks have not happened, so the only figures are what experts say, and they disagree widely. Every item below is labelled as an expert estimate with its source.
-        </p>
-      </Section>
-      <Section title="Expert estimates">
-        <ul className="space-y-2">
-          {rows.map((e) => (
-            <li key={e.id + e.who} className="border border-line p-2.5">
-              <p className="mono text-[10px] font-bold tracking-wider" style={{ color: "var(--bio)" }}>
-                EXPERT ESTIMATE · {e.id === "ai-risk" ? "ADVANCED AI" : "ENGINEERED PANDEMIC"}
-              </p>
-              <p className="mt-1 text-[12px] font-bold">{e.who}</p>
-              <p className="mt-0.5 text-[11px] font-light leading-relaxed text-dim">{e.what}</p>
-              <a href={ref(e.ref).url} target="_blank" rel="noopener noreferrer" className="mono mt-1 inline-block text-[10px] text-dim underline">
-                source
-              </a>
-            </li>
-          ))}
-        </ul>
-      </Section>
-      <Section title="The one live gauge nearby">
-        <Big label="WHO OUTBREAK REPORTS · 90D" value={who?.value ?? "–"} color="var(--bio)" sub={who?.trendLabel} />
-        <p className="mt-2 text-[10px] font-light leading-relaxed text-dim">Natural outbreaks, not engineered ones. Context only.</p>
-      </Section>
-    </>
-  );
-}
-
 export function IceReadout({ world, tide }: { world: WorldState; tide: TideGaugesFile | null }) {
   const sl = c(world, "sea-level");
   const ice = c(world, "sea-ice");
@@ -88,7 +52,7 @@ export function IceReadout({ world, tide }: { world: WorldState; tide: TideGauge
         <Big label="SEA LEVEL" value={sl ? `${sl.value} mm` : "–"} color="var(--accent)" sub="since 1993, satellite altimetry" />
         <Big label="ARCTIC SEA ICE" value={ice?.value ?? "–"} color="var(--accent)" sub="million km²" />
       </div>
-      <Section title="Global mean sea level (annual means)">
+      <Section open title="Global mean sea level (annual means)">
         <Spark values={sl?.history ?? []} color="var(--accent)" label="Global mean sea level, annual means" />
         <p className="mono mt-1 text-[10px] font-light text-dim">{sl?.trendLabel}</p>
         <p className="mt-1 text-[10px] font-light leading-relaxed text-dim">{sl?.note}</p>
@@ -134,70 +98,74 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
       </p>
     );
   }
-  const list = [...file.approaches].sort((a, b) => a.ld - b.ld);
-  const nearest = list[0];
-  const inside = list.filter((a) => a.ld < 1).length;
-  const soon = [...file.approaches].sort((a, b) => a.date.localeCompare(b.date));
-  const size = (a: (typeof list)[number]) => (a.dMinM && a.dMaxM ? `${a.dMinM}–${a.dMaxM} m` : "size unknown");
+  const byDist = [...file.approaches].sort((a, b) => a.ld - b.ld);
+  const nearest = byDist[0];
+  const inside = byDist.filter((a) => a.ld < 1).length;
+  const soon = [...file.approaches].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 7);
+  const size = (a: (typeof byDist)[number]) => (a.dMinM && a.dMaxM ? `${a.dMinM}–${a.dMaxM} m` : "?");
   return (
     <>
-      <div className="grid grid-cols-2 gap-px border-b border-line bg-line">
-        <Big label="NEAREST APPROACH" value={nearest ? `${nearest.ld.toFixed(2)} LD` : "–"} color="var(--space)" sub={nearest ? `${nearest.des} · ${nearest.date.slice(0, 11)}` : undefined} />
-        <Big label="INSIDE THE MOON ORBIT" value={String(inside)} color={inside ? "var(--geo)" : "var(--fg)"} sub={`of ${list.length} in ${file.windowDays} days`} />
+      {/* one dense header row: nearest approach, count inside the Moon's orbit, Sentry numbers */}
+      <div className="flex items-stretch gap-px border-b border-line bg-line">
+        <div className="min-w-0 flex-[1.4] bg-panel-solid px-3 py-2">
+          <p className="label">Nearest</p>
+          <p className="mono text-xl font-bold leading-tight" style={{ color: "var(--space)" }}>
+            {nearest ? `${nearest.ld.toFixed(2)} LD` : "–"}
+          </p>
+          <p className="mono truncate text-[10px] font-light text-dim">{nearest ? `${nearest.des} · ${nearest.date.slice(5, 11)}` : ""}</p>
+        </div>
+        <div className="flex-1 bg-panel-solid px-3 py-2">
+          <p className="label">&lt; 1 LD</p>
+          <p className="mono text-xl font-bold leading-tight" style={{ color: inside ? "var(--geo)" : "var(--fg)" }}>{inside}</p>
+          <p className="mono text-[10px] font-light text-dim">of {byDist.length}</p>
+        </div>
+        <div className="flex-1 bg-panel-solid px-3 py-2" title="NASA Sentry: objects with a non-zero impact chance in 100 years; Torino scale above 0">
+          <p className="label">Sentry</p>
+          <p className="mono text-xl font-bold leading-tight">{file.sentry ? file.sentry.tracked : "–"}</p>
+          <p className="mono text-[10px] font-light text-dim">{file.sentry ? `${file.sentry.torinoAbove0} above Torino 0` : "unavailable"}</p>
+        </div>
       </div>
-      <Section title="Distance from Earth (1 LD = Earth–Moon, 384,400 km)">
-        <div className="relative h-8 border-y border-line" role="img" aria-label="Close approaches by distance in lunar distances">
-          <div className="absolute inset-y-0 left-0 w-px bg-fg" title="Earth" />
+
+      {/* distance ribbon, one thin line: Earth at the left edge, the Moon's orbit as the amber tick */}
+      <div className="border-b border-line px-3 py-2">
+        <div className="relative h-4 border-y border-line" role="img" aria-label="Close approaches by distance in lunar distances">
           <div className="absolute inset-y-0 w-px bg-geo" style={{ left: `${(1 / file.maxLd) * 100}%` }} title="Moon orbit (1 LD)" />
-          {list.map((a) => (
+          {byDist.map((a) => (
             <span
               key={a.des + a.date}
-              className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-              style={{ left: `${(a.ld / file.maxLd) * 100}%`, background: a.ld < 1 ? "var(--geo)" : "var(--space)" }}
+              className="absolute top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{ left: `${Math.max(1, (a.ld / file.maxLd) * 100)}%`, background: a.ld < 1 ? "var(--geo)" : "var(--space)" }}
               title={`${a.des}: ${a.ld.toFixed(2)} LD`}
             />
           ))}
         </div>
-        <div className="mono mt-1 flex justify-between text-[9px] font-light text-dim">
-          <span>Earth</span>
-          <span>Moon 1 LD</span>
-          <span>{file.maxLd.toFixed(0)} LD</span>
-        </div>
+        <p className="mono mt-0.5 flex justify-between text-[9px] font-light text-dim"><span>Earth</span><span>Moon 1 LD</span><span>{file.maxLd.toFixed(0)} LD</span></p>
+      </div>
+
+      <Section open title="Next approaches" meta={`${file.windowDays} d window`}>
+        <table className="mono w-full text-[11px]">
+          <thead className="text-[9px] font-light text-dim">
+            <tr className="text-left"><th className="pb-1 font-light">UTC</th><th className="font-light">OBJECT</th><th className="text-right font-light">SIZE</th><th className="text-right font-light">KM/S</th><th className="text-right font-light">LD</th></tr>
+          </thead>
+          <tbody>
+            {soon.map((a) => (
+              <tr key={a.des + a.date} className="border-t border-line/50">
+                <td className="py-0.5 font-light text-dim">{a.date.slice(5, 11)}</td>
+                <td className="font-bold">{a.des}</td>
+                <td className="text-right font-light text-dim">{size(a)}</td>
+                <td className="text-right font-light text-dim">{a.kms.toFixed(1)}</td>
+                <td className="text-right font-bold" style={{ color: a.ld < 1 ? "var(--geo)" : "var(--space)" }}>{a.ld.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </Section>
-      <Section title="Next close approaches">
-        <ul className="divide-y divide-line border border-line">
-          {soon.slice(0, 8).map((a) => (
-            <li key={a.des + a.date} className="flex items-center justify-between gap-3 px-2.5 py-1.5">
-              <span className="min-w-0">
-                <span className="block text-[12px] font-bold">{a.des}</span>
-                <span className="mono block text-[10px] font-light text-dim">
-                  {a.date} UTC · {size(a)} · {a.kms.toFixed(1)} km/s
-                </span>
-              </span>
-              <span className="mono shrink-0 text-[11px] font-bold" style={{ color: a.ld < 1 ? "var(--geo)" : "var(--space)" }}>
-                {a.ld.toFixed(2)} LD
-              </span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2 text-[10px] font-light leading-relaxed text-dim">
-          Sizes are rough ranges computed from brightness (H) with two assumed reflectivities, not measurements. A listed approach is a flyby, not an impact.
+      <Section title="About these numbers">
+        <p className="text-[11px] font-light leading-relaxed text-dim">
+          LD = lunar distance (384,400 km). A listed approach is a flyby, not an impact. Sizes are rough ranges from brightness (H) with two assumed reflectivities, not measurements.
+          Sentry lists objects with a non-zero chance of impact within 100 years; Torino 0 means no hazard.{" "}
+          {ctr ? `Source: ${ctr.source.name}, updated ${ctr.cadence}.` : ""}
         </p>
-      </Section>
-      <Section title="Impact monitoring (NASA Sentry)">
-        {file.sentry ? (
-          <p className="text-[12px] font-light leading-relaxed text-dim">
-            Sentry currently tracks <strong className="text-fg">{file.sentry.tracked}</strong> objects with a non-zero chance of impact within 100 years;{" "}
-            <strong className="text-fg">{file.sentry.torinoAbove0}</strong> rate above 0 on the Torino scale (0 means no hazard).
-          </p>
-        ) : (
-          <p className="text-[12px] text-dim">Sentry table unavailable right now.</p>
-        )}
-        {ctr && (
-          <p className="mono mt-2 text-[10px] font-light text-dim">
-            Source: {ctr.source.name}. Updated {ctr.cadence}.
-          </p>
-        )}
       </Section>
     </>
   );

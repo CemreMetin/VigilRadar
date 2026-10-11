@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useJson } from "@/lib/useJson";
-import { Card, Ext, H1, H2, KindTag, Lead, Loading } from "./ui";
+import { Card, Ext, KindTag, Loading } from "./ui";
+import WikiShell, { type WikiSection } from "./WikiShell";
 
 type Series = {
   giss: { baseline: string; annual: { y: number; v: number }[]; source: { name: string; url: string } };
@@ -117,16 +118,8 @@ const ORD: { label: string; oneIn: number; total?: boolean }[] = [
 export default function TrajectoryView() {
   const { data, error, loading } = useJson<Series>("/data/series.json");
 
-  return (
-    <>
-      <H1>Trajectory</H1>
-      <Lead>
-        Where we are, where the climate is heading under different choices, and what experts think about the largest risks. The three
-        kinds of statement are always marked: <KindTag kind="observed" /> measurements, <KindTag kind="projection" /> scenarios that
-        depend on choices, <KindTag kind="expert" /> personal judgements.
-      </Lead>
-
-      <H2>Where we are</H2>
+  const sections: WikiSection[] = [
+    { id: "now", label: "Where we are", group: "Observed", content: (<>
       {loading || error || !data ? <Loading error={error} /> : (
         <>
           <p className="mt-3 flex items-center gap-3 text-sm"><KindTag kind="observed" /> Global surface temperature, annual mean</p>
@@ -148,7 +141,8 @@ export default function TrajectoryView() {
         <Ext href="https://wmo.int/files/state-of-global-climate-2024">WMO report ↗</Ext>
       </p>
 
-      <H2>Where it could go: IPCC scenarios</H2>
+    </>) },
+    { id: "ipcc", label: "IPCC scenarios", group: "Projections", content: (<>
       <p className="mt-3 flex items-center gap-3 text-sm"><KindTag kind="projection" /> Warming by 2081-2100 vs 1850-1900 (best estimate and very likely range)</p>
       <RangeBars field="t" max={6} unit=" °C" />
       <p className="mt-6 flex items-center gap-3 text-sm"><KindTag kind="projection" /> Global sea level rise by 2100 vs 1995-2014 (median and likely range)</p>
@@ -160,7 +154,8 @@ export default function TrajectoryView() {
         Tipping points are on the <Link href="/scenarios/climate-tipping" className="text-accent hover:underline">climate tipping scenario</Link>.
       </p>
 
-      <H2>What experts estimate about the largest risks</H2>
+    </>) },
+    { id: "experts", label: "Expert estimates", group: "Judgements", content: (<>
       <p className="mt-3 flex items-center gap-3 text-sm"><KindTag kind="expert" /> Toby Ord, <em>The Precipice</em> (2020): chance of an existential catastrophe within the next 100 years</p>
       <ul className="mt-2 divide-y divide-line border border-line">
         {ORD.map((r) => {
@@ -202,6 +197,9 @@ export default function TrajectoryView() {
         <Link href="/scenarios" className="text-accent hover:underline">the scenarios</Link> for the reasoning behind each, and{" "}
         <Link href="/methodology#kinds" className="text-accent hover:underline">how the labels work</Link>.
       </p>
-    </>
-  );
+    </>) },
+  ];
+  return <WikiShell title="Trajectory" intro={<>Where we are, where the climate is heading under different choices, and what experts think about the largest risks. The three
+        kinds of statement are always marked: <KindTag kind="observed" /> measurements, <KindTag kind="projection" /> scenarios that
+        depend on choices, <KindTag kind="expert" /> personal judgements.</>} sections={sections} />;
 }

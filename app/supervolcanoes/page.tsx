@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
-import { Card, Ext, H1, H2, Lead, Page } from "@/components/ui";
+import WikiShell, { type WikiSection } from "@/components/WikiShell";
+import { Card, Ext } from "@/components/ui";
 import VolcanoCards from "@/components/VolcanoCards";
 
 export const metadata: Metadata = {
@@ -10,20 +11,17 @@ export const metadata: Metadata = {
 };
 
 export default function SupervolcanoesPage() {
-  return (
-    <>
-      <SiteNav />
-      <Page>
-        <H1 color="var(--geo)">Supervolcanoes</H1>
-        <Lead>
-          Six calderas that have each produced at least one supereruption (VEI 7 or larger). Status comes from the official
-          observatories where they publish an open feed. &quot;Normal&quot; is the usual state and nearly every volcano is normal nearly
-          all the time.
-        </Lead>
-
+  const sections: WikiSection[] = [
+    { id: "watchlist", label: "Watchlist", group: "Status", content: (<>
         <VolcanoCards />
-
-        <H2>Reading the watchlist</H2>
+        <p className="mt-6 text-sm">
+          What a supereruption could do:{" "}
+          <Link href="/scenarios/supervolcano" className="text-accent hover:underline">Supervolcano scenario →</Link>
+          {" · "}
+          <Link href="/?sc=volcano" className="text-accent hover:underline">Show on the map →</Link>
+        </p>
+    </>) },
+    { id: "reading", label: "Reading the watchlist", group: "Context", content: (<>
         <Card className="mt-3">
           <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed">
             <li>
@@ -46,7 +44,8 @@ export default function SupervolcanoesPage() {
           </ul>
         </Card>
 
-        <H2>Sources</H2>
+    </>) },
+    { id: "sources", label: "Sources", group: "Context", content: (<>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
           <li><Ext href="https://www.usgs.gov/observatories/yvo">USGS Yellowstone Volcano Observatory</Ext>, <Ext href="https://www.usgs.gov/programs/VHP">USGS Volcano Hazards Program</Ext></li>
           <li><Ext href="https://www.ov.ingv.it/">INGV Osservatorio Vesuviano</Ext> (Campi Flegrei)</li>
@@ -59,7 +58,21 @@ export default function SupervolcanoesPage() {
           {" · "}
           <Link href="/?sc=volcano" className="text-accent hover:underline">Show on the map →</Link>
         </p>
-      </Page>
+    </>) },
+  ];
+  return (
+    <>
+      <SiteNav />
+      <WikiShell
+        title="Supervolcanoes"
+        accent="var(--geo)"
+        intro={<>
+          Six calderas that have each produced at least one supereruption (VEI 7 or larger). Status comes from the official
+          observatories where they publish an open feed. &quot;Normal&quot; is the usual state and nearly every volcano is normal nearly
+          all the time.
+        </>}
+        sections={sections}
+      />
     </>
   );
 }

@@ -4,6 +4,9 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import manual from "@/data/manual-counters.json";
 import { arsenals } from "@/lib/arsenals";
+import dyadsFile from "@/data/dyads.json";
+import SiteNav from "@/components/SiteNav";
+import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import type { PlantsFile } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -39,21 +42,9 @@ export default async function NuclearPage() {
   }
   const plantRows = [...byCountry.entries()].sort((a, b) => b[1].mw - a[1].mw).slice(0, 12);
 
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <Link href="/" className="mono text-xs text-dim hover:text-accent">
-        ← back to map
-      </Link>
-      <h1 className="mono mt-4 text-xl font-bold tracking-wide" style={{ color: "var(--threat)" }}>
-        Nuclear
-      </h1>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-dim">
-        Who has how many warheads, and what the most-cited symbolic clock says. These are published
-        estimates, not live data. Tension between the pairs is on the map and below.
-      </p>
-
-      {/* clock + totals */}
-      <div className="mt-6 grid gap-px border border-line bg-line sm:grid-cols-3">
+  const sections: WikiSection[] = [
+    { id: "overview", label: "Overview", group: "Weapons", content: (<>
+            <div className="mt-3 grid gap-px border border-line bg-line sm:grid-cols-3">
         <div className="bg-panel-solid p-4">
           <p className="label">Doomsday Clock</p>
           <p className="mono mt-1 text-3xl" style={{ color: "var(--threat)" }}>
@@ -80,8 +71,8 @@ export default async function NuclearPage() {
         </div>
       </div>
 
-      {/* arsenals */}
-      <h2 className="label mt-10">Arsenals by country · {arsenals.asOf}</h2>
+    </>) },
+    { id: "arsenals", label: `Arsenals · ${arsenals.asOf}`, group: "Weapons", content: (<>
       <div className="mt-2 overflow-x-auto border border-line">
         <table className="w-full min-w-[620px] text-sm">
           <thead>
@@ -158,8 +149,25 @@ export default async function NuclearPage() {
         · published {arsenals.publishedAt}
       </p>
 
-      {/* plants */}
-      <h2 className="label mt-10">Nuclear power plants</h2>
+    </>) },
+    { id: "pairs", label: "Tension pairs", group: "Weapons", content: (<>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-dim">
+        The map draws a line between these country pairs and colours it by how tense news coverage of the pair is. Each pair is listed for the reason given here.
+        Being listed is not an accusation and not a prediction. Live values are on the map (Nuclear tab) and in <Link href="/methodology?tab=pairs" className="text-accent hover:underline">the methodology</Link>.
+      </p>
+      <ul className="mt-3 divide-y divide-line border border-line">
+        {dyadsFile.pairs.map((d) => (
+          <li key={d.a + d.b} className="px-3 py-2">
+            <p className="text-[13px] font-bold">
+              {d.label}
+              {"sensitive" in d && d.sensitive ? <span className="mono ml-2 text-[10px] font-bold text-geo">SENSITIVE</span> : null}
+            </p>
+            <p className="mt-0.5 text-xs leading-relaxed text-dim">{d.why}</p>
+          </li>
+        ))}
+      </ul>
+    </>) },
+    { id: "plants", label: "Power plants", group: "Civil", content: (<>
       <p className="mt-2 max-w-2xl text-xs leading-relaxed text-dim">
         Civil power reactors are not weapons. They are shown because a war, quake or flood near a
         plant is a risk of its own; the map links quakes and conflict reports near a plant. Switch on{" "}
@@ -196,6 +204,18 @@ export default async function NuclearPage() {
           </p>
         </>
       )}
-    </div>
+    </>) },
+  ];
+
+  return (
+    <>
+      <SiteNav />
+      <WikiShell
+        title="Nuclear"
+        accent="var(--threat)"
+        intro="Who has how many warheads, and what the most-cited symbolic clock says. These are published estimates, not live data."
+        sections={sections}
+      />
+    </>
   );
 }

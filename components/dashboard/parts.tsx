@@ -1,13 +1,26 @@
 import type { ReactNode } from "react";
 
-export function Section({ title, children }: { title: string; children: ReactNode }) {
+/**
+ * Collapsible block (progressive disclosure). Closed by default: only the title shows, in muted type.
+ * Native <details>, so it is keyboard- and screen-reader-accessible without extra code.
+ */
+export function Section({ title, children, open = false, meta }: { title: string; children: ReactNode; open?: boolean; meta?: string }) {
   return (
-    <section className="border-b border-line px-3 py-3">
-      <p className="label caret mb-2">{title}</p>
-      {children}
-    </section>
+    <details open={open} className="group border-b border-line">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 hover:bg-accent/5 [&::-webkit-details-marker]:hidden">
+        <span className="label">{title}</span>
+        <span className="mono flex shrink-0 items-center gap-2 text-[10px] font-light text-dim">
+          {meta}
+          <span className="font-bold text-accent group-open:hidden" aria-hidden>+</span>
+          <span className="hidden font-bold text-accent group-open:inline" aria-hidden>−</span>
+        </span>
+      </summary>
+      <div className="px-3 pb-3">{children}</div>
+    </details>
   );
 }
+
+export const Disclose = Section;
 
 export function Big({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
   return (

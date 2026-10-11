@@ -179,23 +179,6 @@ export const MODES: Mode[] = [
     signal: (w) => fromCounters(w, ["kp"], (x) => describe(x, "kp", "Planetary Kp index")),
   },
   {
-    id: "aibio",
-    title: "AI & Bio",
-    color: "var(--bio)",
-    layers: ["outbreaks"],
-    camera: { center: [20, 20], zoom: 1.5 },
-    page: "/scenarios/ai-risk",
-    pageLabel: "AI risk scenario",
-    blurb: "Engineered pandemics and advanced AI are risks no instrument measures. This tab shows published expert estimates with their sources, next to the one live gauge there is: WHO outbreak reports.",
-    counterIds: ["outbreaks"],
-    stat: () => "expert estimates",
-    signal: (w) => ({
-      level: "none",
-      label: "NO LIVE GAUGE",
-      basis: `No sensor or index measures this risk. ${describe(w, "outbreaks", "WHO outbreak reports are the live context.")}`,
-    }),
-  },
-  {
     id: "ice",
     title: "Ice & Sea",
     color: "var(--accent)",
