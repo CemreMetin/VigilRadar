@@ -68,7 +68,7 @@ check(persisted, "offline: checklist tick persists across reload");
 
 // metrics from the cached world_state
 await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
-await page.getByText(/Doomsday Clock/i).first().waitFor({ timeout: 15_000 }).then(
+await page.getByText(/[1-9]\d* feeds live/i).first().waitFor({ timeout: 15_000 }).then(
   () => check(true, "offline: map page shows cached metrics"),
   () => check(false, "offline: map page shows cached metrics"),
 );

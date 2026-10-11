@@ -18,7 +18,11 @@ export type LayerId =
   | "conflict"
   | "geomag"
   | "cables"
-  | "tide";
+  | "tide"
+  | "bases"
+  | "satellites"
+  | "starlink"
+  | "debris";
 
 export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: string }> = {
   quakes: { label: "Earthquakes", blurb: "Magnitude 4.5+ from USGS", color: "var(--geo)" },
@@ -30,6 +34,10 @@ export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: 
   conflict: { label: "Conflict coverage", blurb: "Armed conflict in the news, 7 d", color: "var(--conflict)" },
   geomag: { label: "Geomagnetic latitude", blurb: "50° and 60° bands: storms hit hardest", color: "var(--space)" },
   cables: { label: "Submarine cables", blurb: "Cyan crosses the 50° band", color: "var(--accent)" },
+  bases: { label: "Military bases", blurb: "Wikidata reference layer; not an order of battle", color: "#FFFF00" },
+  satellites: { label: "Satellites", blurb: "Active, non-Starlink (CelesTrak)", color: "#00e5ff" },
+  starlink: { label: "Starlink", blurb: "The largest constellation", color: "#7d8c97" },
+  debris: { label: "Tracked debris", blurb: "Four major breakup events", color: "#ffb000" },
   tide: { label: "Tide gauges", blurb: "Relative sea-level trend, last 30 yr (PSMSL)", color: "var(--accent)" },
 };
 
@@ -41,7 +49,9 @@ export type Mode = {
   title: string;
   color: string; // CSS colour: tints the borders, the map vignette and the readout
   layers: LayerId[];
-  camera: { center: [number, number]; zoom: number };
+  camera: { center: [number, number]; zoom: number; minZoom?: number };
+  /** the scenario only makes sense on the 3D globe: the map switches to it and the 2D/3D button has no effect */
+  globe?: boolean;
   page: string;
   pageLabel: string;
   blurb: string;
@@ -70,6 +80,9 @@ function fromCounters(w: WorldState | null, ids: string[], basis: (w: WorldState
   }
   return { level, label: LEVEL_LABEL[level], basis: basis(w) };
 }
+
+/** Zoom at which the globe is small enough to leave room for the Earth-Moon plot drawn around it. */
+export const ASTEROID_ZOOM = -0.6;
 
 export const MODES: Mode[] = [
   {
@@ -150,11 +163,11 @@ export const MODES: Mode[] = [
     id: "conflict",
     title: "Conflict",
     color: "var(--conflict)",
-    layers: ["conflict"],
+    layers: ["conflict", "bases"],
     camera: { center: [42, 32], zoom: 2.2 },
     page: "/links",
     pageLabel: "How risks feed each other",
-    blurb: "Armed conflict as reported in the news, and the shipping chokepoints it can disrupt.",
+    blurb: "Armed conflict as reported in the news, the shipping chokepoints it can disrupt, and a reference layer of military bases. Fleet positions are not public data and are not shown.",
     counterIds: ["conflict-news", "chokepoints"],
     stat: (w) => {
       const c = counter(w, "chokepoints");
@@ -179,6 +192,23 @@ export const MODES: Mode[] = [
     signal: (w) => fromCounters(w, ["kp"], (x) => describe(x, "kp", "Planetary Kp index")),
   },
   {
+    id: "orbit",
+    title: "Orbit",
+    color: "#6fa8ff",
+    layers: ["satellites", "starlink", "debris"],
+    camera: { center: [0, 15], zoom: 1.4 },
+    globe: true,
+    page: "/scenarios/kessler",
+    pageLabel: "Kessler syndrome scenario",
+    blurb: "Catalogued satellites and tracked debris, positioned from published orbital elements at the snapshot time. Starlink is drawn dim because it would otherwise hide everything else.",
+    counterIds: ["satellites"],
+    stat: (w) => {
+      const c = counter(w, "satellites");
+      return c ? `${c.value} satellites` : "Orbit";
+    },
+    signal: (w) => ({ level: "none", label: "TRACKING", basis: describe(w, "satellites", "Catalogue counts only.") }),
+  },
+  {
     id: "ice",
     title: "Ice & Sea",
     color: "var(--accent)",
@@ -199,7 +229,8 @@ export const MODES: Mode[] = [
     title: "Asteroid",
     color: "var(--space)",
     layers: [],
-    camera: { center: [15, 22], zoom: 1.6 },
+    camera: { center: [0, 15], zoom: ASTEROID_ZOOM, minZoom: -2 },
+    globe: true,
     page: "/scenarios/asteroid",
     pageLabel: "Asteroid impact scenario",
     blurb: "Close approaches listed by NASA JPL for the next weeks, measured in Earth–Moon distances, and what the Sentry impact-monitoring table currently holds.",

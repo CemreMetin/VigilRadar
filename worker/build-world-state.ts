@@ -29,6 +29,7 @@ import { volcanoWatch } from "./feeds/volcanoes";
 import { worldBankIndicators } from "./feeds/worldbank";
 import { buildLinks } from "./links";
 import arsenalsRaw from "../data/arsenals.json";
+import { orbitFeed } from "./feeds/orbit";
 import { overdueReviews } from "../lib/reviews";
 
 const DATA_DIR = path.join(process.cwd(), "public", "data");
@@ -114,6 +115,14 @@ const FEEDS: Feed[] = [
     },
   },
   {
+    counterIds: ["satellites"],
+    meta: { id: "celestrak-orbit", name: "CelesTrak satellite catalogue (SGP4 positions)", domain: "space", url: "https://celestrak.org/", license: "Free; attribution, one download per group per 2 hours", cadence: "elements about every 2 hours" },
+    run: async () => {
+      const o = await orbitFeed();
+      return { counters: o.counters, files: { orbit: o.file } };
+    },
+  },
+  {
     counterIds: ["sea-level"],
     meta: { id: "noaa-sea-level", name: "NOAA satellite altimetry: global mean sea level", domain: "climate", url: "https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/", license: "Free; acknowledge NOAA Laboratory for Satellite Altimetry", cadence: "weeks, lags the present" },
     run: async () => ({ counters: await seaLevelCounter() }),
@@ -188,6 +197,7 @@ const ORDER = [
   "warheads",
   "warming",
   "co2",
+  "satellites",
   "sea-level",
   "sea-ice",
   "glaciers",
@@ -206,6 +216,7 @@ const MAX_AGE_HOURS: Record<string, number> = {
   "swpc-kp": 8,
   "volcano-watch": 6,
   "jpl-cneos": 36,
+  "celestrak-orbit": 24, // elements are cached for 2 h; their epochs are typically a few hours to a day old
   "gdelt-events": 72,
   "nsidc-sea-ice": 72,
   "who-don": 24 * 30, // WHO publishes irregularly; weeks between reports are normal

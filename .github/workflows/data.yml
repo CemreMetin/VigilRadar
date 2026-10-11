@@ -51,6 +51,13 @@ jobs:
           key: gdelt-${{ github.run_id }}
           restore-keys: gdelt-
 
+      # CelesTrak orbital elements are cached too: it allows one download per group every 2 hours.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/celestrak
+          key: celestrak-${{ github.run_id }}
+          restore-keys: celestrak-
+
       # Always the full refresh: with the cache above the slow feeds are cheap, and it avoids the
       # fast mode carrying over stale values from the committed copy of the data.
       - name: Refresh data

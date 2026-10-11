@@ -1,6 +1,6 @@
 "use client";
 
-import type { AsteroidsFile, Counter, TideGaugesFile, WorldState } from "@/lib/types";
+import type { AsteroidsFile, Counter, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
 import { Bar, Big, Section } from "./parts";
 
 /** Readouts for the Ice & Sea and Asteroid tabs. Published figures and observations only. */
@@ -165,6 +165,66 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
           LD = lunar distance (384,400 km). A listed approach is a flyby, not an impact. Sizes are rough ranges from brightness (H) with two assumed reflectivities, not measurements.
           Sentry lists objects with a non-zero chance of impact within 100 years; Torino 0 means no hazard.{" "}
           {ctr ? `Source: ${ctr.source.name}, updated ${ctr.cadence}.` : ""}
+        </p>
+      </Section>
+    </>
+  );
+}
+
+export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFile | null }) {
+  const ctr = c(world, "satellites");
+  if (!file) {
+    return (
+      <p className="mono caret p-4 text-xs font-light text-dim" role="status">
+        LOADING CATALOGUE SNAPSHOT
+      </p>
+    );
+  }
+  const { counts } = file;
+  const max = Math.max(counts.satellites, counts.starlink, counts.debris, 1);
+  const rows: [string, number, string][] = [
+    ["Other satellites", counts.satellites, "#00e5ff"],
+    ["Starlink", counts.starlink, "#7d8c97"],
+    ["Tracked debris", counts.debris, "#ffb000"],
+  ];
+  return (
+    <>
+      <div className="flex items-stretch gap-px border-b border-line bg-line">
+        <div className="flex-1 bg-panel-solid px-3 py-2">
+          <p className="label">Active</p>
+          <p className="mono text-xl font-bold leading-tight" style={{ color: "#6fa8ff" }}>{(counts.satellites + counts.starlink).toLocaleString("en-US")}</p>
+        </div>
+        <div className="flex-1 bg-panel-solid px-3 py-2">
+          <p className="label">Debris</p>
+          <p className="mono text-xl font-bold leading-tight">{counts.debris.toLocaleString("en-US")}</p>
+        </div>
+        <div className="flex-1 bg-panel-solid px-3 py-2">
+          <p className="label">Snapshot</p>
+          <p className="mono text-xl font-bold leading-tight">{file.generatedAt.slice(11, 16)}</p>
+          <p className="mono text-[10px] font-light text-dim">UTC</p>
+        </div>
+      </div>
+      <Section open title="By kind">
+        <ul>
+          {rows.map(([label, n, color]) => (
+            <Bar key={label} label={label} value={n.toLocaleString("en-US")} pct={(n / max) * 100} color={color} />
+          ))}
+        </ul>
+      </Section>
+      <Section title="Space stations (at the snapshot)">
+        <ul className="mono text-[11px]">
+          {file.stations.map(([name, lon, lat, alt]) => (
+            <li key={name} className="flex justify-between border-t border-line/50 py-0.5 first:border-0">
+              <span className="font-bold">{name.replace(/ \(.*\)/, "")}</span>
+              <span className="font-light text-dim">{lat.toFixed(1)}°, {lon.toFixed(1)}° · {alt} km</span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+      <Section title="About this snapshot">
+        <p className="text-[11px] font-light leading-relaxed text-dim">
+          Positions are computed (SGP4) from published orbital elements for {file.generatedAt.slice(0, 16).replace("T", " ")} UTC. Satellites move about 7 km/s, so the dots show where objects were at that time, not where they are now. Debris covers four major breakups only, and small objects are not tracked.{" "}
+          {ctr ? `Source: ${ctr.source.name}.` : ""}
         </p>
       </Section>
     </>

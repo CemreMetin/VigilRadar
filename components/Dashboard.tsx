@@ -10,6 +10,8 @@ import { LAYER_INFO, MODES, MODE_BY_ID, type LayerId } from "@/lib/lenses";
 import { overdueReviews } from "@/lib/reviews";
 import type {
   AsteroidsFile,
+  MilitaryBasesFile,
+  OrbitFile,
   ConflictCell,
   ConflictFile,
   LinksFile,
@@ -31,6 +33,7 @@ import StatusBar from "./dashboard/StatusBar";
 import TopBar from "./dashboard/TopBar";
 import LinksPanel, { linksFor } from "./LinksPanel";
 import FreshnessTable from "./FreshnessTable";
+import AsteroidOrbit from "./dashboard/AsteroidOrbit";
 import ViewControls from "./dashboard/ViewControls";
 import type { MiniPoint } from "./dashboard/MiniContext";
 import MapView, { type MapControls, type MapData } from "./MapView";
@@ -85,6 +88,8 @@ export default function Dashboard() {
   const [hydrated, setHydrated] = useState(false);
   const [tideFile, setTideFile] = useState<TideGaugesFile | null>(null);
   const [asteroids, setAsteroids] = useState<AsteroidsFile | null>(null);
+  const [orbitFile, setOrbitFile] = useState<OrbitFile | null>(null);
+  const [basesFile, setBasesFile] = useState<MilitaryBasesFile | null>(null);
   const [freshnessOpen, setFreshnessOpen] = useState(false);
   const controlsRef = useRef<MapControls | null>(null);
 
@@ -207,6 +212,45 @@ export default function Dashboard() {
     if (modeId !== "asteroid" || asteroids) return;
     getJson<AsteroidsFile>("/data/asteroids.json").then(setAsteroids).catch(() => {});
   }, [modeId, asteroids]);
+  const basesOn = layersOn.has("bases");
+  useEffect(() => {
+    if (!basesOn || basesFile) return;
+    let cancelled = false;
+    getJson<MilitaryBasesFile>("/data/military_bases.json").then((f) => !cancelled && setBasesFile(f)).catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [basesOn, basesFile]);
+  useEffect(() => {
+    if (modeId !== "orbit" || orbitFile) return;
+    getJson<OrbitFile>("/data/orbit.json").then(setOrbitFile).catch(() => {});
+  }, [modeId, orbitFile]);
+  const basesFc = useMemo<Fc | null>(
+    () =>
+      basesOn && basesFile
+        ? {
+            type: "FeatureCollection",
+            features: basesFile.bases.map(([id, name, lat, lon, country, kind]) => ({
+              type: "Feature",
+              properties: { id: `base:${id}`, name, country, kind },
+              geometry: { type: "Point", coordinates: [lon, lat] },
+            })),
+          }
+        : null,
+    [basesOn, basesFile],
+  );
+  const orbitFc = useMemo<Fc | null>(() => {
+    if (!orbitFile || modeId !== "orbit") return null;
+    const on = [layersOn.has("satellites"), layersOn.has("starlink"), layersOn.has("debris")];
+    const features = orbitFile.objects
+      .filter((o) => ((k) => k === 3 ? on[0] : k === 1 ? on[1] : k === 2 ? on[2] : on[0])(o[3]))
+      .map(([lon, lat, alt, kind, name]) => ({
+        type: "Feature",
+        properties: { kind, alt, name },
+        geometry: { type: "Point", coordinates: [lon, lat] },
+      }));
+    return { type: "FeatureCollection", features };
+  }, [orbitFile, modeId, layersOn]);
   const tideFc = useMemo<Fc | null>(
     () =>
       tideOn && tideFile
@@ -291,8 +335,10 @@ export default function Dashboard() {
       geomag: geomagFc,
       cables: cablesOn ? cables : null,
       tide: tideFc,
+      bases: basesFc,
+      orbit: orbitFc,
     }),
-    [layersOn, tideFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
+    [layersOn, tideFc, basesFc, orbitFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
   );
 
   // left panel: live counts per layer, and every drawn point for the mini context map
@@ -306,6 +352,10 @@ export default function Dashboard() {
     conflict: cells.length || undefined,
     cables: cables?.features.length,
     tide: tideFile?.stations.length,
+    bases: basesFile?.bases.length,
+    satellites: orbitFile?.counts.satellites,
+    starlink: orbitFile?.counts.starlink,
+    debris: orbitFile?.counts.debris,
   };
   const miniPoints = useMemo<MiniPoint[]>(() => {
     const out: MiniPoint[] = [];
@@ -315,11 +365,12 @@ export default function Dashboard() {
     for (const x of mapData.volcanoes) out.push({ lon: x.lon, lat: x.lat, color: LAYER_INFO.volcanoes.color });
     for (const x of mapData.outbreaks) out.push({ lon: x.lon, lat: x.lat, color: LAYER_INFO.outbreaks.color });
     for (const x of mapData.cells) out.push({ lon: x.lon, lat: x.lat, color: LAYER_INFO.conflict.color });
+    for (const b of basesFile && basesOn ? basesFile.bases : []) out.push({ lon: b[3], lat: b[2], color: LAYER_INFO.bases.color });
     for (const f of (mapData.tide?.features ?? []) as { geometry: { coordinates: [number, number] } }[]) {
       out.push({ lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], color: LAYER_INFO.tide.color });
     }
     return out;
-  }, [mapData]);
+  }, [mapData, basesFile, basesOn]);
 
   const liveFeeds = world?.feeds.filter((f) => f.ok && !isStale(f.fetchedAt, nowMs)).length ?? 0;
   const totalFeeds = world?.feeds.length ?? 0;
@@ -394,6 +445,8 @@ export default function Dashboard() {
       {conflictOn && <p><span style={{ color: "var(--conflict)" }}>●</span> news-reported armed conflict, last 7 days</p>}
       {layersOn.has("outbreaks") && <p><span style={{ color: "var(--bio)" }}>◯</span> WHO report (country centre)</p>}
       {layersOn.has("volcanoes") && <p>◉ supervolcano: white normal, red above baseline, grey no feed</p>}
+      {layersOn.has("bases") && <p><span style={{ color: "#FFFF00" }}>●</span> military base (Wikidata; coverage uneven, not an order of battle)</p>}
+      {modeId === "orbit" && <p>Dots are positions at the snapshot time; objects move about 7 km/s</p>}
       {layersOn.has("geomag") && <p><span style={{ color: "var(--geo)" }}>┄</span> 50° <span style={{ color: "var(--threat)" }}>┄</span> 60° geomagnetic latitude</p>}
       <p className="pt-1">Only observations and published figures; nothing here is a forecast.</p>
     </>
@@ -448,7 +501,7 @@ export default function Dashboard() {
 
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto" role="tabpanel" key={`${mode.id}-${tab}`}>
         {tab === "readout" && (
-          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} />
+          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} />
         )}
         {tab === "metrics" && (
           <>
@@ -511,15 +564,16 @@ export default function Dashboard() {
           entities={entities}
           selectedId={selectedId}
           onSelect={select}
-          globe={globe}
+          globe={globe || !!mode.globe}
           camera={{ ...mode.camera, key: mode.id }}
           controlsRef={controlsRef}
         />
       }
-      controls={<ViewControls globe={globe} onGlobe={setGlobe} controls={controlsRef} />}
+      controls={<ViewControls globe={globe || !!mode.globe} locked={!!mode.globe} onGlobe={setGlobe} controls={controlsRef} />}
       mapOverlay={
         <>
           <MapHud color={mode.color} id={mode.id} />
+          {mode.id === "asteroid" && <AsteroidOrbit file={asteroids} now={now} />}
           {freshnessOpen && world && (
             <section className="panel-scn panel-glass absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-12 lg:left-[270px] lg:w-[min(760px,calc(100%-660px))]" aria-label="Data freshness">
               <div className="mb-2 flex items-center justify-between">

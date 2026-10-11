@@ -252,3 +252,21 @@ export type TideGaugesFile = {
   fields: string[];
   stations: [number, string, number, number, number, number, number][]; // id, name, lat, lon, mm/yr, years, last year
 };
+
+export type OrbitFile = {
+  generatedAt: string; // the snapshot time: every position is for this instant
+  kinds: string[];
+  fields: string[];
+  counts: { satellites: number; starlink: number; debris: number };
+  stations: [string, number, number, number][]; // name, lon, lat, altitude km
+  objects: ([number, number, number, number] | [number, number, number, number, string])[]; // lon, lat, altitude km, kind index, (name for stations)
+  source: SourceRef;
+};
+
+export type MilitaryBasesFile = {
+  source: SourceRef;
+  retrieved: string;
+  note: string;
+  fields: string[];
+  bases: [string, string, number, number, string, string][]; // id, name, lat, lon, country, kind
+};

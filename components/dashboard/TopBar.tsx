@@ -44,19 +44,16 @@ export default function TopBar({
               role="tab"
               aria-selected={active}
               onClick={() => onSelect(m.id)}
+              title={m.stat(world)}
               style={{ "--c": m.color } as CSSProperties}
-              className="tab-btn group relative min-w-[106px] shrink-0 px-2.5 pb-2 pt-1.5 text-left"
+              className="tab-btn group relative flex w-fit shrink-0 items-baseline gap-2 whitespace-nowrap px-4 py-2 text-left"
             >
-              <span className="flex items-baseline justify-between gap-2">
-                <span className="mono text-[13px] font-bold uppercase tracking-wider" style={{ color: m.color }}>
-                  {m.title}
-                </span>
-                <span className="mono text-[9px] font-light text-dim opacity-60 group-hover:opacity-100" aria-hidden>
-                  {i + 1}
-                </span>
+              <span className="mono text-[13px] font-bold uppercase tracking-wider" style={{ color: active ? "#fff" : m.color }}>
+                {m.title}
               </span>
-              <span className="mono mt-0.5 block truncate text-[11px] font-light text-dim">{m.stat(world)}</span>
-              <span aria-hidden className="tab-bar absolute inset-x-0 bottom-0 h-0.5" style={{ background: m.color }} />
+              <span className="mono text-[9px] font-light text-dim" aria-hidden>
+                {i + 1}
+              </span>
             </button>
           );
         })}

@@ -1,22 +1,55 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type WikiSection = {
   id: string;
   label: string;
-  /** sidebar group heading */
+  /** kept for older call sites; the sidebar groups by page, not by section group */
   group?: string;
-  /** one line under the label in the sidebar */
   hint?: string;
   content: ReactNode;
 };
 
 /**
- * Wiki layout for informational pages: a sidebar of sections with a filter box, and one section shown at a time.
- * The section lives in the URL (?tab=id), and a #id hash (older links) opens the same section.
- * Narrow screens: the sidebar becomes a scrolling tab strip above the content.
+ * The site's wiki frame: a dual-pane layout used by every informational page.
+ *
+ *   left pane   a fixed, scrollable tree of all pages in three groups; the current page is white and
+ *               expands to its own sections, everything else is muted
+ *   right pane  the reading area, at most 3xl wide so lines stay readable
+ *
+ * One section of the current page is shown at a time. It lives in the URL as ?tab=id (a #id hash from older
+ * links works too). On narrow screens the tree moves into a menu above the content.
+ * Type: Inter for running text, JetBrains Mono for headings, tables and data (see .wiki in globals.css).
  */
+
+const TREE: { group: string; pages: { href: string; label: string }[] }[] = [
+  { group: "Preparedness", pages: [{ href: "/survive", label: "Survive" }] },
+  {
+    group: "Scenario deep-dives",
+    pages: [
+      { href: "/scenarios", label: "Scenarios" },
+      { href: "/nuclear", label: "Nuclear" },
+      { href: "/health", label: "Health" },
+      { href: "/supervolcanoes", label: "Supervolcanoes" },
+      { href: "/trajectory", label: "Trajectory" },
+      { href: "/country", label: "Countries" },
+      { href: "/links", label: "Links" },
+    ],
+  },
+  {
+    group: "Data & methodology",
+    pages: [
+      { href: "/methodology", label: "Methodology" },
+      { href: "/sources", label: "Sources" },
+    ],
+  },
+];
+
+const isActivePage = (path: string, href: string) => path === href || path.startsWith(`${href}/`);
+
 export default function WikiShell({
   title,
   intro,
@@ -34,19 +67,20 @@ export default function WikiShell({
   /** a query parameter that opens a section when no tab is given, e.g. { for: "bag" } */
   openOnParam?: Record<string, string>;
 }) {
+  const path = usePathname() ?? "";
   const [activeId, setActiveId] = useState(sections[0].id);
   const [query, setQuery] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const open = useCallback(
-    (id: string, push = true) => {
+    (id: string) => {
       if (!sections.some((s) => s.id === id)) return;
       setActiveId(id);
-      if (push) {
-        const p = new URLSearchParams(window.location.search);
-        p.set("tab", id);
-        window.history.replaceState(null, "", `${window.location.pathname}?${p}`);
-      }
+      const p = new URLSearchParams(window.location.search);
+      p.set("tab", id);
+      window.history.replaceState(null, "", `${window.location.pathname}?${p}`);
       window.scrollTo({ top: 0 });
+      setMenuOpen(false);
     },
     [sections],
   );
@@ -65,76 +99,106 @@ export default function WikiShell({
   }, [sections, openOnParam]);
 
   const q = query.trim().toLowerCase();
-  const visible = useMemo(
-    () => sections.filter((s) => !q || `${s.label} ${s.hint ?? ""} ${s.group ?? ""}`.toLowerCase().includes(q)),
-    [sections, q],
+  const tree = useMemo(
+    () =>
+      TREE.map((g) => ({
+        ...g,
+        pages: g.pages.filter(
+          (p) => !q || p.label.toLowerCase().includes(q) || (isActivePage(path, p.href) && sections.some((s) => s.label.toLowerCase().includes(q))),
+        ),
+      })).filter((g) => g.pages.length > 0),
+    [q, path, sections],
   );
-  const groups = useMemo(() => {
-    const m = new Map<string, WikiSection[]>();
-    for (const s of visible) m.set(s.group ?? "", [...(m.get(s.group ?? "") ?? []), s]);
-    return [...m.entries()];
-  }, [visible]);
 
   const index = sections.findIndex((s) => s.id === activeId);
   const active = sections[index] ?? sections[0];
   const prev = sections[index - 1];
   const next = sections[index + 1];
 
+  const nav = (
+    <nav aria-label="Wiki" className="text-[13px]">
+      <Link href="/" className="mono mb-4 block text-[11px] font-bold tracking-[0.2em] text-dim hover:text-fg">
+        ← MONITORING
+      </Link>
+      <label className="sr-only" htmlFor="wiki-filter">
+        Filter pages
+      </label>
+      <input
+        id="wiki-filter"
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Filter pages"
+        className="mono mb-5 w-full border border-line bg-transparent px-2 py-1.5 text-xs placeholder:text-dim focus:outline-none"
+      />
+      {tree.map((g) => (
+        <div key={g.group} className="mb-5">
+          <p className="mono mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-dim opacity-70">{g.group}</p>
+          <ul className="border-l border-line">
+            {g.pages.map((p) => {
+              const here = isActivePage(path, p.href);
+              return (
+                <li key={p.href}>
+                  <Link
+                    href={p.href}
+                    aria-current={here ? "page" : undefined}
+                    className={`block py-1 pl-3 hover:text-fg ${here ? "-ml-px border-l border-fg font-semibold text-fg" : "text-dim"}`}
+                  >
+                    {p.label}
+                  </Link>
+                  {here && (
+                    <ul className="mb-1 ml-3 border-l border-line">
+                      {sections
+                        .filter((s) => !q || s.label.toLowerCase().includes(q) || p.label.toLowerCase().includes(q))
+                        .map((s) => (
+                          <li key={s.id}>
+                            <button
+                              type="button"
+                              onClick={() => open(s.id)}
+                              aria-current={s.id === active.id ? "true" : undefined}
+                              className={`block w-full py-0.5 pl-3 text-left text-[12px] hover:text-fg ${s.id === active.id ? "-ml-px border-l border-fg text-fg" : "text-dim"}`}
+                            >
+                              {s.label}
+                            </button>
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+      {tree.length === 0 && <p className="mono text-[11px] text-dim">No page matches.</p>}
+    </nav>
+  );
+
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-24 pt-8">
-      <h1 className="mono text-xl font-bold tracking-wide" style={{ color: accent }}>
-        {title}
-      </h1>
-      {intro && <div className="mt-3 max-w-3xl text-sm leading-relaxed text-dim">{intro}</div>}
+    <div className="mx-auto flex max-w-6xl flex-col lg:flex-row">
+      {/* narrow screens: the tree sits behind a menu button above the content */}
+      <div className="no-print border-b border-line px-4 py-2 lg:hidden">
+        <button type="button" className="btn mono px-3 py-1.5 text-xs font-bold" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
+          {menuOpen ? "CLOSE MENU" : `MENU · ${title.toUpperCase()}`}
+        </button>
+        {menuOpen && <div className="mt-3">{nav}</div>}
+      </div>
+      {/* wide screens: fixed, scrollable left pane */}
+      <aside className="no-print scroll-thin sticky top-0 hidden h-screen w-64 shrink-0 overflow-y-auto border-r border-line px-5 py-6 lg:block">{nav}</aside>
 
-      <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-        <nav aria-label={`${title} sections`} className="no-print lg:sticky lg:top-4 lg:self-start">
-          <label className="sr-only" htmlFor="wiki-filter">
-            Filter sections
-          </label>
-          <input
-            id="wiki-filter"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filter sections"
-            className="mono mb-3 hidden w-full border border-line bg-transparent px-2 py-1.5 text-xs placeholder:text-dim focus:outline-none lg:block"
-          />
-          {/* wide: grouped vertical list; narrow: one scrolling row */}
-          <div className="scroll-thin -mx-4 flex gap-1 overflow-x-auto px-4 lg:mx-0 lg:block lg:overflow-visible lg:px-0" role="tablist" aria-orientation="vertical">
-            {groups.map(([group, list]) => (
-              <div key={group} className="flex gap-1 lg:mb-3 lg:block">
-                {group && <p className="label caret mb-1 hidden lg:block">{group}</p>}
-                {list.map((s) => {
-                  const on = s.id === active.id;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={on}
-                      onClick={() => open(s.id)}
-                      className="tab-btn relative w-auto shrink-0 px-2.5 py-1.5 text-left lg:block lg:w-full"
-                      style={{ "--c": accent } as React.CSSProperties}
-                    >
-                      <span className="mono block whitespace-nowrap text-[12px] font-bold lg:whitespace-normal">{s.label}</span>
-                      {s.hint && <span className="mono hidden text-[10px] font-light text-dim lg:block">{s.hint}</span>}
-                      <span aria-hidden className="tab-bar absolute inset-x-0 bottom-0 h-0.5" style={{ background: accent }} />
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-            {visible.length === 0 && <p className="mono text-[11px] text-dim">No section matches.</p>}
-          </div>
-        </nav>
+      <main className="min-w-0 flex-1 px-4 pb-24 pt-8 lg:px-10" role="tabpanel" aria-label={active.label}>
+        <article className="wiki max-w-3xl">
+          <h1 className="mono text-xl font-bold tracking-wide" style={{ color: accent }}>
+            {title}
+          </h1>
+          {intro && <div className="mt-3 text-sm leading-relaxed text-dim">{intro}</div>}
+          {aside && <div className="no-print mt-5">{aside}</div>}
 
-        <main className="min-w-0" role="tabpanel" aria-label={active.label}>
-          {aside && <div className="no-print mb-4">{aside}</div>}
-          <h2 className="mono text-sm font-bold tracking-[0.14em]" style={{ color: accent }}>
+          <h2 className="mono mt-8 border-t border-line pt-4 text-sm font-bold tracking-[0.14em]" style={{ color: accent }}>
             {active.label.toUpperCase()}
           </h2>
           <div className="mt-1">{active.content}</div>
+
           <div className="no-print mt-10 flex justify-between gap-3 border-t border-line pt-3">
             {prev ? (
               <button type="button" className="btn mono px-3 py-1.5 text-xs font-bold" onClick={() => open(prev.id)}>
@@ -149,8 +213,8 @@ export default function WikiShell({
               </button>
             )}
           </div>
-        </main>
-      </div>
+        </article>
+      </main>
     </div>
   );
 }

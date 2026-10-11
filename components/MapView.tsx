@@ -26,13 +26,16 @@ export type MapData = {
   cables: { type: "FeatureCollection"; features: unknown[] } | null;
   /** tide-gauge stations: relative sea-level trend in mm/yr (ice and sea scenario) */
   tide: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** military bases (conflict scenario) and catalogued objects in orbit (orbit scenario) */
+  bases: { type: "FeatureCollection"; features: unknown[] } | null;
+  orbit: { type: "FeatureCollection"; features: unknown[] } | null;
 };
 
 /** Imperative controls for the on-map view buttons (bottom right). */
 export type MapControls = { zoomIn: () => void; zoomOut: () => void; reset: () => void; flyTo: (lon: number, lat: number) => void };
 
 /** Where the camera should go when the scenario changes. `key` identifies the scenario. */
-export type Camera = { center: [number, number]; zoom: number; key: string };
+export type Camera = { center: [number, number]; zoom: number; key: string; minZoom?: number };
 
 type Props = {
   data: MapData;
@@ -69,6 +72,8 @@ function buildSources(d: MapData): Record<string, FC> {
     gm: d.geomag ?? fc([]),
     cables: d.cables ?? fc([]),
     tide: d.tide ?? fc([]),
+    bases: d.bases ?? fc([]),
+    orbit: d.orbit ?? fc([]),
   };
 }
 
@@ -140,7 +145,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         style: STYLE_URL,
         center: cam?.center ?? [15, 20],
         zoom: cam ? (narrow ? Math.max(0.3, cam.zoom - 1.3) : cam.zoom) : narrow ? 0.3 : 1.6,
-        minZoom: 0.5,
+        minZoom: cam?.minZoom ?? 0.5,
         maxZoom: 9,
         attributionControl: false, // credited in the status bar instead, so the corner stays free for the view controls
         dragRotate: false,
@@ -189,21 +194,29 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           },
         });
         map.addLayer({
+          id: "orbit-core", type: "circle", source: "orbit",
+          paint: {
+            "circle-color": ["match", ["get", "kind"], 1, "#7d8c97", 2, "#ffb000", 3, "#ffffff", "#00e5ff"],
+            "circle-radius": ["match", ["get", "kind"], 3, 4, 2, 1.6, 1.4],
+            "circle-opacity": ["match", ["get", "kind"], 1, 0.55, 0.9],
+          },
+        });
+        map.addLayer({
+          id: "bases-core", type: "circle", source: "bases",
+          paint: {
+            "circle-color": "#FFFF00",
+            "circle-radius": ["match", ["get", "kind"], "naval", 3.5, 3],
+            "circle-stroke-color": "#050505",
+            "circle-stroke-width": 0.8,
+          },
+        });
+        map.addLayer({
           id: "gm-lines", type: "line", source: "gm",
           paint: {
             "line-color": ["match", ["get", "deg"], 60, "#ff003c", "#ffb000"],
             "line-width": 1.8,
             "line-dasharray": [3, 2],
             "line-opacity": 0.9,
-          },
-        });
-        map.addLayer({
-          id: "cells-halo", type: "circle", source: "cells",
-          paint: {
-            "circle-color": DOMAIN_BY_ID.conflict.color,
-            "circle-opacity": 0.12,
-            "circle-radius": ["interpolate", ["linear"], ["get", "n"], 15, 10, 100, 22, 500, 44],
-            "circle-blur": 0.9,
           },
         });
         map.addLayer({
@@ -248,15 +261,6 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           },
         });
         map.addLayer({
-          id: "events-halo", type: "circle", source: "events",
-          paint: {
-            "circle-color": DOMAIN_BY_ID.geophysical.color,
-            "circle-opacity": 0.16,
-            "circle-radius": ["interpolate", ["linear"], ["get", "mag"], 4.5, 9, 6, 20, 8, 44],
-            "circle-blur": 0.8,
-          },
-        });
-        map.addLayer({
           id: "events-core", type: "circle", source: "events",
           paint: {
             "circle-color": DOMAIN_BY_ID.geophysical.color,
@@ -294,25 +298,40 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           },
         });
 
-        map.on("click", "tide-core", (ev) => {
-          const f = ev.features?.[0];
-          if (!f) return;
-          const p = f.properties as { name: string; trend: number; years: number; last: number };
-          const box = document.createElement("div");
-          const t = document.createElement("div");
-          t.style.fontWeight = "600";
-          t.textContent = p.name;
-          const m = document.createElement("div");
-          m.style.cssText = "margin-top:4px;color:#9aa8b3;font-size:11px;line-height:1.4";
-          m.textContent = `${p.trend > 0 ? "+" : ""}${Number(p.trend).toFixed(1)} mm/yr relative sea level (${p.years} yr of data to ${p.last}). Includes land rising or sinking at this gauge.`;
-          box.append(t, m);
-          import("maplibre-gl").then((ml) => {
-            popupRef.current?.remove();
-            popupRef.current = new ml.Popup({ offset: 8, maxWidth: "280px" }).setLngLat(ev.lngLat).setDOMContent(box).addTo(map!);
+        // layers whose points are not entities: a small popup with plain text
+        const simple = (layer: string, text: (p: Record<string, unknown>) => [string, string]) => {
+          map!.on("click", layer, (ev) => {
+            const f = ev.features?.[0];
+            if (!f) return;
+            const [title, body] = text(f.properties as Record<string, unknown>);
+            const box = document.createElement("div");
+            const t = document.createElement("div");
+            t.style.fontWeight = "600";
+            t.textContent = title;
+            const m = document.createElement("div");
+            m.style.cssText = "margin-top:4px;color:#9aa8b3;font-size:11px;line-height:1.4";
+            m.textContent = body;
+            box.append(t, m);
+            import("maplibre-gl").then((ml) => {
+              popupRef.current?.remove();
+              popupRef.current = new ml.Popup({ offset: 8, maxWidth: "280px" }).setLngLat(ev.lngLat).setDOMContent(box).addTo(map!);
+            });
           });
-        });
-        map.on("mouseenter", "tide-core", () => (map!.getCanvas().style.cursor = "pointer"));
-        map.on("mouseleave", "tide-core", () => (map!.getCanvas().style.cursor = ""));
+          map!.on("mouseenter", layer, () => (map!.getCanvas().style.cursor = "pointer"));
+          map!.on("mouseleave", layer, () => (map!.getCanvas().style.cursor = ""));
+        };
+        simple("tide-core", (p) => [
+          String(p.name),
+          `${Number(p.trend) > 0 ? "+" : ""}${Number(p.trend).toFixed(1)} mm/yr relative sea level (${p.years} yr of data to ${p.last}). Includes land rising or sinking at this gauge.`,
+        ]);
+        simple("bases-core", (p) => [
+          String(p.name),
+          `${p.kind === "naval" ? "Naval base" : p.kind === "air" ? "Airbase" : "Military base"}${p.country ? `, ${p.country}` : ""}. Wikidata entry: coverage is uneven and entries may be historical.`,
+        ]);
+        simple("orbit-core", (p) => [
+          p.name ? String(p.name) : ["Satellite", "Starlink satellite", "Tracked debris", "Space station"][Number(p.kind)] ?? "Object",
+          `Altitude about ${p.alt} km at the snapshot time. Positions are a snapshot: objects move about 7 km/s.`,
+        ]);
 
         map.on("click", (ev) => {
           const box: [[number, number], [number, number]] = [
@@ -414,7 +433,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
   const { quakes, plants, volcanoes, outbreaks, cells, dyads, connections, arsenals } = data;
   useEffect(() => {
     applyDataRef.current();
-  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide]);
+  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide, data.bases, data.orbit]);
 
   useEffect(() => {
     applyArsenalsRef.current();
@@ -426,6 +445,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
 
   // scenario change: fly the camera to that scenario's preset view
   const camKey = camera?.key;
+  const lastCamKey = useRef(camKey);
   const firstCam = useRef(true);
   useEffect(() => {
     const map = mapRef.current;
@@ -436,17 +456,22 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
     }
     if (!map || !readyRef.current || !cam) return;
     const narrow = (el.current?.clientWidth ?? 800) < 700;
-    map.flyTo({ center: cam.center, zoom: narrow ? Math.max(0.3, cam.zoom - 1.3) : cam.zoom, duration: 1400, essential: false });
+    map.setMinZoom(cam.minZoom ?? 0.5);
+    map.flyTo({ center: cam.center, zoom: narrow ? Math.max(cam.minZoom ?? 0.3, cam.zoom - 1.3) : cam.zoom, duration: 1400, essential: false });
   }, [camKey]);
 
-  // projection toggle
+  // projection: follows the 2D/3D button, and scenarios that need the globe (orbit, asteroid) force it
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
     map.setProjection({ type: globe ? "globe" : "mercator" });
+    // a scenario change already flies the camera; only the button should nudge the zoom
+    const scenarioChanged = lastCamKey.current !== camKey;
+    lastCamKey.current = camKey;
+    if (scenarioChanged) return;
     const narrow = (el.current?.clientWidth ?? 800) < 700;
     map.easeTo({ zoom: (narrow ? 0.3 : 1.6) + (globe ? 0.7 : 0), duration: 600 });
-  }, [globe]);
+  }, [globe, camKey]);
 
   return <div ref={el} className="h-full w-full" role="application" aria-label="World map" />;
 }
