@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import dyadsFile from "@/data/dyads.json";
 import SiteNav from "@/components/SiteNav";
-import { Card, Ext, H1, H2, KindTag, Lead, Page, TierBadge } from "@/components/ui";
+import WikiShell, { type WikiSection } from "@/components/WikiShell";
+import { Card, Ext, KindTag, TierBadge } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Methodology · Monitoring",
@@ -13,17 +14,9 @@ const P = ({ children }: { children: React.ReactNode }) => <p className="mt-3 te
 const UL = ({ children }: { children: React.ReactNode }) => <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">{children}</ul>;
 
 export default function MethodologyPage() {
-  return (
-    <>
-      <SiteNav />
-      <Page>
-        <H1>Methodology</H1>
-        <Lead>
-          How things on this site are made, so you can judge them. This is a personal, ad-free project; the aim is to be useful and honest
-          about uncertainty rather than dramatic.
-        </Lead>
-
-        <H2 id="kinds">1 · Three kinds of statement</H2>
+  const sections: WikiSection[] = [
+    { id: "kinds", label: "Three kinds of statement", group: "Concepts", content: (
+      <>
         <P>Every number or claim is one of these, and is labelled so they never blur together:</P>
         <ul className="mt-3 space-y-2 text-sm leading-relaxed">
           <li><KindTag kind="observed" /> a measurement or a published record (an earthquake, CO₂ at Mauna Loa, a SIPRI warhead count).</li>
@@ -35,7 +28,10 @@ export default function MethodologyPage() {
           <span className="text-fg">This site never invents probabilities.</span> It shows other people&apos;s, with names and sources, side by side.
         </P>
 
-        <H2 id="tiers">2 · Evidence tiers for scenarios</H2>
+      </>
+    ) },
+    { id: "tiers", label: "Evidence tiers for scenarios", group: "Concepts", content: (
+      <>
         <P>Tiers rate how good the evidence is, not how likely the event is. A very unlikely event can still have strong evidence for how it would work.</P>
         <ul className="mt-3 space-y-2 text-sm leading-relaxed">
           <li><TierBadge tier="A" /> The mechanism is known, there is historical precedent, and there is a published scenario or model.</li>
@@ -43,7 +39,10 @@ export default function MethodologyPage() {
           <li><TierBadge tier="C" /> Physically conceivable, but the evidence is weak, disputed or mostly folklore. Hidden by default.</li>
         </ul>
 
-        <H2 id="tension">3 · The tension index for country pairs</H2>
+      </>
+    ) },
+    { id: "tension", label: "The tension index for country pairs", group: "Computed values", content: (
+      <>
         <P>
           For each tracked pair the site looks at how news reports their interactions over the last 30 days, using the GDELT event
           database (events coded automatically from news with the CAMEO scheme). It computes four things, weighted by how many articles
@@ -74,7 +73,10 @@ export default function MethodologyPage() {
           list is a judgement and can be changed.
         </P>
 
-        <H2 id="gdelt">4 · About GDELT, and the conflict layer</H2>
+      </>
+    ) },
+    { id: "gdelt", label: "About GDELT, and the conflict layer", group: "Computed values", content: (
+      <>
         <UL>
           <li>GDELT codes events automatically from news text. It makes mistakes, double-counts, and misreads context.</li>
           <li>
@@ -89,7 +91,10 @@ export default function MethodologyPage() {
           <li>Counts measure how much is reported. They are not casualties, and they over-represent countries with heavy English-language coverage.</li>
         </UL>
 
-        <H2 id="links">5 · Links: computed versus causal</H2>
+      </>
+    ) },
+    { id: "links", label: "Links: computed versus causal", group: "Computed values", content: (
+      <>
         <P>There are two kinds of link on this site and they claim different things.</P>
         <p className="mt-4 text-sm font-semibold">Computed links (automatic; show connection, not cause)</p>
         <UL>
@@ -104,7 +109,26 @@ export default function MethodologyPage() {
           arrow has an evidence rating (strong, moderate, speculative) and at least one citation, except speculative arrows, which are hidden by default.
         </P>
 
-        <H2 id="counters">6 · Counters</H2>
+      </>
+    ) },
+    { id: "pairs", label: "Why each pair is on the map", group: "Computed values", content: (
+      <>
+        <P>
+          The tension map draws a line only for pairs listed in <span className="mono">data/dyads.json</span>. Each pair carries one of four reasons and a one-sentence explanation, shown in its popup and in the Nuclear readout:
+        </P>
+        <UL>
+          <li><span className="mono">both-nuclear</span>: both states hold nuclear weapons.</li>
+          <li><span className="mono">war-with-nuclear-state</span>: a nuclear-armed state is in a direct war with a state that has no such weapons.</li>
+          <li><span className="mono">nuclear-vs-neighbour</span>: a nuclear-armed state shares a border or lies within range of a neighbour without such weapons.</li>
+          <li><span className="mono">threshold-state</span>: a state that holds no weapons but whose enrichment programme is under international scrutiny (IAEA).</li>
+        </UL>
+        <P>
+          Pairs whose inclusion is politically contestable are marked <span className="mono">sensitive</span> and carry an asterisk. Being listed is not an accusation and not a prediction; the index only describes how news reports the pair.
+        </P>
+      </>
+    ) },
+    { id: "counters", label: "Counters", group: "Computed values", content: (
+      <>
         <UL>
           <li>Each counter shows its value, the date of the data, how often it updates, its source and its licence. Tap one on the map for the caveats.</li>
           <li>Counters marked <span className="mono">manual</span> come from annual publications and are updated by hand. Each has a review date; a counter past its date says so.</li>
@@ -113,7 +137,10 @@ export default function MethodologyPage() {
           <li>If a source stops updating, its last value stays and the feed status turns amber; the site does not go blank.</li>
         </UL>
 
-        <H2 id="limits">7 · What this site does not do</H2>
+      </>
+    ) },
+    { id: "limits", label: "What this site does not do", group: "Boundaries", content: (
+      <>
         <UL>
           <li>It makes no forecasts or probabilities of its own.</li>
           <li>It has no ash-fall, fallout or impact-damage maps. These need inputs (winds, targets, angle, yield) that nobody can know in advance, and a precise-looking map would claim more than the science does.</li>
@@ -121,14 +148,40 @@ export default function MethodologyPage() {
           <li>It does not track you: there are no accounts, ads or analytics, and your checklist stays on your device.</li>
         </UL>
 
-        <H2 id="data">8 · Data, licences, citations</H2>
+      </>
+    ) },
+    { id: "freshness", label: "Data freshness", group: "Computed values", content: (
+      <>
+        <UL>
+          <li><span className="text-fg">Newest observation</span> is the timestamp of the newest value in a feed. Monthly series are shown as the month, daily series as the day, so no false precision is invented.</li>
+          <li><span className="text-fg">Latency</span> is how old that observation is right now, which includes the source&apos;s own publishing delay.</li>
+          <li><span className="text-fg">Fetched</span> is when this site last pulled the feed successfully (the data job runs twice an hour).</li>
+          <li><span className="text-fg">LATE</span> means a feed failed or its newest observation is older than that feed&apos;s normal lag (for example 2 hours for earthquakes, 120 days for the sea-level series). A failed feed keeps its last value and is marked.</li>
+          <li>Hand-entered figures carry a review date; past it, the status bar shows a warning and the data job logs one.</li>
+        </UL>
+        <P>The live table is on the <Link href="/sources" className="text-accent hover:underline">Sources page</Link> and behind the Freshness button on the map.</P>
+      </>
+    ) },
+    { id: "data", label: "Data, licences, citations", group: "Boundaries", content: (
+      <>
         <P>
           Every source, its licence and its last update are on the <Link href="/sources" className="text-accent hover:underline">Sources page</Link>. Scholarly citations
           were checked against the Crossref record and web links were opened. The basemap is © CARTO and © OpenStreetMap contributors. This is a personal,
           non-commercial project; some datasets (such as the submarine-cable map, CC BY-NC-SA) permit only that use. Data come from{" "}
           <Ext href="https://www.gdeltproject.org/">GDELT</Ext>, USGS, NASA, NOAA, WHO, IMF PortWatch, SIPRI, the World Bank and others listed there.
         </P>
-      </Page>
+      </>
+    ) },
+  ];
+  return (
+    <>
+      <SiteNav />
+      <WikiShell
+        title="Methodology"
+        intro={<>How things on this site are made, so you can judge them. This is a personal, ad-free project; the aim is to be useful and honest
+          about uncertainty rather than dramatic.</>}
+        sections={sections}
+      />
     </>
   );
 }

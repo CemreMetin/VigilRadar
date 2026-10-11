@@ -186,7 +186,7 @@ export default function CountryView() {
                 )}
 
                 <p className="mt-8 text-sm">
-                  <Link href={`/?layers=nuclear%2Cconflict%2Chealth%2Cgeophysical&sel=country%3A${p.iso3}&tab=links`} className="text-accent hover:underline">
+                  <Link href={`/?sc=nuclear&sel=country%3A${p.iso3}&tab=links`} className="text-accent hover:underline">
                     Show on the map with connections →
                   </Link>
                 </p>

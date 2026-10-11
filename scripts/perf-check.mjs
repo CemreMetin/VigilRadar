@@ -8,7 +8,7 @@ import { chromium } from "playwright-core";
 const BASE = process.argv[2] ?? "http://localhost:8081";
 const PAGES = [
   ["/", "map, default layers", 9_000],
-  ["/?layers=nuclear%2Cconflict%2Chealth%2Cgeophysical", "map, all layers", 12_000],
+  ["/?sc=overview", "map, all layers", 12_000],
   ["/survive", "survive", 2_500],
   ["/scenarios/pandemic-x", "pandemic explorer", 12_000],
   ["/trajectory", "trajectory", 2_500],

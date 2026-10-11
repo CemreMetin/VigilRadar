@@ -174,6 +174,7 @@ export function buildEntityIndex(input: {
       lat: mid[1],
       lon: mid[0],
       lines: [
+        `Why this pair is drawn: ${d.why ?? "both states are on the tracked list"}${d.sensitive ? " Politically sensitive: read the reason before reading the number." : ""}`,
         d.tension != null
           ? `Media tension index ${d.tension}/100 (a description of how news reports the pair, not a forecast)`
           : "Too little data to compute an index",

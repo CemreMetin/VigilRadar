@@ -1,4 +1,4 @@
-import type { Counter, Tone } from "../../lib/types";
+import type { AsteroidsFile, Counter, Tone } from "../../lib/types";
 import { fetchOpen } from "../http";
 
 const AU_PER_LD = 0.00256955; // one lunar distance in au
@@ -15,7 +15,7 @@ function fmtM(m: number): string {
   return `${Math.round(m)} m`;
 }
 
-export async function asteroidCounter(): Promise<Counter[]> {
+export async function asteroidFeed(): Promise<{ counters: Counter[]; file: AsteroidsFile }> {
   const from = new Date().toISOString().slice(0, 10);
   const to = new Date(Date.now() + 60 * 86_400_000).toISOString().slice(0, 10);
   const cad = (await (
@@ -33,11 +33,13 @@ export async function asteroidCounter(): Promise<Counter[]> {
 
   // Sentry: objects with a non-zero computed impact probability over the next ~100 years
   let sentryNote = "";
+  let sentry: AsteroidsFile["sentry"] = null;
   try {
     const s = (await (await fetchOpen("https://ssd-api.jpl.nasa.gov/sentry.api")).json()) as {
       data: { ts_max: string; ps_max: string; fullname: string; diameter?: string }[];
     };
     const torino = s.data.filter((d) => Number(d.ts_max) > 0).length;
+    sentry = { tracked: s.data.length, torinoAbove0: torino };
     sentryNote = ` NASA's Sentry system tracks ${s.data.length.toLocaleString("en-US")} objects with a non-zero computed chance of impact within about a century; ${torino} of them rate 1 or higher on the Torino scale (0 = no hazard, 10 = certain global catastrophe).`;
   } catch {
     sentryNote = "";
@@ -46,7 +48,7 @@ export async function asteroidCounter(): Promise<Counter[]> {
   const within1 = rows.filter((r) => r.ld <= 1).length;
   const nearest = rows[0];
   const tone: Tone = within1 > 0 ? "elevated" : "normal";
-  return [
+  const counters: Counter[] = [
     {
       id: "asteroids",
       label: "Asteroid close approaches",
@@ -55,6 +57,7 @@ export async function asteroidCounter(): Promise<Counter[]> {
       numeric: rows.length,
       unit: "within 20 Moon-distances, next 60 days",
       tone,
+      basis: "Elevated when a known object passes within one Moon-distance. No known object is rated a hazard, so it is never critical.",
       trendLabel: nearest
         ? `Closest: ${nearest.des} at ${nearest.ld.toFixed(1)} LD on ${nearest.date.slice(0, 11)}`
         : "None in the window",
@@ -77,4 +80,16 @@ export async function asteroidCounter(): Promise<Counter[]> {
       href: "/scenarios/asteroid",
     },
   ];
+  const file: AsteroidsFile = {
+    generatedAt: new Date().toISOString(),
+    windowDays: 60,
+    maxLd: 0.05 / AU_PER_LD,
+    approaches: rows.map((r) => {
+      const dia = r.h != null ? diameterRange(r.h) : null;
+      return { des: r.des, date: r.date, ld: Math.round(r.ld * 100) / 100, kms: r.v, h: r.h, dMinM: dia ? Math.round(dia[0]) : null, dMaxM: dia ? Math.round(dia[1]) : null };
+    }),
+    sentry,
+    source: { name: "NASA/JPL Center for Near-Earth Object Studies", url: "https://cneos.jpl.nasa.gov/ca/", license: "Public domain (NASA)" },
+  };
+  return { counters, file };
 }

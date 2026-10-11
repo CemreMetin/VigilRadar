@@ -6,7 +6,8 @@ import { SCENARIOS, SCENARIO_BY_ID, type Evidence } from "@/data/scenarios";
 import LiveIndicators from "@/components/scenarios/LiveIndicators";
 import ModuleLoader from "@/components/scenarios/ModuleLoader";
 import SiteNav from "@/components/SiteNav";
-import { Card, Ext, H2, KindTag, Page, TierBadge } from "@/components/ui";
+import WikiShell, { type WikiSection } from "@/components/WikiShell";
+import { Card, Ext, KindTag, TierBadge } from "@/components/ui";
 
 export const dynamicParams = false;
 
@@ -34,18 +35,9 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
   const related = (s.related ?? []).map((r) => SCENARIO_BY_ID[r]).filter(Boolean);
   const surviveHref = s.tag ? `/survive?for=${s.tag}#bag` : "/survive";
 
-  return (
-    <>
-      <SiteNav />
-      <Page>
-        <p className="mono text-xs text-dim">
-          <Link href="/scenarios" className="hover:text-accent">← all scenarios</Link>
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <TierBadge tier={s.tier} />
-          <span className="label">{s.group}</span>
-        </div>
-        <h1 className="mono mt-3 text-xl font-bold tracking-wide text-fg">{s.title}</h1>
+  const sections: WikiSection[] = [
+    { id: "overview", label: "Overview", group: "This scenario", content: (
+      <>
         {s.tier === "C" && (
           <p className="mt-3 border border-dashed border-geo px-3 py-2 text-xs leading-relaxed text-geo">
             Thought experiment: physically conceivable, but the evidence is weak or disputed. It is here for curiosity and to say what
@@ -59,7 +51,10 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
 
         {s.module && <ModuleLoader module={s.module} />}
 
-        <H2>How it could unfold</H2>
+      </>
+    ) },
+    { id: "unfold", label: "How it could unfold", group: "This scenario", content: (
+      <>
         <ol className="mt-3 space-y-2">
           {s.chain.map((c, i) => {
             const e = EVIDENCE[c.evidence];
@@ -75,14 +70,18 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
           })}
         </ol>
 
-        <H2>Historical anchors</H2>
+        <p className="label mt-6">Historical anchors</p>
         <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
           {s.analogs.map((a) => <li key={a}>{a}</li>)}
         </ul>
 
+      </>
+    ) },
+    ...(s.estimates.length > 0 || s.caveat
+      ? [{ id: "evidence", label: "What experts say", group: "Evidence", content: (
+          <>
         {s.estimates.length > 0 && (
           <>
-            <H2>What experts and models say</H2>
             <div className="mt-3 overflow-x-auto border border-line">
               <table className="w-full min-w-[520px] text-left text-xs">
                 <thead>
@@ -120,7 +119,11 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
           </Card>
         )}
 
-        <H2>What you can do</H2>
+          </>
+        ) }]
+      : []),
+    { id: "todo", label: "What you can do", group: "Action", content: (
+      <>
         <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
           {s.doNow.map((d) => <li key={d}>{d}</li>)}
         </ul>
@@ -130,7 +133,7 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
 
         {related.length > 0 && (
           <>
-            <H2>Related scenarios</H2>
+            <p className="label mt-6">Related scenarios</p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {related.map((r) => (
                 <li key={r.id}>
@@ -143,7 +146,10 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
           </>
         )}
 
-        <H2>References</H2>
+      </>
+    ) },
+    { id: "refs", label: "References", group: "Evidence", content: (
+      <>
         <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-xs leading-relaxed text-dim">
           {s.refs.map((rid) => {
             const r = ref(rid);
@@ -154,7 +160,26 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
             );
           })}
         </ol>
-      </Page>
+      </>
+    ) },
+  ];
+
+  return (
+    <>
+      <SiteNav />
+      <WikiShell
+        title={s.title}
+        intro={
+          <>
+            <span className="flex flex-wrap items-center gap-3">
+              <Link href="/scenarios" className="mono text-xs hover:text-accent">← all scenarios</Link>
+              <TierBadge tier={s.tier} />
+              <span className="label">{s.group}</span>
+            </span>
+          </>
+        }
+        sections={sections}
+      />
     </>
   );
 }

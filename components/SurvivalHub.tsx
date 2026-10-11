@@ -13,6 +13,7 @@ import {
   type ScenarioTag,
 } from "@/data/survival";
 import OfflineButton from "./OfflineButton";
+import WikiShell, { type WikiSection } from "./WikiShell";
 
 const STORAGE_KEY = "monitoring.bag.v1";
 
@@ -39,15 +40,6 @@ const A = ({ href, children }: { href: string; children: React.ReactNode }) => (
   </a>
 );
 
-function SectionTitle({ id, children }: { id: string; children: React.ReactNode }) {
-  return (
-    <h2 id={id} className="mono mt-12 scroll-mt-4 text-sm font-bold tracking-[0.14em] text-safe">
-      {children}
-    </h2>
-  );
-}
-
-/** Offline map helper: turns a place and radius into a ready-to-run `pmtiles extract` command. */
 function MapExtractTool() {
   const [lat, setLat] = useState("41.01");
   const [lon, setLon] = useState("28.98");
@@ -169,39 +161,9 @@ export default function SurvivalHub() {
   const relevant = (tags: ScenarioTag[]) => filter === "all" || tags.length === 0 || tags.includes(filter);
   const tierDone = items.filter((i) => checked.has(i.id)).length;
 
-  const nav = [
-    ["plan", "Plan"],
-    ["bag", "Checklist"],
-    ["shelter", "Radiation shelter"],
-    ["comms", "Communication"],
-    ["maps", "Offline maps"],
-    ["guides", "Official guides"],
-  ];
-
-  return (
-    <div className="mx-auto max-w-4xl px-4 pb-24 pt-8">
-      <h1 className="mono text-xl font-bold tracking-wide text-safe">What can you do?</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-dim">
-        The risks on this site are large, but your best preparation is dull and local: water, food, light,
-        medicine, a way to get news and a plan your household has practised. The same kit covers an earthquake, a
-        flood, a long power cut or a pandemic wave. Nothing here asks for an account, and your ticks never
-        leave this device.
-      </p>
-
-      <nav aria-label="Sections" className="no-print mt-5 flex flex-wrap gap-x-4 gap-y-1">
-        {nav.map(([id, label]) => (
-          <a key={id} href={`#${id}`} className="mono text-xs text-dim hover:text-safe">
-            {label}
-          </a>
-        ))}
-      </nav>
-
-      <div className="no-print mt-5">
-        <OfflineButton />
-      </div>
-
-      {/* PLAN */}
-      <SectionTitle id="plan">1 · MAKE A PLAN (30 MINUTES, NO MONEY)</SectionTitle>
+  const sections: WikiSection[] = [
+    { id: "plan", label: "Plan", group: "Start here", hint: "30 minutes, no money", content: (
+      <>
       <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed">
         <li>
           <strong>Meet.</strong> Talk through how you would get alerts, where you would shelter, how you would leave, and
@@ -221,8 +183,10 @@ export default function SurvivalHub() {
         Steps from <A href="https://www.ready.gov/plan">Ready.gov: Make a plan</A>.
       </p>
 
-      {/* CHECKLIST */}
-      <SectionTitle id="bag">2 · CHECKLIST</SectionTitle>
+      </>
+    ) },
+    { id: "bag", label: "Checklist", group: "Start here", hint: "Packing list, ticks stay on this device", content: (
+      <>
       <div className="no-print mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Highlight for scenario">
         {SCENARIO_FILTERS.map((f) => (
           <button
@@ -320,8 +284,10 @@ export default function SurvivalHub() {
         print this list
       </button>
 
-      {/* SHELTER */}
-      <SectionTitle id="shelter">3 · IF THERE IS A NUCLEAR OR RADIATION EMERGENCY</SectionTitle>
+      </>
+    ) },
+    { id: "shelter", label: "Radiation shelter", group: "Emergencies", hint: "Get inside, stay inside, stay tuned", content: (
+      <>
       <div className="mt-3 border border-line p-4 text-sm leading-relaxed">
         <p>
           Official guidance (Ready.gov) is three words: <strong>get inside, stay inside, stay tuned.</strong>
@@ -339,8 +305,10 @@ export default function SurvivalHub() {
         </p>
       </div>
 
-      {/* COMMS */}
-      <SectionTitle id="comms">4 · COMMUNICATION WHEN NETWORKS FAIL</SectionTitle>
+      </>
+    ) },
+    { id: "comms", label: "Communication", group: "Emergencies", hint: "When networks fail", content: (
+      <>
       <p className="mt-3 text-sm leading-relaxed text-dim">
         Start simple: a written contact list, a meeting place and a battery radio to hear official instructions. Two-way
         radio is a bonus; learn it before you need it.
@@ -379,8 +347,10 @@ export default function SurvivalHub() {
         .
       </p>
 
-      {/* MAPS */}
-      <SectionTitle id="maps">5 · OFFLINE MAPS</SectionTitle>
+      </>
+    ) },
+    { id: "maps", label: "Offline maps", group: "Resources", hint: "Maps without a connection", content: (
+      <>
       <p className="mt-3 text-sm leading-relaxed text-dim">
         For most people the easiest option is a phone app with downloaded regions. If you are technical and want a map file
         you control, the tool below builds the extraction command for a circle around a place.
@@ -394,8 +364,10 @@ export default function SurvivalHub() {
       </ul>
       <MapExtractTool />
 
-      {/* GUIDES */}
-      <SectionTitle id="guides">6 · OFFICIAL GUIDES</SectionTitle>
+      </>
+    ) },
+    { id: "guides", label: "Official guides", group: "Resources", hint: "Links to the agencies that issue them", content: (
+      <>
       <p className="mt-3 text-sm leading-relaxed text-dim">
         These are links, not copies: guidance changes, and the issuing health and emergency agencies keep it current. For
         medicine and doses, follow them, not this page. Save the ones you need before a crisis (print to PDF or open them in
@@ -413,10 +385,33 @@ export default function SurvivalHub() {
           </li>
         ))}
       </ul>
+      </>
+    ) },
+  ];
+
+  return (
+    <WikiShell
+      title="What can you do?"
+      accent="var(--safe)"
+      intro={
+        <>
+          The risks on this site are large, but your best preparation is dull and local: water, food, light, medicine, a way to get news and a plan your
+          household has practised. The same kit covers an earthquake, a flood, a long power cut or a pandemic wave. Nothing here asks for an account, and
+          your ticks never leave this device.
+        </>
+      }
+      aside={<OfflineButton />}
+      openOnParam={{ for: "bag" }}
+      sections={sections.map((sec, i) =>
+        i === sections.length - 1
+          ? { ...sec, content: (<>{sec.content}
       <p className="mt-6 text-xs leading-relaxed text-dim">
         This page gives general information, not medical or safety advice for your situation. Follow instructions from
         local authorities.
       </p>
-    </div>
+</>) }
+          : sec,
+      )}
+    />
   );
 }

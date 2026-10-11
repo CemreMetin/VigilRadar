@@ -50,8 +50,6 @@ export default function FilterPanel({
   onRange,
   minMag,
   onMinMag,
-  globe,
-  onGlobe,
   showConnections,
   onConnections,
   legend,
@@ -63,8 +61,6 @@ export default function FilterPanel({
   onRange: (v: "24h" | "7d") => void;
   minMag: number;
   onMinMag: (v: number) => void;
-  globe: boolean;
-  onGlobe: (v: boolean) => void;
   showConnections: boolean;
   onConnections: (v: boolean) => void;
   legend: ReactNode;
@@ -75,6 +71,11 @@ export default function FilterPanel({
       <p className="mono text-[11px] font-bold tracking-wider" style={{ color: mode.color }}>
         {`${mode.title.toUpperCase()} // LAYERS`}
       </p>
+      {mode.layers.length === 0 && (
+        <p className="readout-in mt-3 text-[11px] font-light leading-relaxed text-dim">
+          This scenario has no map layer: the objects are not on the ground. Its readout is on the right.
+        </p>
+      )}
       <ul className="readout-in mt-3 space-y-1.5">
         {mode.layers.map((id) => {
           const info = LAYER_INFO[id];
@@ -127,16 +128,7 @@ export default function FilterPanel({
         </>
       )}
 
-      <Heading>View</Heading>
-      <Segmented
-        label="Map projection"
-        value={globe ? "3D" : "2D"}
-        onChange={(v) => onGlobe(v === "3D")}
-        options={[
-          { value: "2D", label: "2D MAP" },
-          { value: "3D", label: "3D GLOBE" },
-        ]}
-      />
+      <Heading>Selection</Heading>
       <button
         type="button"
         aria-pressed={showConnections}
@@ -146,7 +138,7 @@ export default function FilterPanel({
         <span className="text-[13px] font-bold">Draw links for selection</span>
         <span className="mono text-[10px] font-bold">{showConnections ? "ON" : "OFF"}</span>
       </button>
-      <p className="mt-1.5 text-[11px] font-light leading-relaxed text-dim">Click anything on the map to draw lines to what it is linked to.</p>
+      <p className="mt-1.5 text-[11px] font-light leading-relaxed text-dim">Click anything on the map to draw lines to what it is linked to. View and zoom buttons are at the bottom right of the map.</p>
 
       <div className="mt-6 space-y-1 text-[11px] font-light text-dim">{legend}</div>
     </div>

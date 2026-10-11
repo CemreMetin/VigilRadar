@@ -1,5 +1,6 @@
 import { ageLabel } from "@/lib/format";
 import { utcClock } from "@/lib/format";
+import type { Overdue } from "@/lib/reviews";
 import type { WorldState } from "@/lib/types";
 
 /**
@@ -15,6 +16,9 @@ export default function StatusBar({
   stale,
   failed,
   summary,
+  overdue,
+  freshnessOpen,
+  onFreshness,
 }: {
   world: WorldState | null;
   loadError: string | null;
@@ -24,6 +28,9 @@ export default function StatusBar({
   stale: boolean;
   failed: string[];
   summary: string;
+  overdue: Overdue[];
+  freshnessOpen: boolean;
+  onFreshness: () => void;
 }) {
   const state = !world
     ? loadError
@@ -44,7 +51,36 @@ export default function StatusBar({
         UTC <span className="font-bold text-fg">{now ? utcClock(now) : "--:--:--"}</span>
       </span>
       {world && now && <span className="font-light text-dim">DATA AGE {ageLabel(world.generatedAt, now)}</span>}
+      <button
+        type="button"
+        aria-pressed={freshnessOpen}
+        aria-expanded={freshnessOpen}
+        onClick={onFreshness}
+        className="btn px-2 py-0.5 text-[11px] font-bold"
+        title="Per-feed latency and exact update times"
+      >
+        FRESHNESS
+      </button>
+      {overdue.length > 0 && (
+        <button
+          type="button"
+          onClick={onFreshness}
+          className="font-bold"
+          style={{ color: "var(--geo)" }}
+          title={overdue.map((o) => `${o.label}: review was due ${o.reviewBy} (${o.source})`).join("; ")}
+        >
+          ⚠ {overdue.length} MANUAL {overdue.length === 1 ? "FIGURE" : "FIGURES"} PAST REVIEW DATE
+        </button>
+      )}
       {summary && <span className="min-w-0 truncate font-light text-dim">{summary}</span>}
+      <span className="font-light text-dim">
+        Map ©{" "}
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a>
+        {" · "}
+        <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer" className="underline">CARTO</a>
+        {" · "}
+        <a href="https://maplibre.org" target="_blank" rel="noopener noreferrer" className="underline">MapLibre</a>
+      </span>
     </div>
   );
 }

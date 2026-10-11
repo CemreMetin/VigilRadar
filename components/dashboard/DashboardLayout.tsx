@@ -4,7 +4,8 @@ import type { CSSProperties, ReactNode } from "react";
  * Page frame for the map view: three strict zones around a full-window map.
  *
  *   top bar  (scenario tabs)            macro context, which world am I looking at
- *   left     (layers of that scenario)  micro control, what do I want on the map
+ *   left     (layers of that scenario)  micro control, a glass overlay on the map
+ *   bottom right of the map: view and camera controls
  *   right    (readouts + survival hub)  analysis and action, what does it mean, what do I do
  *   bottom   (status line)              system state
  *
@@ -20,6 +21,7 @@ export default function DashboardLayout({
   footer,
   map,
   mapOverlay,
+  controls,
 }: {
   themeColor: string;
   topBar: ReactNode;
@@ -28,19 +30,22 @@ export default function DashboardLayout({
   footer: ReactNode;
   map: ReactNode;
   mapOverlay?: ReactNode;
+  controls?: ReactNode;
 }) {
   return (
     <div className="relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden" style={{ "--scn": themeColor } as CSSProperties}>
       <section className="relative order-2 h-[58vh] min-h-[320px] lg:absolute lg:inset-0 lg:order-none lg:h-auto lg:min-h-0" aria-label="Map">
         {map}
         {mapOverlay}
+        {/* view and camera controls: bottom right of the open map, just left of the right panel */}
+        <div className="absolute bottom-2 right-2 z-20 lg:bottom-12 lg:right-[388px]">{controls}</div>
       </section>
 
       <header className="panel-scn relative z-30 order-1 border-x-0 border-t-0 lg:absolute lg:inset-x-0 lg:top-0">{topBar}</header>
 
       <div className="panel-scn order-3 border-x-0 lg:absolute lg:bottom-1.5 lg:left-3 lg:right-[250px] lg:z-20 lg:order-none lg:border-x">{footer}</div>
 
-      <aside className="panel-scn order-4 overflow-y-auto scroll-thin lg:absolute lg:bottom-11 lg:left-3 lg:top-[68px] lg:z-20 lg:w-[250px]" aria-label="Map layers for this scenario">
+      <aside className="panel-scn panel-glass order-4 overflow-y-auto scroll-thin lg:absolute lg:bottom-11 lg:left-3 lg:top-[68px] lg:z-20 lg:w-[250px]" aria-label="Map layers for this scenario">
         {left}
       </aside>
 

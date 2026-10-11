@@ -65,15 +65,25 @@ jobs:
       - name: Build static site
         run: npm run build
 
+      - name: Check deploy secrets
+        id: secrets
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Deploy skipped::CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID must both be set as repository secrets."
+          fi
+
       - name: Create the Pages project (first run only)
-        if: env.CLOUDFLARE_API_TOKEN != ''
+        if: steps.secrets.outputs.deploy == 'true'
         continue-on-error: true
         run: npx wrangler pages project create "$PROJECT" --production-branch=main
 
       - name: Deploy to Cloudflare Pages
-        if: env.CLOUDFLARE_API_TOKEN != ''
+        if: steps.secrets.outputs.deploy == 'true'
         run: npx wrangler pages deploy out --project-name="$PROJECT" --branch=main --commit-dirty=true
 
       - name: Note when deploy was skipped
-        if: env.CLOUDFLARE_API_TOKEN == ''
-        run: echo "CLOUDFLARE_API_TOKEN is not set, so the site was built but not deployed."
+        if: steps.secrets.outputs.deploy != 'true'
+        run: echo "A Cloudflare secret is missing, so the site was built but not deployed."

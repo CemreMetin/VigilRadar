@@ -2,6 +2,9 @@ import type { Counter, MonitorEvent, Tone } from "../../lib/types";
 import { findCountry } from "../geo";
 import { fetchOpen } from "../http";
 
+/** WHO reports in 90 days from which the outbreaks metric reads as elevated. */
+const OUTBREAK_ELEVATED_AT = 12;
+
 export const KP_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json";
 export const DON_URL =
   "https://www.who.int/api/news/diseaseoutbreaknews?sf_culture=en&$select=Title,PublicationDate,UrlName,DonId&$orderby=PublicationDate%20desc&$top=80";
@@ -36,6 +39,7 @@ export async function kpCounter(): Promise<Counter[]> {
       numeric: last.Kp,
       unit: `Kp · ${gScale(last.Kp)}`,
       tone,
+      basis: "Elevated from Kp 5 (NOAA G1 storm), critical from Kp 7 (G3)",
       trendLabel: `24 h peak Kp ${max24.toFixed(1)} (${gScale(max24)})`,
       note: "Planetary Kp index, 0-9, from NOAA SWPC (3-hour values). G1 starts at Kp 5. The 1859 Carrington event is estimated to have been beyond anything in the modern record.",
       asOf: new Date(last.time_tag + "Z").toISOString(),
@@ -109,7 +113,8 @@ export async function donFeed(): Promise<{ counters: Counter[]; events: MonitorE
       value: String(recent.length),
       numeric: recent.length,
       unit: "reports in 90 days",
-      tone: recent.length >= 12 ? "elevated" : "normal",
+      tone: recent.length >= OUTBREAK_ELEVATED_AT ? "elevated" : "normal",
+      basis: `Elevated from ${OUTBREAK_ELEVATED_AT} WHO reports in 90 days`,
       trendLabel: `Latest: ${latest.Title}`,
       note: "Count of WHO Disease Outbreak News publications, not a count of active outbreaks: WHO only publishes events it judges relevant for international attention, and one outbreak can have several reports. On the map, each report is placed at the centre of the country named in its title (not at the outbreak site).",
       asOf: new Date(latest.PublicationDate).toISOString(),

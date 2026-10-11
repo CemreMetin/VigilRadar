@@ -49,7 +49,7 @@ export default async function NuclearPage() {
       </h1>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-dim">
         Who has how many warheads, and what the most-cited symbolic clock says. These are published
-        estimates, not live data. Tension pairs between nuclear states arrive in Phase 4.
+        estimates, not live data. Tension between the pairs is on the map and below.
       </p>
 
       {/* clock + totals */}
@@ -162,7 +162,7 @@ export default async function NuclearPage() {
       <h2 className="label mt-10">Nuclear power plants</h2>
       <p className="mt-2 max-w-2xl text-xs leading-relaxed text-dim">
         Civil power reactors are not weapons. They are shown because a war, quake or flood near a
-        plant is a risk of its own; Phase 5 will link such events to nearby plants. Switch on{" "}
+        plant is a risk of its own; the map links quakes and conflict reports near a plant. Switch on{" "}
         <em>Nuclear</em> on the map to see all {plantsFile?.plants.length ?? "–"}.
       </p>
       {plantsFile && (

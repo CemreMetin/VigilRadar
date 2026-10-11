@@ -107,6 +107,7 @@ export async function portwatchCounter(): Promise<Counter[]> {
       numeric: disrupted,
       unit: `below ${DISRUPTED_BELOW}% of normal`,
       tone,
+      basis: `Counted when a chokepoint's 7-day transits are more than ${Math.abs(DISRUPTED_BELOW)}% below its 12-month average; elevated at one chokepoint, critical at three`,
       trendLabel: `Lowest: ${results[0].name} ${fmtPct(results[0].pct)}`,
       note: `Average daily ship transits over the last 7 days vs the average of the previous 12 months, per chokepoint. A drop can come from war, weather, drought (Panama), or rerouting; it does not say why. PortWatch publishes with a delay of several days.`,
       asOf,

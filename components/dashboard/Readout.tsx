@@ -3,7 +3,9 @@
 import { arsenals } from "@/lib/arsenals";
 import { relTime } from "@/lib/format";
 import type { Mode } from "@/lib/lenses";
-import type { Counter, MonitorEvent, WorldState } from "@/lib/types";
+import type { AsteroidsFile, Counter, MonitorEvent, TideGaugesFile, WorldState } from "@/lib/types";
+import { AiBioReadout, AsteroidReadout, IceReadout } from "./ExtraReadouts";
+import { Bar, Big, Section } from "./parts";
 
 /**
  * Right panel, "Readout" tab: read-only analysis for the active scenario. Nothing here changes the map
@@ -12,44 +14,6 @@ import type { Counter, MonitorEvent, WorldState } from "@/lib/types";
 
 const n = (v: number) => v.toLocaleString("en-US");
 const num = (s: string) => Number(s.replace(/[,%+]/g, "").replace("−", "-"));
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="border-b border-line px-3 py-3">
-      <p className="label caret mb-2">{title}</p>
-      {children}
-    </section>
-  );
-}
-
-function Big({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
-  return (
-    <div className="bg-panel-solid p-3">
-      <p className="label">{label}</p>
-      <p className="mono readout-in mt-1 text-2xl font-bold leading-none" style={{ color }}>
-        {value}
-      </p>
-      {sub && <p className="mono mt-1 text-[10px] font-light text-dim">{sub}</p>}
-    </div>
-  );
-}
-
-/** One labelled horizontal bar: label left, value right, a 4px flat bar below. */
-function Bar({ label, value, pct, color, hint }: { label: string; value: string; pct: number; color: string; hint?: string }) {
-  return (
-    <li className="py-1" title={hint}>
-      <div className="flex items-baseline justify-between gap-3 text-[12px]">
-        <span className="min-w-0 truncate">{label}</span>
-        <span className="mono shrink-0 text-[11px] font-bold" style={{ color }}>
-          {value}
-        </span>
-      </div>
-      <div className="mt-1 h-1 bg-line" role="img" aria-label={`${label}: ${value}`}>
-        <div className="bar-fill h-full" style={{ width: `${Math.max(2, Math.min(100, pct))}%`, background: color }} />
-      </div>
-    </li>
-  );
-}
 
 function QuakeList({ quakes, now, selectedId, onSelect, limit = 6 }: { quakes: MonitorEvent[]; now: number | null; selectedId: string | null; onSelect: (id: string) => void; limit?: number }) {
   if (quakes.length === 0) return <p className="text-xs text-dim">No earthquakes match the filters.</p>;
@@ -122,6 +86,8 @@ export default function Readout({
   now,
   selectedId,
   onSelect,
+  asteroids,
+  tide,
 }: {
   mode: Mode;
   world: WorldState | null;
@@ -129,6 +95,8 @@ export default function Readout({
   now: number | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  asteroids: AsteroidsFile | null;
+  tide: TideGaugesFile | null;
 }) {
   if (!world) {
     return (
@@ -183,10 +151,13 @@ export default function Readout({
         <Section title="Tension between pairs (media coverage, 0-100)">
           <ul>
             {dyads.map((d) => (
-              <Bar key={d.label} label={d.label} value={String(d.tension)} pct={d.tension ?? 0} color={(d.tension ?? 0) >= 55 ? "var(--threat)" : (d.tension ?? 0) >= 40 ? "var(--conflict)" : "var(--geo)"} />
+              <li key={d.label} className="border-b border-line/50 pb-1.5 last:border-0">
+                <ul><Bar label={`${d.label}${d.sensitive ? " *" : ""}`} value={String(d.tension)} pct={d.tension ?? 0} color={(d.tension ?? 0) >= 55 ? "var(--threat)" : (d.tension ?? 0) >= 40 ? "var(--conflict)" : "var(--geo)"} hint={d.why} /></ul>
+                {d.why && <p className="text-[10px] font-light leading-snug text-dim">Why drawn: {d.why}</p>}
+              </li>
             ))}
           </ul>
-          <p className="mt-1 text-[10px] font-light leading-relaxed text-dim">Describes how news reports each pair; not a forecast.</p>
+          <p className="mt-1 text-[10px] font-light leading-relaxed text-dim">Describes how news reports each pair; not a forecast. * Politically sensitive: the pair is listed for the reason given, which is not an accusation.</p>
         </Section>
         <Section title="Largest arsenals (military stockpile)">
           <ul>
@@ -288,6 +259,10 @@ export default function Readout({
       </>
     );
   }
+
+  if (mode.id === "aibio") return <AiBioReadout world={world} />;
+  if (mode.id === "ice") return <IceReadout world={world} tide={tide} />;
+  if (mode.id === "asteroid") return <AsteroidReadout world={world} file={asteroids} />;
 
   // solar
   const kp = c("kp");

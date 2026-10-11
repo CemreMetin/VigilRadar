@@ -21,6 +21,8 @@ const PAGES_TO_SAVE = [
   "/data/links.json",
   "/data/country_profiles.json",
   "/data/nuclear_plants.json",
+  "/data/asteroids.json",
+  "/data/tide_gauges.json",
   "/data/conflict_cells.json",
   "/data/indicators.json",
   "/data/airports.json",

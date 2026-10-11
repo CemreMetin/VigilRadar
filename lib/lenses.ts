@@ -17,7 +17,8 @@ export type LayerId =
   | "outbreaks"
   | "conflict"
   | "geomag"
-  | "cables";
+  | "cables"
+  | "tide";
 
 export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: string }> = {
   quakes: { label: "Earthquakes", blurb: "Magnitude 4.5+ from USGS", color: "var(--geo)" },
@@ -29,9 +30,11 @@ export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: 
   conflict: { label: "Conflict coverage", blurb: "Armed conflict in the news, 7 d", color: "var(--conflict)" },
   geomag: { label: "Geomagnetic latitude", blurb: "50° and 60° bands: storms hit hardest", color: "var(--space)" },
   cables: { label: "Submarine cables", blurb: "Cyan crosses the 50° band", color: "var(--accent)" },
+  tide: { label: "Tide gauges", blurb: "Relative sea-level trend, last 30 yr (PSMSL)", color: "var(--accent)" },
 };
 
-export type Signal = { level: Tone; label: string; basis: string };
+/** "none" = no instrument measures this; the readout says so instead of showing a level. */
+export type Signal = { level: Tone | "none"; label: string; basis: string };
 
 export type Mode = {
   id: string;
@@ -49,6 +52,13 @@ export type Mode = {
 
 const counter = (w: WorldState | null, id: string) => w?.counters.find((c) => c.id === id);
 const LEVEL_LABEL: Record<Tone, string> = { normal: "NOMINAL", elevated: "ELEVATED", high: "CRITICAL" };
+
+/** One sentence built from a live metric: its value, and the threshold text its feed publishes (counter.basis). */
+function describe(w: WorldState | null, id: string, fallback: string): string {
+  const c = counter(w, id);
+  if (!c) return fallback;
+  return `${c.label} ${c.value}${c.unit ? ` ${c.unit}` : ""}. ${c.basis ?? c.trendLabel ?? ""}`.trim();
+}
 
 /** Highest status among a set of metrics. Thresholds live in the worker feeds; see /methodology. */
 function fromCounters(w: WorldState | null, ids: string[], basis: (w: WorldState | null) => string): Signal {
@@ -93,11 +103,7 @@ export const MODES: Mode[] = [
       const c = counter(w, "doomsday-clock");
       return c ? `${c.value} to midnight` : "Doomsday Clock";
     },
-    signal: (w) =>
-      fromCounters(w, ["doomsday-clock", "warheads"], (x) => {
-        const c = counter(x, "doomsday-clock");
-        return c ? `Doomsday Clock ${c.value} to midnight (symbolic setting, closest ever)` : "Doomsday Clock";
-      }),
+    signal: (w) => fromCounters(w, ["doomsday-clock", "warheads"], (x) => describe(x, "doomsday-clock", "Doomsday Clock")),
   },
   {
     id: "bio",
@@ -113,11 +119,7 @@ export const MODES: Mode[] = [
       const c = counter(w, "outbreaks");
       return c ? `${c.value} WHO reports, 90 d` : "WHO reports";
     },
-    signal: (w) =>
-      fromCounters(w, ["outbreaks"], (x) => {
-        const c = counter(x, "outbreaks");
-        return c ? `${c.value} WHO outbreak reports in 90 days (elevated from 12)` : "WHO outbreak reports";
-      }),
+    signal: (w) => fromCounters(w, ["outbreaks"], (x) => describe(x, "outbreaks", "WHO outbreak reports")),
   },
   {
     id: "volcano",
@@ -158,11 +160,7 @@ export const MODES: Mode[] = [
       const c = counter(w, "chokepoints");
       return c ? `${c.value} chokepoints low` : "Chokepoints";
     },
-    signal: (w) =>
-      fromCounters(w, ["chokepoints"], (x) => {
-        const c = counter(x, "chokepoints");
-        return c ? `${c.value} shipping chokepoints more than 25% below normal` : "Shipping chokepoints";
-      }),
+    signal: (w) => fromCounters(w, ["chokepoints"], (x) => describe(x, "chokepoints", "Shipping chokepoints")),
   },
   {
     id: "solar",
@@ -178,11 +176,56 @@ export const MODES: Mode[] = [
       const c = counter(w, "kp");
       return c ? `Kp ${c.value}` : "Space weather";
     },
-    signal: (w) =>
-      fromCounters(w, ["kp"], (x) => {
-        const c = counter(x, "kp");
-        return c ? `Kp ${c.value}, ${c.unit?.split("·")[1]?.trim() ?? ""} (storm starts at Kp 5)` : "Planetary Kp index";
-      }),
+    signal: (w) => fromCounters(w, ["kp"], (x) => describe(x, "kp", "Planetary Kp index")),
+  },
+  {
+    id: "aibio",
+    title: "AI & Bio",
+    color: "var(--bio)",
+    layers: ["outbreaks"],
+    camera: { center: [20, 20], zoom: 1.5 },
+    page: "/scenarios/ai-risk",
+    pageLabel: "AI risk scenario",
+    blurb: "Engineered pandemics and advanced AI are risks no instrument measures. This tab shows published expert estimates with their sources, next to the one live gauge there is: WHO outbreak reports.",
+    counterIds: ["outbreaks"],
+    stat: () => "expert estimates",
+    signal: (w) => ({
+      level: "none",
+      label: "NO LIVE GAUGE",
+      basis: `No sensor or index measures this risk. ${describe(w, "outbreaks", "WHO outbreak reports are the live context.")}`,
+    }),
+  },
+  {
+    id: "ice",
+    title: "Ice & Sea",
+    color: "var(--accent)",
+    layers: ["tide"],
+    camera: { center: [10, 30], zoom: 1.5 },
+    page: "/scenarios/climate-tipping",
+    pageLabel: "Tipping points",
+    blurb: "Observed sea level, sea-ice extent, and published glacier and ice-sheet losses. Tide gauges show how fast the sea is rising against the land at each coast.",
+    counterIds: ["sea-level", "sea-ice", "glaciers", "ice-sheets"],
+    stat: (w) => {
+      const c = counter(w, "sea-level");
+      return c ? `${c.value} mm since 1993` : "Sea level";
+    },
+    signal: (w) => fromCounters(w, ["sea-level", "sea-ice"], (x) => `${describe(x, "sea-level", "Sea level")} ${counter(x, "sea-ice")?.basis ?? ""}`.trim()),
+  },
+  {
+    id: "asteroid",
+    title: "Asteroid",
+    color: "var(--space)",
+    layers: [],
+    camera: { center: [15, 22], zoom: 1.6 },
+    page: "/scenarios/asteroid",
+    pageLabel: "Asteroid impact scenario",
+    blurb: "Close approaches listed by NASA JPL for the next weeks, measured in Earth–Moon distances, and what the Sentry impact-monitoring table currently holds.",
+    counterIds: ["asteroids"],
+    stat: (w) => {
+      const c = counter(w, "asteroids");
+      return c ? `${c.value} ${c.unit ?? ""}`.trim() : "Close approaches";
+    },
+    signal: (w) => fromCounters(w, ["asteroids"], (x) => describe(x, "asteroids", "Close approaches")),
   },
 ];
 

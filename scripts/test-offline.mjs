@@ -54,7 +54,7 @@ for (const [path, heading] of Object.entries(EXPECT)) {
 }
 
 // checklist still works offline: tick an item, reload, it stays ticked
-await page.goto(`${BASE}/survive`, { waitUntil: "domcontentloaded" });
+await page.goto(`${BASE}/survive?tab=bag`, { waitUntil: "domcontentloaded" });
 const box = page.getByRole("checkbox").first();
 await box.check();
 const stored = await page.evaluate(() => window.localStorage.getItem("monitoring.bag.v1"));

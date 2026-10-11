@@ -1,17 +1,98 @@
 {
-  "_comment": "Tracked country pairs: nuclear-armed state(s) with strained relations or direct confrontation. Order within a pair does not matter. Add pairs here; the worker computes tension from GDELT.",
+  "_comment": "Tracked country pairs: nuclear-armed state(s) with strained relations or direct confrontation. Order within a pair does not matter. Add pairs here; the worker computes tension from GDELT. Each pair carries a basis and a one-sentence why; sensitive:true marks pairs whose inclusion is contestable. Being listed is not an accusation or a prediction.",
   "pairs": [
-    { "a": "USA", "b": "RUS", "label": "United States – Russia", "note": "New START expired Feb 2026 with no replacement (SIPRI)." },
-    { "a": "USA", "b": "CHN", "label": "United States – China" },
-    { "a": "RUS", "b": "GBR", "label": "Russia – United Kingdom" },
-    { "a": "RUS", "b": "FRA", "label": "Russia – France" },
-    { "a": "RUS", "b": "UKR", "label": "Russia – Ukraine", "note": "Nuclear-armed state in a direct war." },
-    { "a": "IND", "b": "PAK", "label": "India – Pakistan", "note": "Both nuclear-armed; SIPRI 2026 cites the outbreak of conflict between them." },
-    { "a": "IND", "b": "CHN", "label": "India – China" },
-    { "a": "PRK", "b": "USA", "label": "North Korea – United States" },
-    { "a": "PRK", "b": "KOR", "label": "North Korea – South Korea" },
-    { "a": "PRK", "b": "JPN", "label": "North Korea – Japan" },
-    { "a": "ISR", "b": "IRN", "label": "Israel – Iran", "note": "Israel is an undeclared nuclear state; Iran is a threshold state, not a nuclear-armed one." },
-    { "a": "USA", "b": "IRN", "label": "United States – Iran" }
+    {
+      "a": "USA",
+      "b": "RUS",
+      "label": "United States – Russia",
+      "note": "New START expired Feb 2026 with no replacement (SIPRI).",
+      "basis": "both-nuclear",
+      "why": "Both states hold nuclear weapons, and they hold the two largest arsenals (SIPRI)."
+    },
+    {
+      "a": "USA",
+      "b": "CHN",
+      "label": "United States – China",
+      "basis": "both-nuclear",
+      "why": "Both states hold nuclear weapons."
+    },
+    {
+      "a": "RUS",
+      "b": "GBR",
+      "label": "Russia – United Kingdom",
+      "basis": "both-nuclear",
+      "why": "Both states hold nuclear weapons."
+    },
+    {
+      "a": "RUS",
+      "b": "FRA",
+      "label": "Russia – France",
+      "basis": "both-nuclear",
+      "why": "Both states hold nuclear weapons."
+    },
+    {
+      "a": "RUS",
+      "b": "UKR",
+      "label": "Russia – Ukraine",
+      "note": "Nuclear-armed state in a direct war.",
+      "basis": "war-with-nuclear-state",
+      "why": "Ukraine holds no nuclear weapons. The pair is listed only because a nuclear-armed state is in a direct war with it.",
+      "sensitive": true
+    },
+    {
+      "a": "IND",
+      "b": "PAK",
+      "label": "India – Pakistan",
+      "note": "Both nuclear-armed; SIPRI 2026 cites the outbreak of conflict between them.",
+      "basis": "both-nuclear",
+      "why": "Both states hold nuclear weapons."
+    },
+    {
+      "a": "IND",
+      "b": "CHN",
+      "label": "India – China",
+      "basis": "both-nuclear",
+      "why": "Both states hold nuclear weapons and share a disputed border."
+    },
+    {
+      "a": "PRK",
+      "b": "USA",
+      "label": "North Korea – United States",
+      "basis": "both-nuclear",
+      "why": "Both states hold nuclear weapons."
+    },
+    {
+      "a": "PRK",
+      "b": "KOR",
+      "label": "North Korea – South Korea",
+      "basis": "nuclear-vs-neighbour",
+      "why": "South Korea holds no nuclear weapons. The pair is listed because a nuclear-armed state shares a divided border with it.",
+      "sensitive": true
+    },
+    {
+      "a": "PRK",
+      "b": "JPN",
+      "label": "North Korea – Japan",
+      "basis": "nuclear-vs-neighbour",
+      "why": "Japan holds no nuclear weapons. The pair is listed because it lies within range of a nuclear-armed neighbour.",
+      "sensitive": true
+    },
+    {
+      "a": "ISR",
+      "b": "IRN",
+      "label": "Israel – Iran",
+      "note": "Israel is an undeclared nuclear state; Iran is a threshold state, not a nuclear-armed one.",
+      "basis": "threshold-state",
+      "why": "Israel is an undeclared nuclear state. Iran holds no nuclear weapons; it is listed as a threshold state because its enrichment programme is under international scrutiny (IAEA).",
+      "sensitive": true
+    },
+    {
+      "a": "USA",
+      "b": "IRN",
+      "label": "United States – Iran",
+      "basis": "threshold-state",
+      "why": "Iran holds no nuclear weapons; it is listed as a threshold state because its enrichment programme is under international scrutiny (IAEA).",
+      "sensitive": true
+    }
   ]
 }

@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { DOMAIN_BY_ID } from "@/lib/domains";
+import FreshnessTable from "@/components/FreshnessTable";
+import SiteNav from "@/components/SiteNav";
+import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import type { WorldState } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Sources · Monitoring" };
 
 const PLANNED = [
   { name: "NASA EONET, FIRMS (storms, fires, floods) as a map layer", domain: "Climate & Water", phase: "later" },
-  { name: "NSIDC sea ice, NASA sea level, Drought Monitor, GRACE-FO", domain: "Climate & Water", phase: "later" },
+  { name: "Drought Monitor, GRACE-FO", domain: "Climate & Water", phase: "later" },
   { name: "ECDC and WOAH feeds (currently linked, not ingested)", domain: "Pandemic & Health", phase: "later" },
   { name: "IAEA PRIS (current reactor status, to replace the older plant dataset)", domain: "Nuclear", phase: "later" },
   { name: "ACLED and UCDP (need a registered key or token; GDELT is used meanwhile)", domain: "Conflict", phase: "if a key is added" },
@@ -27,19 +29,17 @@ async function loadWorld(): Promise<WorldState | null> {
 
 export default async function SourcesPage() {
   const world = await loadWorld();
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link href="/" className="mono text-xs text-dim hover:text-accent">
-        ← back to map
-      </Link>
-      <h1 className="mono mt-4 text-xl font-bold tracking-wide text-accent">Sources</h1>
-      <p className="mt-2 text-sm leading-relaxed text-dim">
-        Every number on this site comes from an open source listed here, with its license. This is a
-        personal, ad-free project. Observations, forecasts and expert estimates will always be
-        visually distinct.
-      </p>
+  const sections: WikiSection[] = [
+    { id: "freshness", label: "Data freshness", group: "Live", content: (
+      <>
+      <div className="mt-2 border border-line p-3">
+        <FreshnessTable />
+      </div>
 
-      <h2 className="label mt-8">Live feeds (as of last build)</h2>
+      </>
+    ) },
+    { id: "feeds", label: "Live feeds", group: "Live", content: (
+      <>
       <div className="mt-2 divide-y divide-line border border-line">
         {world?.feeds.map((f) => (
           <div key={f.id} className="p-3">
@@ -64,7 +64,10 @@ export default async function SourcesPage() {
         )) ?? <p className="p-3 text-sm text-dim">No world_state.json found. Run npm run data.</p>}
       </div>
 
-      <h2 id="metrics" className="label mt-8">Metrics shown in the right panel</h2>
+      </>
+    ) },
+    { id: "metrics", label: "Metrics", group: "Live", content: (
+      <>
       <div className="mt-2 divide-y divide-line border border-line">
         {world?.counters?.map((c) => (
           <div key={c.id} className="p-3">
@@ -88,7 +91,10 @@ export default async function SourcesPage() {
         )) ?? <p className="p-3 text-sm text-dim">No counters found.</p>}
       </div>
 
-      <h2 className="label mt-8">Static datasets</h2>
+      </>
+    ) },
+    { id: "static", label: "Static datasets", group: "Reference", content: (
+      <>
       <ul className="mt-2 divide-y divide-line border border-line text-sm">
         <li className="p-3">Nuclear arsenals: SIPRI Yearbook 2026 (January 2026 estimates), hand-entered in data/arsenals.json.</li>
         <li className="p-3">Nuclear power plants: WRI Global Power Plant Database v1.3, CC BY 4.0. Vintage about 2019, so recent openings and closures are not reflected.</li>
@@ -98,7 +104,10 @@ export default async function SourcesPage() {
         <li className="p-3">Scenario references: each was checked against the Crossref record or opened; see the Methodology page.</li>
       </ul>
 
-      <h2 className="label mt-8">Planned</h2>
+      </>
+    ) },
+    { id: "planned", label: "Planned", group: "Reference", content: (
+      <>
       <ul className="mt-2 divide-y divide-line border border-line">
         {PLANNED.map((p) => (
           <li key={p.name} className="flex items-baseline justify-between gap-3 p-3 text-sm">
@@ -114,6 +123,17 @@ export default async function SourcesPage() {
         Basemap: © CARTO, © OpenStreetMap contributors. Licenses are verified per source before a
         feed goes live.
       </p>
-    </div>
+      </>
+    ) },
+  ];
+  return (
+    <>
+      <SiteNav />
+      <WikiShell
+        title="Sources"
+        intro="Every number on this site comes from an open source listed here, with its licence. This is a personal, ad-free project. Observations, forecasts and expert estimates are always visually distinct."
+        sections={sections}
+      />
+    </>
   );
 }

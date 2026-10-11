@@ -57,7 +57,7 @@ export default function SupervolcanoesPage() {
           What a supereruption could do:{" "}
           <Link href="/scenarios/supervolcano" className="text-accent hover:underline">Supervolcano scenario →</Link>
           {" · "}
-          <Link href="/?layers=geophysical" className="text-accent hover:underline">Show on the map →</Link>
+          <Link href="/?sc=volcano" className="text-accent hover:underline">Show on the map →</Link>
         </p>
       </Page>
     </>

@@ -168,6 +168,19 @@ body {
   transition: border-color 400ms;
 }
 
+/* Glass overlay: the map stays readable through it. Falls back to solid where blur is unsupported. */
+.panel-glass {
+  background: color-mix(in srgb, var(--panel-solid) 62%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+}
+@media (max-width: 1023px) {
+  .panel-glass { background: var(--panel-solid); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .panel-glass { background: var(--panel-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
 /* Scenario tab: tinted on hover, a solid bar underneath when selected (the bar slides in) */
 .tab-btn {
   --c: var(--accent);

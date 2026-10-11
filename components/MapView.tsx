@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MutableRefObject } from "react";
 import type { GeoJSONSource, Map as MlMap, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { greatCircle } from "@/lib/arcs";
@@ -24,7 +24,12 @@ export type MapData = {
   /** geomagnetic latitude lines and submarine cables (solar scenario) */
   geomag: { type: "FeatureCollection"; features: unknown[] } | null;
   cables: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** tide-gauge stations: relative sea-level trend in mm/yr (ice and sea scenario) */
+  tide: { type: "FeatureCollection"; features: unknown[] } | null;
 };
+
+/** Imperative controls for the on-map view buttons (bottom right). */
+export type MapControls = { zoomIn: () => void; zoomOut: () => void; reset: () => void };
 
 /** Where the camera should go when the scenario changes. `key` identifies the scenario. */
 export type Camera = { center: [number, number]; zoom: number; key: string };
@@ -36,6 +41,7 @@ type Props = {
   onSelect: (id: string | null) => void;
   globe: boolean;
   camera?: Camera;
+  controlsRef?: MutableRefObject<MapControls | null>;
 };
 
 type FC = { type: "FeatureCollection"; features: unknown[] };
@@ -62,6 +68,7 @@ function buildSources(d: MapData): Record<string, FC> {
     connections: fc(d.connections.map((c) => arcFeature(c.from, c.to, { id: c.id }))),
     gm: d.geomag ?? fc([]),
     cables: d.cables ?? fc([]),
+    tide: d.tide ?? fc([]),
   };
 }
 
@@ -102,7 +109,7 @@ const CLICKABLE = [
   "dyads",
 ];
 
-export default function MapView({ data, entities, selectedId, onSelect, globe, camera }: Props) {
+export default function MapView({ data, entities, selectedId, onSelect, globe, camera, controlsRef }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const readyRef = useRef(false);
@@ -135,12 +142,24 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         zoom: cam ? (narrow ? Math.max(0.3, cam.zoom - 1.3) : cam.zoom) : narrow ? 0.3 : 1.6,
         minZoom: 0.5,
         maxZoom: 9,
-        attributionControl: { compact: true },
+        attributionControl: false, // credited in the status bar instead, so the corner stays free for the view controls
         dragRotate: false,
         pitchWithRotate: false,
       });
       map.touchZoomRotate.disableRotation();
       mapRef.current = map;
+      if (controlsRef) {
+        const home = () => {
+          const c = latest.current.camera;
+          const small = (el.current?.clientWidth ?? 800) < 700;
+          return { center: c?.center ?? ([15, 20] as [number, number]), zoom: (c ? (small ? Math.max(0.3, c.zoom - 1.3) : c.zoom) : small ? 0.3 : 1.6) + (latest.current.globe ? 0.7 : 0) };
+        };
+        controlsRef.current = {
+          zoomIn: () => map?.zoomIn({ duration: 300 }),
+          zoomOut: () => map?.zoomOut({ duration: 300 }),
+          reset: () => map?.flyTo({ ...home(), duration: 900 }),
+        };
+      }
 
       map.on("load", () => {
         if (!map) return;
@@ -155,6 +174,17 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
             "line-color": ["case", ["==", ["get", "hi"], 1], "#00e5ff", "#4a6a78"],
             "line-width": ["case", ["==", ["get", "hi"], 1], 1.1, 0.6],
             "line-opacity": 0.75,
+          },
+        });
+        map.addLayer({
+          id: "tide-core", type: "circle", source: "tide",
+          paint: {
+            // mm/yr of sea-level change relative to the land at the gauge: falling = blue, fast rise = red
+            "circle-color": ["interpolate", ["linear"], ["get", "trend"], -5, "#4a90ff", 0, "#7d8c97", 3, "#ffb000", 8, "#ff003c"],
+            "circle-opacity": 0.85,
+            "circle-radius": 3.5,
+            "circle-stroke-color": "#050505",
+            "circle-stroke-width": 0.6,
           },
         });
         map.addLayer({
@@ -263,6 +293,26 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           },
         });
 
+        map.on("click", "tide-core", (ev) => {
+          const f = ev.features?.[0];
+          if (!f) return;
+          const p = f.properties as { name: string; trend: number; years: number; last: number };
+          const box = document.createElement("div");
+          const t = document.createElement("div");
+          t.style.fontWeight = "600";
+          t.textContent = p.name;
+          const m = document.createElement("div");
+          m.style.cssText = "margin-top:4px;color:#9aa8b3;font-size:11px;line-height:1.4";
+          m.textContent = `${p.trend > 0 ? "+" : ""}${Number(p.trend).toFixed(1)} mm/yr relative sea level (${p.years} yr of data to ${p.last}). Includes land rising or sinking at this gauge.`;
+          box.append(t, m);
+          import("maplibre-gl").then((ml) => {
+            popupRef.current?.remove();
+            popupRef.current = new ml.Popup({ offset: 8, maxWidth: "280px" }).setLngLat(ev.lngLat).setDOMContent(box).addTo(map!);
+          });
+        });
+        map.on("mouseenter", "tide-core", () => (map!.getCanvas().style.cursor = "pointer"));
+        map.on("mouseleave", "tide-core", () => (map!.getCanvas().style.cursor = ""));
+
         map.on("click", (ev) => {
           const box: [[number, number], [number, number]] = [
             [ev.point.x - 6, ev.point.y - 6],
@@ -356,12 +406,14 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
       map?.remove();
       mapRef.current = null;
     };
+    // controlsRef is a stable ref object; the map is created once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { quakes, plants, volcanoes, outbreaks, cells, dyads, connections, arsenals } = data;
   useEffect(() => {
     applyDataRef.current();
-  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables]);
+  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide]);
 
   useEffect(() => {
     applyArsenalsRef.current();

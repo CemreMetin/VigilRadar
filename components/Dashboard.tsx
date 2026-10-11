@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { arsenals } from "@/lib/arsenals";
 import { buildEntityIndex, dyadLines, groupOutbreaks, type Entity } from "@/lib/entities";
 import { isStale } from "@/lib/format";
 import { geomagLat, geomagLines } from "@/lib/geomag";
 import { LAYER_INFO, MODES, MODE_BY_ID, type LayerId } from "@/lib/lenses";
+import { overdueReviews } from "@/lib/reviews";
 import type {
+  AsteroidsFile,
   ConflictCell,
   ConflictFile,
   LinksFile,
@@ -15,6 +17,7 @@ import type {
   Plant,
   PlantsFile,
   ProfilesFile,
+  TideGaugesFile,
   WorldState,
 } from "@/lib/types";
 import CounterPanel from "./CounterPanel";
@@ -26,7 +29,9 @@ import Readout from "./dashboard/Readout";
 import StatusBar from "./dashboard/StatusBar";
 import TopBar from "./dashboard/TopBar";
 import LinksPanel, { linksFor } from "./LinksPanel";
-import MapView, { type MapData } from "./MapView";
+import FreshnessTable from "./FreshnessTable";
+import ViewControls from "./dashboard/ViewControls";
+import MapView, { type MapControls, type MapData } from "./MapView";
 
 type Range = "24h" | "7d";
 type Tab = "readout" | "metrics" | "links";
@@ -76,6 +81,10 @@ export default function Dashboard() {
   const [links, setLinks] = useState<LinksFile | null>(null);
   const [profiles, setProfiles] = useState<ProfilesFile | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [tideFile, setTideFile] = useState<TideGaugesFile | null>(null);
+  const [asteroids, setAsteroids] = useState<AsteroidsFile | null>(null);
+  const [freshnessOpen, setFreshnessOpen] = useState(false);
+  const controlsRef = useRef<MapControls | null>(null);
 
   const mode = MODE_BY_ID[modeId];
 
@@ -178,6 +187,39 @@ export default function Dashboard() {
     };
   }, [cablesOn, cables]);
 
+  const tideOn = layersOn.has("tide");
+  useEffect(() => {
+    if (!tideOn || tideFile) return;
+    let cancelled = false;
+    getJson<TideGaugesFile>("/data/tide_gauges.json").then((f) => !cancelled && setTideFile(f)).catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [tideOn, tideFile]);
+  // the Ice readout summarises the gauges even when the layer is off
+  useEffect(() => {
+    if (modeId !== "ice" || tideFile) return;
+    getJson<TideGaugesFile>("/data/tide_gauges.json").then(setTideFile).catch(() => {});
+  }, [modeId, tideFile]);
+  useEffect(() => {
+    if (modeId !== "asteroid" || asteroids) return;
+    getJson<AsteroidsFile>("/data/asteroids.json").then(setAsteroids).catch(() => {});
+  }, [modeId, asteroids]);
+  const tideFc = useMemo<Fc | null>(
+    () =>
+      tideOn && tideFile
+        ? {
+            type: "FeatureCollection",
+            features: tideFile.stations.map(([id, name, lat, lon, trend, years, last]) => ({
+              type: "Feature",
+              properties: { id: `tide:${id}`, name, trend, years, last },
+              geometry: { type: "Point", coordinates: [lon, lat] },
+            })),
+          }
+        : null,
+    [tideOn, tideFile],
+  );
+
   const nowMs = now ?? 0;
   const today = now ? new Date(now).toISOString().slice(0, 10) : "0000-00-00";
 
@@ -246,13 +288,15 @@ export default function Dashboard() {
       connections,
       geomag: geomagFc,
       cables: cablesOn ? cables : null,
+      tide: tideFc,
     }),
-    [layersOn, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
+    [layersOn, tideFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
   );
 
   const liveFeeds = world?.feeds.filter((f) => f.ok && !isStale(f.fetchedAt, nowMs)).length ?? 0;
   const totalFeeds = world?.feeds.length ?? 0;
   const dataStale = world ? isStale(world.generatedAt, nowMs) : false;
+  const overdue = useMemo(() => (world ? overdueReviews(world.counters, arsenals, today) : []), [world, today]);
   const failedFeeds = world?.feeds.filter((f) => !f.ok).map((f) => f.name) ?? [];
 
   const toggleLayer = (id: LayerId) =>
@@ -277,7 +321,7 @@ export default function Dashboard() {
     setTab("readout");
   }, []);
 
-  // keys 1-6 switch scenarios (ignored while typing)
+  // keys 1-9 switch scenarios (ignored while typing)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -301,7 +345,7 @@ export default function Dashboard() {
     .join("  |  ");
 
   const signal = mode.signal(world);
-  const SIGNAL_COLOR = { normal: "var(--safe)", elevated: "var(--geo)", high: "var(--threat)" } as const;
+  const SIGNAL_COLOR = { normal: "var(--safe)", elevated: "var(--geo)", high: "var(--threat)", none: "var(--fg-dim)" } as const;
 
   const tabs: [Tab, string][] = [
     ["readout", "Readout"],
@@ -368,7 +412,7 @@ export default function Dashboard() {
 
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto" role="tabpanel" key={`${mode.id}-${tab}`}>
         {tab === "readout" && (
-          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} />
+          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} />
         )}
         {tab === "metrics" && (
           <>
@@ -398,8 +442,6 @@ export default function Dashboard() {
           onRange={setRange}
           minMag={minMag}
           onMinMag={setMinMag}
-          globe={globe}
-          onGlobe={setGlobe}
           showConnections={showConnections}
           onConnections={setShowConnections}
           legend={legend}
@@ -416,6 +458,9 @@ export default function Dashboard() {
           stale={dataStale}
           failed={failedFeeds}
           summary={mapSummary}
+          overdue={overdue}
+          freshnessOpen={freshnessOpen}
+          onFreshness={() => setFreshnessOpen((v) => !v)}
         />
       }
       map={
@@ -426,9 +471,34 @@ export default function Dashboard() {
           onSelect={select}
           globe={globe}
           camera={{ ...mode.camera, key: mode.id }}
+          controlsRef={controlsRef}
         />
       }
-      mapOverlay={<MapHud color={mode.color} id={mode.id} />}
+      controls={<ViewControls globe={globe} onGlobe={setGlobe} controls={controlsRef} />}
+      mapOverlay={
+        <>
+          <MapHud color={mode.color} id={mode.id} />
+          {freshnessOpen && world && (
+            <section className="panel-scn panel-glass absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-12 lg:left-[270px] lg:w-[min(760px,calc(100%-660px))]" aria-label="Data freshness">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="label caret">Data freshness</p>
+                <button type="button" className="btn mono px-2 py-0.5 text-[11px] font-bold" onClick={() => setFreshnessOpen(false)}>CLOSE</button>
+              </div>
+              <FreshnessTable feeds={world.feeds} />
+              {overdue.length > 0 && (
+                <div className="mt-3 border border-geo p-2 text-[11px] leading-relaxed">
+                  <p className="mono font-bold" style={{ color: "var(--geo)" }}>PAST REVIEW DATE (hand-entered figures)</p>
+                  <ul className="mt-1 text-dim">
+                    {overdue.map((o) => (
+                      <li key={o.label}>{o.label}: due {o.reviewBy}, check {o.source}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+          )}
+        </>
+      }
     />
   );
 }

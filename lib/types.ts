@@ -34,6 +34,12 @@ export type FeedStatus = {
   cadence: string;
   ok: boolean;
   fetchedAt: string | null; // last successful fetch
+  /** newest observation time in the data this feed produced (ISO, UTC); month data is end of month */
+  dataAsOf?: string | null;
+  /** how precisely the source states its time */
+  asOfPrecision?: "time" | "day" | "month";
+  /** data older than this is "late" for this feed (hours); monthly sources lag by design */
+  maxAgeHours?: number;
   count: number;
   error?: string;
 };
@@ -53,6 +59,7 @@ export type Counter = {
   trend?: "up" | "down" | "flat";
   trendLabel?: string; // e.g. "+2.4 ppm vs a year ago"
   note?: string; // honest caveat shown when expanded
+  basis?: string; // how the tone is decided (thresholds), shown next to the scenario signal
   asOf: string; // ISO date/time or YYYY-MM
   cadence: string;
   manual?: boolean; // hand-maintained annual value
@@ -91,11 +98,18 @@ export type DyadComponents = {
   events7d: number;
 };
 
+/** Why a pair is on the map at all. Shown wherever the edge is drawn. */
+export type DyadBasis = "both-nuclear" | "nuclear-vs-neighbour" | "war-with-nuclear-state" | "threshold-state";
+
 export type Dyad = {
   a: string; // ISO3
   b: string;
   label: string;
   note?: string;
+  basis?: DyadBasis;
+  why?: string; // one sentence: the inclusion reason
+  sensitive?: boolean; // politically sensitive: inclusion is contestable, read the reason
+
   tension: number | null; // 0-100, null when too little data
   lowData: boolean;
   components: DyadComponents | null;
@@ -191,6 +205,7 @@ export type ArsenalCountry = {
 
 export type Arsenals = {
   asOf: string;
+  reviewBy: string; // hand-entered: re-check the source after this date
   publishedAt: string;
   source: SourceRef;
   definitions: Record<string, string>;
@@ -211,3 +226,29 @@ export type Plant = {
 };
 
 export type PlantsFile = { source: SourceRef; vintage: string; plants: Plant[] };
+
+export type AsteroidApproach = {
+  des: string;
+  date: string; // "2026-Oct-31 12:01" (UTC), as JPL writes it
+  ld: number; // miss distance in lunar distances
+  kms: number; // relative speed, km/s
+  h: number | null; // absolute magnitude
+  dMinM: number | null; // rough diameter range in metres from H (albedo 0.25 .. 0.05)
+  dMaxM: number | null;
+};
+
+export type AsteroidsFile = {
+  generatedAt: string;
+  windowDays: number;
+  maxLd: number;
+  approaches: AsteroidApproach[];
+  sentry: { tracked: number; torinoAbove0: number } | null;
+  source: SourceRef;
+};
+
+export type TideGaugesFile = {
+  source: SourceRef;
+  note: string;
+  fields: string[];
+  stations: [number, string, number, number, number, number, number][]; // id, name, lat, lon, mm/yr, years, last year
+};

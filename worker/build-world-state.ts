@@ -20,13 +20,16 @@ import type {
 } from "../lib/types";
 import { climateSeries, co2Counter, CO2_URL, GISS_URL, warmingCounter } from "./feeds/climate";
 import { gdeltFeed } from "./feeds/gdelt";
-import { asteroidCounter } from "./feeds/jpl";
+import { seaIceCounter, seaLevelCounter } from "./feeds/ice-sea";
+import { asteroidFeed } from "./feeds/jpl";
 import { portwatchCounter } from "./feeds/portwatch";
 import { DON_URL, donFeed, KP_URL, kpCounter } from "./feeds/space-health";
 import { USGS_URL, usgsQuakes } from "./feeds/usgs";
 import { volcanoWatch } from "./feeds/volcanoes";
 import { worldBankIndicators } from "./feeds/worldbank";
 import { buildLinks } from "./links";
+import arsenalsRaw from "../data/arsenals.json";
+import { overdueReviews } from "../lib/reviews";
 
 const DATA_DIR = path.join(process.cwd(), "public", "data");
 const OUT = path.join(DATA_DIR, "world_state.json");
@@ -105,7 +108,20 @@ const FEEDS: Feed[] = [
   {
     counterIds: ["asteroids"],
     meta: { id: "jpl-cneos", name: "NASA/JPL close approaches and Sentry", domain: "space", url: "https://cneos.jpl.nasa.gov/", license: "Public domain (NASA)", cadence: "daily" },
-    run: async () => ({ counters: await asteroidCounter() }),
+    run: async () => {
+      const a = await asteroidFeed();
+      return { counters: a.counters, files: { asteroids: a.file } };
+    },
+  },
+  {
+    counterIds: ["sea-level"],
+    meta: { id: "noaa-sea-level", name: "NOAA satellite altimetry: global mean sea level", domain: "climate", url: "https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/", license: "Free; acknowledge NOAA Laboratory for Satellite Altimetry", cadence: "weeks, lags the present" },
+    run: async () => ({ counters: await seaLevelCounter() }),
+  },
+  {
+    counterIds: ["sea-ice"],
+    meta: { id: "nsidc-sea-ice", name: "NSIDC Sea Ice Index (Arctic and Antarctic extent)", domain: "climate", url: "https://nsidc.org/data/g02135", license: "Free; cite Fetterer et al.", cadence: "daily" },
+    run: async () => ({ counters: await seaIceCounter() }),
   },
   {
     keeps: ["volcanoes"],
@@ -172,6 +188,10 @@ const ORDER = [
   "warheads",
   "warming",
   "co2",
+  "sea-level",
+  "sea-ice",
+  "glaciers",
+  "ice-sheets",
   "overshoot-day",
   "outbreaks",
   "chokepoints",
@@ -179,6 +199,49 @@ const ORDER = [
   "asteroids",
   "kp",
 ];
+
+/** After this many hours without a newer observation a feed counts as "late". Monthly sources lag by design. */
+const MAX_AGE_HOURS: Record<string, number> = {
+  "usgs-quakes": 2,
+  "swpc-kp": 8,
+  "volcano-watch": 6,
+  "jpl-cneos": 36,
+  "gdelt-events": 72,
+  "nsidc-sea-ice": 72,
+  "who-don": 24 * 30, // WHO publishes irregularly; weeks between reports are normal
+  "imf-portwatch": 24 * 14,
+  "noaa-co2": 24 * 75,
+  "nasa-giss": 24 * 60,
+  "climate-series": 24 * 60,
+  "noaa-sea-level": 24 * 120,
+};
+
+type AsOf = { iso: string; precision: "time" | "day" | "month" };
+
+/** Parse a counter's asOf ("2026-08", "2026-10-09", or a full ISO time). Month and day data count as complete at the end of the period. */
+function parseAsOf(a: string): AsOf | null {
+  if (/^\d{4}-\d{2}$/.test(a)) {
+    const [y, m] = a.split("-").map(Number);
+    return { iso: new Date(Date.UTC(y, m, 1) - 1000).toISOString(), precision: "month" };
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(a)) return { iso: `${a}T23:59:59.000Z`, precision: "day" };
+  const t = new Date(a);
+  return Number.isNaN(t.getTime()) ? null : { iso: t.toISOString(), precision: "time" };
+}
+
+/** Newest observation time in what a feed produced (oldest for the hand-entered feed, to be conservative). */
+function freshness(feedId: string, r: FeedResult): AsOf | null {
+  const found: AsOf[] = [];
+  for (const e of r.events ?? []) found.push({ iso: e.updatedAt, precision: "time" });
+  for (const c of r.counters ?? []) {
+    const p = parseAsOf(c.asOf);
+    if (p) found.push(p);
+  }
+  for (const v of r.volcanoes ?? []) if (v.asOf) found.push({ iso: v.asOf, precision: "time" });
+  if (found.length === 0) return null;
+  found.sort((a, b) => a.iso.localeCompare(b.iso));
+  return feedId === "manual-annual" ? found[0] : found[found.length - 1];
+}
 
 async function readJson<T>(file: string): Promise<T | null> {
   try {
@@ -230,12 +293,30 @@ async function main() {
       if (r.volcanoes) volcanoes = r.volcanoes;
       if (r.dyads) dyads = r.dyads;
       Object.assign(files, r.files ?? {});
-      feeds.push({ ...feed.meta, ok: true, fetchedAt: new Date().toISOString(), count: evs.length + cs.length + (r.volcanoes?.length ?? 0) + (r.dyads?.length ?? 0) });
+      const fr = freshness(feed.meta.id, r);
+      feeds.push({
+        ...feed.meta,
+        ok: true,
+        fetchedAt: new Date().toISOString(),
+        dataAsOf: fr?.iso ?? null,
+        asOfPrecision: fr?.precision,
+        maxAgeHours: MAX_AGE_HOURS[feed.meta.id],
+        count: evs.length + cs.length + (r.volcanoes?.length ?? 0) + (r.dyads?.length ?? 0),
+      });
       console.log(`ok   ${feed.meta.id}: ${evs.length} events, ${cs.length} counters`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       const kept = carryOver(feed);
-      feeds.push({ ...feed.meta, ok: false, fetchedAt: prevStatus?.fetchedAt ?? null, count: kept, error: message });
+      feeds.push({
+        ...feed.meta,
+        ok: false,
+        fetchedAt: prevStatus?.fetchedAt ?? null,
+        dataAsOf: prevStatus?.dataAsOf ?? null,
+        asOfPrecision: prevStatus?.asOfPrecision,
+        maxAgeHours: MAX_AGE_HOURS[feed.meta.id],
+        count: kept,
+        error: message,
+      });
       console.warn(`FAIL ${feed.meta.id}: ${message} (kept previous values)`);
     }
   }
@@ -252,6 +333,14 @@ async function main() {
     volcanoes,
     dyads,
   };
+
+  // hand-entered figures past their review date: warn here and in the CI log (the site shows a warning too)
+  const today = new Date().toISOString().slice(0, 10);
+  for (const o of overdueReviews(counters, arsenalsRaw, today)) {
+    const msg = `${o.label} was due for review on ${o.reviewBy}; re-check ${o.source}`;
+    console.warn(`REVIEW DUE ${msg}`);
+    if (process.env.GITHUB_ACTIONS) console.log(`::warning title=Manual data review due::${msg}`);
+  }
 
   await mkdir(DATA_DIR, { recursive: true });
   await writeFile(OUT, JSON.stringify(state));

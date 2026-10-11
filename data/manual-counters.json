@@ -60,6 +60,44 @@
         "url": "https://footprintnetwork.org/2026/06/05/announcement-earth-overshoot-day-2026-falls-on-july-30/",
         "license": "Cited with attribution"
       }
+    },
+    {
+      "id": "glaciers",
+      "label": "Glacier ice loss",
+      "domain": "climate",
+      "value": "273",
+      "unit": "Gt per year, 2000-2023",
+      "tone": "elevated",
+      "trendLabel": "36% faster in 2012-2023 than in 2000-2011",
+      "note": "GlaMBIE community estimate combining field, airborne and satellite measurements of all glaciers outside the ice sheets. The loss equals about 0.75 mm of sea-level rise per year. A published figure, not a live feed.",
+      "asOf": "2025-02",
+      "reviewBy": "2027-03-01",
+      "cadence": "irregular (multi-year assessments)",
+      "manual": true,
+      "source": {
+        "name": "GlaMBIE Team, Nature 2025",
+        "url": "https://www.nature.com/articles/s41586-024-08545-z",
+        "license": "CC BY 4.0"
+      }
+    },
+    {
+      "id": "ice-sheets",
+      "label": "Ice-sheet loss",
+      "domain": "climate",
+      "value": "372",
+      "unit": "Gt per year, 2016-2020",
+      "tone": "elevated",
+      "trendLabel": "vs 105 Gt per year in 1992-1996",
+      "note": "IMBIE assessment of Greenland and Antarctica combined; 21.0 ± 1.9 mm of sea-level rise from ice sheets over 1992-2020. A published figure, not a live feed.",
+      "asOf": "2021-01",
+      "reviewBy": "2027-06-30",
+      "cadence": "irregular (multi-year assessments)",
+      "manual": true,
+      "source": {
+        "name": "IMBIE Team, Nature 2018 / Earth Syst. Sci. Data 2021",
+        "url": "https://imbie.org/",
+        "license": "Open access with attribution"
+      }
     }
   ]
 }

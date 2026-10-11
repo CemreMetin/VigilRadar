@@ -13,7 +13,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { strFromU8, unzipSync } from "fflate";
 import dyadsFile from "../../data/dyads.json";
-import type { ConflictFile, Counter, Dyad, DyadComponents } from "../../lib/types";
+import type { ConflictFile, Counter, Dyad, DyadBasis, DyadComponents } from "../../lib/types";
 import { COUNTRIES } from "../geo";
 import { USER_AGENT } from "../http";
 
@@ -146,7 +146,7 @@ function computeDyad(
     n += x.n; m += x.m; g += x.g; t += x.t; q3 += x.q3; q4 += x.q4;
     if (recent.has(d.day)) n7 += x.n;
   }
-  const base = { a: pair.a, b: pair.b, label: pair.label, note: "note" in pair ? pair.note : undefined, asOf };
+  const base = { a: pair.a, b: pair.b, label: pair.label, note: "note" in pair ? pair.note : undefined, basis: pair.basis as DyadBasis, why: pair.why, sensitive: pair.sensitive, asOf };
   if (n < 100 || m === 0) return { ...base, tension: null, lowData: true, components: null };
 
   const goldstein = g / m;
