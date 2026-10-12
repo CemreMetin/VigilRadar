@@ -12,6 +12,8 @@
     "vendor": "node scripts/copy-vendor.mjs",
     "prebuild": "npm run vendor --silent",
     "postinstall": "node scripts/copy-vendor.mjs",
+    "alerts": "tsx worker/alerts.ts",
+    "test:alerts": "tsx worker/alerts/rules.test.ts",
     "data:fast": "tsx worker/build-world-state.ts --fast",
     "postbuild": "node scripts/flatten-segments.mjs"
   },

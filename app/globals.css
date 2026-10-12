@@ -255,3 +255,29 @@ body {
 .wiki a:not(.btn) {
   text-underline-offset: 3px;
 }
+
+/* ---------- Live alarm: matte red, slow pulse, no glow ---------- */
+.alarm-bar {
+  border-color: #ff1a3c !important;
+  animation: alarm-bar 2.4s ease-in-out infinite;
+}
+.alarm-frame {
+  border: 2px solid #ff1a3c;
+  animation: alarm-frame 2.4s ease-in-out infinite;
+}
+@keyframes alarm-bar {
+  50% {
+    background-color: color-mix(in srgb, #ff1a3c 30%, var(--panel-solid));
+  }
+}
+@keyframes alarm-frame {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .alarm-bar,
+  .alarm-frame {
+    animation: none;
+  }
+}

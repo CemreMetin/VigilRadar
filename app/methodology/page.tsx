@@ -139,6 +139,22 @@ export default function MethodologyPage() {
 
       </>
     ) },
+    { id: "alerts", label: "Alerts", group: "Computed values", content: (
+      <>
+        <P>
+          An alert is a published observation that crossed a fixed line, nothing more. The rules are constants in <span className="mono">worker/alerts/rules.ts</span> and are checked by tests.
+          The alert job runs about every 5 minutes (GitHub may delay it) and uses only primary sources.
+        </P>
+        <UL>
+          <li><span className="text-fg">Critical:</span> earthquake of magnitude 7.0 or more (USGS, within 24 h); a tsunami bulletin of category Warning (NWS tsunami warning centers); planetary Kp of 8 or more (NOAA G4 or stronger).</li>
+          <li><span className="text-fg">Notice:</span> magnitude 6.5 or more with the USGS tsunami flag; a tsunami Watch or Advisory; Kp 7 (G3).</li>
+          <li>Critical alerts are sent to a Telegram channel (if configured) and make an open dashboard flash its top bar red and play a quiet tone, which can be muted. Acknowledging hides an alert on that device only.</li>
+          <li>Alerts expire 6 hours after the event. A failed source keeps its previous alerts until they expire, so a feed outage never silently clears an alarm.</li>
+          <li><span className="text-fg">Not covered:</span> DEFCON, because the US does not publish it and any figure would be unverifiable, and volcano alert levels, because the open feeds only report above or at the usual level.</li>
+        </UL>
+        <P>These messages are automatic and can be wrong or late. They are not an official warning system: follow your national authority.</P>
+      </>
+    ) },
     { id: "limits", label: "What this site does not do", group: "Boundaries", content: (
       <>
         <UL>

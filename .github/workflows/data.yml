@@ -63,6 +63,13 @@ jobs:
       - name: Refresh data
         run: npm run data
 
+      # Own copy of the alert list for the site (no Telegram here; the faster alerts workflow does the sending)
+      - name: Evaluate alerts
+        run: npm run alerts -- --no-send
+
+      - name: Alert rule tests
+        run: npm run test:alerts
+
       - name: Lint and type-check
         run: |
           npx next typegen # route types (PageProps, LayoutProps) are generated, not committed
@@ -71,6 +78,9 @@ jobs:
 
       - name: Build static site
         run: npm run build
+        env:
+          # live browser alarms read the fast alerts feed (branch alerts-feed, written every 5 minutes)
+          NEXT_PUBLIC_ALERTS_URL: https://raw.githubusercontent.com/${{ github.repository }}/alerts-feed/alerts.json
 
       - name: Check deploy secrets
         id: secrets

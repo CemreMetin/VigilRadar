@@ -1,0 +1,65 @@
+# Early-warning alert engine: every 5 minutes it checks the few feeds that matter most (USGS earthquakes,
+# NWS tsunami bulletins, NOAA Kp), applies the fixed rules in worker/alerts/rules.ts, broadcasts new CRITICAL
+# alerts to Telegram, and publishes the active alert list to the `alerts-feed` branch for open browsers.
+#
+# Setup (repository Settings > Secrets and variables > Actions), all optional:
+#   TELEGRAM_BOT_TOKEN   from @BotFather; add the bot as an administrator of your channel
+#   TELEGRAM_CHAT_ID     the channel (@name) or chat id
+# Without them the engine still runs and publishes the feed; it only skips the Telegram message.
+# Note: GitHub may delay scheduled runs by several minutes under load; this is a best-effort alert, not a siren.
+name: alerts
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write # only to update the alerts-feed branch
+
+concurrency:
+  group: alerts
+  cancel-in-progress: false
+
+jobs:
+  alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+
+      # the ids already sent, so nothing is broadcast twice
+      - uses: actions/cache@v4
+        with:
+          path: .cache/alerts
+          key: alerts-state-${{ github.run_id }}
+          restore-keys: alerts-state-
+
+      - name: Evaluate and broadcast
+        run: npm run alerts
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      # publish only when the set of alerts changed (generatedAt alone does not count), so the branch stays quiet
+      - name: Publish alerts feed
+        run: |
+          cp public/data/alerts.json "$RUNNER_TEMP/alerts.json"
+          mkdir "$RUNNER_TEMP/feed" && cd "$RUNNER_TEMP/feed"
+          git init -q
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth=1 origin alerts-feed; then git checkout -q -b alerts-feed FETCH_HEAD; else git checkout -q --orphan alerts-feed; fi
+          if [ -f alerts.json ] && [ "$(jq -S 'del(.generatedAt)' alerts.json)" = "$(jq -S 'del(.generatedAt)' "$RUNNER_TEMP/alerts.json")" ]; then
+            echo "no change in active alerts"; exit 0
+          fi
+          cp "$RUNNER_TEMP/alerts.json" alerts.json
+          git add alerts.json
+          git -c user.name="alerts-bot" -c user.email="alerts-bot@users.noreply.github.com" commit -q -m "alerts: update active list"
+          git push -q origin alerts-feed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

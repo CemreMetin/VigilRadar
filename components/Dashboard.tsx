@@ -7,7 +7,10 @@ import { buildEntityIndex, dyadLines, groupOutbreaks, type Entity } from "@/lib/
 import { isStale } from "@/lib/format";
 import { geomagLat, geomagLines } from "@/lib/geomag";
 import { LAYER_INFO, MODES, MODE_BY_ID, type LayerId } from "@/lib/lenses";
+import { useAlarmSound } from "@/lib/alarmTone";
+import type { Alert } from "@/lib/alerts";
 import { overdueReviews } from "@/lib/reviews";
+import { useAlerts } from "@/lib/useAlerts";
 import type {
   AsteroidsFile,
   MilitaryBasesFile,
@@ -33,6 +36,7 @@ import StatusBar from "./dashboard/StatusBar";
 import TopBar from "./dashboard/TopBar";
 import LinksPanel, { linksFor } from "./LinksPanel";
 import FreshnessTable from "./FreshnessTable";
+import AlarmBar from "./dashboard/AlarmBar";
 import AsteroidOrbit from "./dashboard/AsteroidOrbit";
 import ViewControls from "./dashboard/ViewControls";
 import type { MiniPoint } from "./dashboard/MiniContext";
@@ -266,6 +270,19 @@ export default function Dashboard() {
     [tideOn, tideFile],
   );
 
+  // live alarms: poll the alert feeds, sound and flash while a CRITICAL alert is unacknowledged
+  const { critical, notices, acknowledge } = useAlerts(now);
+  const alarmOn = critical.length > 0;
+  const sound = useAlarmSound(alarmOn);
+  useEffect(() => {
+    if (!alarmOn) return;
+    const base = document.title.replace(/^CRITICAL · /, "");
+    document.title = `CRITICAL · ${base}`;
+    return () => {
+      document.title = base;
+    };
+  }, [alarmOn]);
+
   const nowMs = now ?? 0;
   const today = now ? new Date(now).toISOString().slice(0, 10) : "0000-00-00";
 
@@ -400,6 +417,11 @@ export default function Dashboard() {
     setTab("readout");
   }, []);
 
+  const viewAlert = (a: Alert) => {
+    selectMode(a.scenario);
+    if (a.entityId) setSelectedId(a.entityId);
+  };
+
   // keys 1-9 switch scenarios (ignored while typing)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -521,6 +543,21 @@ export default function Dashboard() {
   return (
     <DashboardLayout
       themeColor={mode.color}
+      alarm={alarmOn}
+      banner={
+        critical.length + notices.length === 0 ? null : (
+        <AlarmBar
+          critical={critical}
+          notices={notices}
+          now={now}
+          muted={sound.muted}
+          locked={sound.locked}
+          onMute={sound.setMuted}
+          onView={viewAlert}
+          onAck={acknowledge}
+        />
+        )
+      }
       topBar={<TopBar modes={MODES} activeId={modeId} onSelect={selectMode} world={world} />}
       left={
         <FilterPanel

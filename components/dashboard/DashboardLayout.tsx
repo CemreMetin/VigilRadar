@@ -22,6 +22,8 @@ export default function DashboardLayout({
   map,
   mapOverlay,
   controls,
+  alarm = false,
+  banner,
 }: {
   themeColor: string;
   topBar: ReactNode;
@@ -31,6 +33,9 @@ export default function DashboardLayout({
   map: ReactNode;
   mapOverlay?: ReactNode;
   controls?: ReactNode;
+  /** a CRITICAL alert is active: the top bar and the screen edge pulse red */
+  alarm?: boolean;
+  banner?: ReactNode;
 }) {
   return (
     <div className="relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden" style={{ "--scn": themeColor } as CSSProperties}>
@@ -41,7 +46,10 @@ export default function DashboardLayout({
         <div className="absolute bottom-2 right-2 z-20 lg:bottom-12 lg:right-[388px]">{controls}</div>
       </section>
 
-      <header className="panel-scn relative z-30 order-1 border-x-0 border-t-0 lg:absolute lg:inset-x-0 lg:top-0">{topBar}</header>
+      {alarm && <div className="alarm-frame no-print pointer-events-none fixed inset-0 z-50" aria-hidden />}
+
+      <header className={`panel-scn relative z-30 order-1 border-x-0 border-t-0 lg:absolute lg:inset-x-0 lg:top-0 ${alarm ? "alarm-bar" : ""}`}>{topBar}</header>
+      {banner && <div className="relative z-40 order-1 px-2 py-1 lg:absolute lg:left-[270px] lg:right-[388px] lg:top-[72px] lg:p-0">{banner}</div>}
 
       <div className="panel-scn order-3 border-x-0 lg:absolute lg:bottom-1.5 lg:left-3 lg:right-[250px] lg:z-20 lg:order-none lg:border-x">{footer}</div>
 

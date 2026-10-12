@@ -208,3 +208,10 @@ Licence note: the submarine-cable dataset is CC BY-NC-SA 3.0, so the project is 
 - Conflict tab: a military-bases layer (Wikidata, CC0, about 3,900 entries; `scripts/build-bases.py`, committed output). It is a reference layer with uneven coverage, not an order of battle. Fleet positions are not public data and are not shown.
 - Matte UI: no glow, blink, pulse, blur halos or scanlines; active states are solid fills with 1px borders; scenario tabs fit their text.
 - Wiki frame: one site-wide tree (Preparedness, Scenario deep-dives, Data & methodology) in a fixed left pane, reading column limited to 3xl; Inter for text, JetBrains Mono for headings and tables.
+
+## Early warning (alerts)
+
+- Alert engine: `worker/alerts.ts` with fixed rules in `worker/alerts/rules.ts` (CRITICAL: M7.0+ earthquake, NWS tsunami Warning, Kp 8+). Run by `.github/workflows/alerts.yml` every 5 minutes; `npm run alerts -- --dry` prints what it would send, `npm run test:alerts` runs the rule tests.
+- Telegram: new CRITICAL alerts are posted to a channel with type, severity, coordinates, time, source and a link to the dashboard tab. Add repository secrets `TELEGRAM_BOT_TOKEN` (from @BotFather, bot added as channel administrator) and `TELEGRAM_CHAT_ID`. No subscriber list is kept; sent ids live in the Actions cache.
+- Browser: the dashboard polls `/data/alerts.json` and the fast feed on the `alerts-feed` branch every minute. A CRITICAL alert turns the top bar and screen edge red (slow pulse, static with reduced motion) and plays a quiet tone with a mute button.
+- No DEFCON: it is not public data, so it is not shown.
