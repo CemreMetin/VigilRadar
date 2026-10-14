@@ -38,8 +38,8 @@ There is no database, no serverless function layer and no authentication. This i
 
 Theme: an underground analysis room. Ultra-dark, flat, monospace.
 
-- Surfaces: background `#050505`, panels `#0a0f14`. Solid fills and 1px borders only; no glass, blur, shadows or glow.
-- Scenario group colours (tabs, panel borders, map frame; matte, defined once in `app/globals.css`): Overview `#9aa7b0`, Human `#d4654c`, Earth `#b8975a`, Space `#8fa3c8`. Map layer colours and the evidence vocabulary keep their own meaning.
+- Surfaces: background `#050505`, panels `#0a0f14`. On the map view (desktop) every panel is see-through, about 55% of the panel colour with a 4px blur, so the map shows under all of them; the border is 1px in the scenario colour at 50%. Below 1024px, and with `prefers-reduced-transparency`, panels are solid. Everywhere else: solid fills and 1px borders; no shadows or glow.
+- Scenario group colours (tabs, panel borders, map frame; defined once in `app/globals.css`): Overview `#e6edf3` (near white), Human `#ff4b3e` (signal red), Earth `#ffb000` (amber), Space `#3ec7ff` (sky blue). All are above 6:1 on `#050505`. Map layer colours and the evidence vocabulary keep their own meaning.
 - Colour roles: red `#ff003c` threat and nuclear, purple `#b026ff` biological, cyan `#00e5ff` accent and water, green `#00ff41` reserved for safe or actionable (preparedness, status), amber `#ffb000` geophysical, orange `#ff6a00` conflict, lavender `#c9d1ff` space.
 - Typography: JetBrains Mono for data, labels and controls; Inter for body text. Weight carries hierarchy: bold for values and titles, light for labels.
 - Interaction contract: anything clickable has a solid 1px border and a visible fill plus brighter border on hover (`.btn`, `.card-btn`, `.tab-btn`). Reading material is muted grey with no border. Colour never carries meaning alone; shape and text accompany it.
@@ -50,7 +50,7 @@ Theme: an underground analysis room. Ultra-dark, flat, monospace.
 
 The map view uses three strict zones around a full-window map, read top-left to bottom-right:
 
-1. Top bar: macro context, in two rows. Four groups (Overview; Human: Nuclear, Conflict, Bio; Earth: Volcano, Weather, Ice & Sea; Space: Solar, Orbit, Asteroid), and below them the scenarios of the active group. A group opens the scenario last used in it. Keys 1 to 4 pick a group; pressing the active group's key again moves to its next scenario.
+1. Scenario menu: macro context, in two rows, floating over the map in the centre of the screen on desktop (the brand sits in the top left corner and the pages menu in the top right, each on its own small panel; below 1024px they form one stacked bar). Four groups (Overview; Human: Nuclear, Conflict, Bio; Earth: Volcano, Weather, Ice & Sea; Space: Solar, Orbit, Asteroid), and below them the scenarios of the active group. A group opens the scenario last used in it. Keys 1 to 4 pick a group; pressing the active group's key again moves to its next scenario.
 2. Left panel: micro control. Only the map layers of the active scenario, their filters and view options. It never switches scenarios.
 3. Right panel: analysis and action. The first view shows only the scenario, its signal with the basis line and the first metric; everything else (more metrics, readouts, links) is under one closed "More" disclosure. The survival card stays visible. It holds no map controls.
 

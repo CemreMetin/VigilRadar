@@ -66,7 +66,13 @@ for (const [label, viewport, mobile] of [["desktop", { width: 1440, height: 860 
   // group colours come from CSS custom properties; scenario panel border follows the group
   const vars = await page.evaluate(() => ["overview", "human", "earth", "space"].map((g) => getComputedStyle(document.documentElement).getPropertyValue(`--grp-${g}`).trim()));
   check(vars.every(Boolean), `group colours defined (${vars.join(" ")})`);
-  check(await page.evaluate(() => [...document.querySelectorAll("*")].every((el) => { const s = getComputedStyle(el); return (s.backdropFilter || "none") === "none"; })), "no backdrop-filter on any element");
+  // panels are see-through (blurred) on desktop and solid when stacked on a phone
+  const blur = await page.evaluate(() => getComputedStyle(document.querySelector("aside")).backdropFilter);
+  check(mobile ? blur === "none" : /blur/.test(blur), mobile ? "phone: panels are solid" : "desktop: panels are see-through (blur)");
+  if (!mobile) {
+    const menu = await page.getByRole("tablist", { name: "Scenario group", exact: true }).evaluate((el) => { const b = el.closest(".float-panel").getBoundingClientRect(); return [b.left, b.right]; });
+    check(Math.abs((menu[0] + menu[1]) / 2 - 720) < 2, "scenario menu is centred on the screen");
+  }
 
   // right panel: first view is short; "More" is a closed <details>
   await page.getByRole("tablist", { name: "Scenario group", exact: true }).getByRole("tab", { name: "Overview" }).click();

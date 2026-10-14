@@ -9,7 +9,8 @@ import type { CSSProperties, ReactNode } from "react";
  *   right    (readouts + survival hub)  analysis and action, what does it mean, what do I do
  *   bottom   (status line)              system state
  *
- * Desktop (lg and up): the map is the background and the zones float over it, docked to the edges.
+ * Desktop (lg and up): the map is the background and the zones float over it, docked to the edges; every panel is
+ * see-through. The brand, the scenario menu (centred) and the pages menu are three small panels over the map.
  * Narrow screens: no overlap; top bar, map, status line, then the two panels stack.
  * `themeColor` is the active scenario's colour: panel borders and the map vignette follow it.
  */
@@ -38,7 +39,7 @@ export default function DashboardLayout({
   banner?: ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden" style={{ "--scn": themeColor } as CSSProperties}>
+    <div className={`relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden ${alarm ? "alarm-on" : ""}`} style={{ "--scn": themeColor } as CSSProperties}>
       <section className="relative order-2 h-[58vh] min-h-[320px] lg:absolute lg:inset-0 lg:order-none lg:h-auto lg:min-h-0" aria-label="Map">
         {map}
         {mapOverlay}
@@ -48,7 +49,8 @@ export default function DashboardLayout({
 
       {alarm && <div className="alarm-frame no-print pointer-events-none fixed inset-0 z-50" aria-hidden />}
 
-      <header className={`panel-scn relative z-30 order-1 border-x-0 border-t-0 lg:absolute lg:inset-x-0 lg:top-0 ${alarm ? "alarm-bar" : ""}`}>{topBar}</header>
+      {/* stacked bar below lg; on desktop the header has no box of its own (display: contents) and its three parts float over the map */}
+      <header className={`panel-scn relative z-30 order-1 border-x-0 border-t-0 lg:contents ${alarm ? "alarm-bar" : ""}`}>{topBar}</header>
       {banner && <div className="relative z-40 order-1 px-2 py-1 lg:absolute lg:left-[270px] lg:right-[388px] lg:top-[calc(var(--topbar-h)+8px)] lg:p-0">{banner}</div>}
 
       <div className="panel-scn order-3 border-x-0 lg:absolute lg:bottom-1.5 lg:left-3 lg:right-[250px] lg:z-20 lg:order-none lg:border-x">{footer}</div>

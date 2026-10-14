@@ -19,12 +19,12 @@
   --space: #c9d1ff;
 
   /* Scenario group colours (top bar tabs, panel borders, map frame). Matte; each is at least 4.5:1 on the panel. */
-  --grp-overview: #9aa7b0;
-  --grp-human: #d4654c;
-  --grp-earth: #b8975a;
-  --grp-space: #8fa3c8;
+  --grp-overview: #e6edf3; /* near white */
+  --grp-human: #ff4b3e; /* signal red */
+  --grp-earth: #ffb000; /* amber */
+  --grp-space: #3ec7ff; /* sky blue */
 
-  --topbar-h: 84px; /* two tab rows; panels on the map view start below it */
+  --topbar-h: 96px; /* the floating scenario menu (two rows) ends here; the side panels start below it */
 }
 
 @theme inline {
@@ -159,26 +159,54 @@ body {
 /* ---------- Map view: scenario theme, tabs and micro-interactions ---------- */
 
 /* Panels on the map view take the active scenario's colour (--scn is set by DashboardLayout) */
-.panel-scn {
-  background: var(--panel-solid);
-  border: 1px solid color-mix(in srgb, var(--scn, var(--accent)) 32%, transparent);
+.panel-scn,
+.float-panel {
+  background: color-mix(in srgb, var(--panel-solid) 55%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: 1px solid color-mix(in srgb, var(--scn, var(--accent)) 50%, transparent);
   transition: border-color 400ms;
+}
+/* the floating brand, scenario menu and pages menu exist only on desktop (they are plain rows in the stacked bar below lg) */
+.float-panel {
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: 0;
+}
+@media (min-width: 1024px) {
+  .float-panel {
+    position: absolute;
+    z-index: 30;
+    background: color-mix(in srgb, var(--panel-solid) 55%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    border: 1px solid color-mix(in srgb, var(--scn, var(--accent)) 50%, transparent);
+  }
+}
+/* stacked layout (panels sit under the map) and users who ask for less transparency: solid panels, no blur */
+@media (max-width: 1023px) {
+  .panel-scn { background: var(--panel-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .panel-scn,
+  .float-panel { background: var(--panel-solid) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 }
 
 /* Scenario tab: flat, 1px border; hover tints the fill, selected is a solid matte fill */
 .tab-btn {
   --c: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--c) 40%, var(--panel-solid));
-  background-color: var(--panel-solid);
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  background-color: transparent;
   color: var(--fg);
   cursor: pointer;
 }
 .tab-btn:hover {
-  background-color: color-mix(in srgb, var(--c) 14%, var(--panel-solid));
+  background-color: color-mix(in srgb, var(--c) 18%, transparent);
   border-color: var(--c);
 }
 .tab-btn[aria-selected="true"] {
-  background-color: color-mix(in srgb, var(--c) 30%, var(--panel-solid));
+  background-color: color-mix(in srgb, var(--c) 35%, transparent);
   border-color: var(--c);
 }
 .tab-btn .tab-bar {
@@ -252,7 +280,8 @@ body {
 }
 
 /* ---------- Live alarm: matte red, slow pulse, no glow ---------- */
-.alarm-bar {
+.alarm-bar,
+.alarm-on .float-panel {
   border-color: #ff1a3c !important;
   animation: alarm-bar 2.4s ease-in-out infinite;
 }
@@ -262,7 +291,7 @@ body {
 }
 @keyframes alarm-bar {
   50% {
-    background-color: color-mix(in srgb, #ff1a3c 30%, var(--panel-solid));
+    background-color: color-mix(in srgb, #ff1a3c 45%, transparent);
   }
 }
 @keyframes alarm-frame {
@@ -272,6 +301,7 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .alarm-bar,
+  .alarm-on .float-panel,
   .alarm-frame {
     animation: none;
   }

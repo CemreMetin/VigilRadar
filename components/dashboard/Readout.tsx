@@ -133,7 +133,7 @@ export default function Readout({
     const up = world.volcanoes.filter((v) => v.level === "elevated").length;
     return (
       <>
-        <div className="grid grid-cols-2 gap-px border-b border-line bg-line">
+        <div className="grid grid-cols-2 border-b border-line">
           <Big label="M5+ · 24H" value={String(d1)} color="var(--geo)" />
           <Big label="STRONGEST · 7D" value={strongest ? `M${strongest.magnitude?.toFixed(1)}` : "–"} color="var(--geo)" />
           <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} color="var(--bio)" sub={`${countries.size} countries`} />
@@ -153,7 +153,7 @@ export default function Readout({
     const seconds = [100, 100, 100, 90, 90, 89, 85]; // Doomsday Clock settings, 2020-2026 (Bulletin of the Atomic Scientists)
     return (
       <>
-        <div className="grid grid-cols-2 gap-px border-b border-line bg-line">
+        <div className="grid grid-cols-2 border-b border-line">
           <Big label="DOOMSDAY CLOCK" value={clock?.value ?? "–"} color="var(--threat)" sub="to midnight (symbolic)" />
           <Big label="MILITARY STOCKPILE" value={n(arsenals.totals.stockpile)} color="var(--geo)" sub="warheads, Jan 2026" />
         </div>
@@ -222,7 +222,7 @@ export default function Readout({
     const pheicDays = pheic?.eventDate && now !== null ? Math.floor((now - Date.parse(pheic.eventDate)) / 86_400_000) : null;
     return (
       <>
-        <div className="grid grid-cols-2 gap-px border-b border-line bg-line">
+        <div className="grid grid-cols-2 border-b border-line">
           <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} color="var(--bio)" />
           <Big
             label="DAYS SINCE LAST WHO EMERGENCY CHANGE"
@@ -290,7 +290,7 @@ export default function Readout({
     const max = Math.max(1, ...rows.map((r) => r.v));
     return (
       <>
-        <div className="grid grid-cols-2 gap-px border-b border-line bg-line">
+        <div className="grid grid-cols-2 border-b border-line">
           <Big label="CONFLICT REPORTS · 7D" value={news?.value ?? "–"} color="var(--conflict)" sub={news?.trendLabel} />
           <Big label="CHOKEPOINTS LOW" value={choke?.value ?? "–"} color="var(--geo)" sub="of tracked straits and canals" />
         </div>

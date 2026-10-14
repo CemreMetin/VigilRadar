@@ -28,7 +28,7 @@ export default function AsteroidOrbit({ file, now, zoom }: { file: AsteroidsFile
   useEffect(() => {
     const el = box.current;
     if (!el) return;
-    const measure = () => setRoom(Math.min(el.clientWidth - 660, el.clientHeight - 190));
+    const measure = () => setRoom(Math.min(el.clientWidth - 660, el.clientHeight - 240));
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);

@@ -37,7 +37,7 @@ export function IceReadout({ world, tide }: { world: WorldState; tide: TideGauge
   const rising = trends.filter((t) => t > 0).length;
   return (
     <>
-      <div className="grid grid-cols-2 gap-px border-b border-line bg-line">
+      <div className="grid grid-cols-2 border-b border-line">
         <Big label="SEA LEVEL" value={sl ? `${sl.value} mm` : "–"} color="var(--accent)" sub="since 1993, satellite altimetry" />
         <Big label="ARCTIC SEA ICE" value={ice?.value ?? "–"} color="var(--accent)" sub="million km²" />
       </div>
@@ -95,20 +95,20 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
   return (
     <>
       {/* one dense header row: nearest approach, count inside the Moon's orbit, Sentry numbers */}
-      <div className="flex items-stretch gap-px border-b border-line bg-line">
-        <div className="min-w-0 flex-[1.4] bg-panel-solid px-3 py-2">
+      <div className="flex items-stretch border-b border-line">
+        <div className="min-w-0 flex-[1.4] border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Nearest</p>
           <p className="mono text-xl font-bold leading-tight" style={{ color: "var(--space)" }}>
             {nearest ? `${nearest.ld.toFixed(2)} LD` : "–"}
           </p>
           <p className="mono truncate text-[10px] font-light text-dim">{nearest ? `${nearest.des} · ${nearest.date.slice(5, 11)}` : ""}</p>
         </div>
-        <div className="flex-1 bg-panel-solid px-3 py-2">
+        <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">&lt; 1 LD</p>
           <p className="mono text-xl font-bold leading-tight" style={{ color: inside ? "var(--geo)" : "var(--fg)" }}>{inside}</p>
           <p className="mono text-[10px] font-light text-dim">of {byDist.length}</p>
         </div>
-        <div className="flex-1 bg-panel-solid px-3 py-2" title="NASA Sentry: objects with a non-zero impact chance in 100 years; Torino scale above 0">
+        <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0" title="NASA Sentry: objects with a non-zero impact chance in 100 years; Torino scale above 0">
           <p className="label">Sentry</p>
           <p className="mono text-xl font-bold leading-tight">{file.sentry ? file.sentry.tracked : "–"}</p>
           <p className="mono text-[10px] font-light text-dim">{file.sentry ? `${file.sentry.torinoAbove0} above Torino 0` : "unavailable"}</p>
@@ -178,16 +178,16 @@ export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFi
   ];
   return (
     <>
-      <div className="flex items-stretch gap-px border-b border-line bg-line">
-        <div className="flex-1 bg-panel-solid px-3 py-2">
+      <div className="flex items-stretch border-b border-line">
+        <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Active</p>
           <p className="mono text-xl font-bold leading-tight" style={{ color: "#6fa8ff" }}>{(counts.satellites + counts.starlink).toLocaleString("en-US")}</p>
         </div>
-        <div className="flex-1 bg-panel-solid px-3 py-2">
+        <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Debris</p>
           <p className="mono text-xl font-bold leading-tight">{counts.debris.toLocaleString("en-US")}</p>
         </div>
-        <div className="flex-1 bg-panel-solid px-3 py-2">
+        <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Snapshot</p>
           <p className="mono text-xl font-bold leading-tight">{file.generatedAt.slice(11, 16)}</p>
           <p className="mono text-[10px] font-light text-dim">UTC</p>
@@ -248,12 +248,12 @@ export function WeatherReadout({ world, file, fires }: { world: WorldState; file
   const top = storms[0];
   return (
     <>
-      <div className="flex items-stretch gap-px border-b border-line bg-line">
-        <div className="flex-1 bg-panel-solid px-3 py-2">
+      <div className="flex items-stretch border-b border-line">
+        <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Active</p>
           <p className="mono text-xl font-bold leading-tight" style={{ color: "#2fd4b0" }}>{storms.length}</p>
         </div>
-        <div className="flex-[1.6] bg-panel-solid px-3 py-2">
+        <div className="flex-[1.6] border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Strongest</p>
           <p className="mono text-xl font-bold leading-tight">{top ? `${top.windKt} kt` : "–"}</p>
           <p className="mono truncate text-[10px] font-light text-dim">{top ? `${top.name}${step(top.windKt) ? ` · category ${step(top.windKt)}` : ""}` : "no active storms"}</p>

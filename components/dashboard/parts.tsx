@@ -24,7 +24,7 @@ export const Disclose = Section;
 
 export function Big({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
   return (
-    <div className="bg-panel-solid p-3">
+    <div className="p-3 odd:border-r odd:border-line [&:nth-child(n+3)]:border-t [&:nth-child(n+3)]:border-line">
       <p className="label">{label}</p>
       <p className="mono readout-in mt-1 text-2xl font-bold leading-none" style={{ color }}>
         {value}
