@@ -12,7 +12,7 @@ const COORDS = /^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/;
  * and names are matched against a bundled list of countries and cities of 100,000+ people (GeoNames, CC BY 4.0).
  * The list is fetched the first time the box is used.
  */
-export default function PlaceSearch({ onFly }: { onFly: (lon: number, lat: number, zoom?: number) => void }) {
+export default function PlaceSearch({ onFly }: { onFly: (lon: number, lat: number, zoom?: number, label?: string) => void }) {
   const [places, setPlaces] = useState<Place[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [q, setQ] = useState("");
@@ -56,7 +56,7 @@ export default function PlaceSearch({ onFly }: { onFly: (lon: number, lat: numbe
   const pick = (i: number) => {
     const r = results[i];
     if (!r) return;
-    onFly(r.lon, r.lat, r.zoom);
+    onFly(r.lon, r.lat, r.zoom, r.label.replace(/^Go to /, ""));
     setOpen(false);
     setQ("");
   };

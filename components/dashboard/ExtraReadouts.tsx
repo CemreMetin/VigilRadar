@@ -1,24 +1,12 @@
 "use client";
 
-import type { AsteroidsFile, Counter, CyclonesFile, FiresFile, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
-import { Bar, Big, Section } from "./parts";
+import type { SolarNow, AsteroidsFile, Counter, CyclonesFile, FiresFile, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
+import { Bar, Big, Section, Spark } from "./parts";
 import PassFinder from "./PassFinder";
 
 /** Readouts for the Ice & Sea and Asteroid tabs. Published figures and observations only. */
 
 const c = (w: WorldState, id: string) => w.counters.find((x) => x.id === id);
-
-function Spark({ values, color, label }: { values: number[]; color: string; label: string }) {
-  if (values.length < 2) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const pts = values.map((v, i) => `${(i / (values.length - 1)) * 100},${28 - ((v - min) / (max - min || 1)) * 26}`).join(" ");
-  return (
-    <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="h-8 w-full" role="img" aria-label={label}>
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-    </svg>
-  );
-}
 
 function Published({ counter }: { counter: Counter | undefined }) {
   if (!counter) return null;
@@ -313,5 +301,31 @@ export function WeatherReadout({ world, file, fires }: { world: WorldState; file
         </p>
       </Section>
     </>
+  );
+}
+
+/** The three NOAA space weather scales as chips: G geomagnetic storms, S radiation storms, R radio blackouts. */
+export function ScaleChips({ solar }: { solar: { data: SolarNow | null; failed: boolean } }) {
+  const sc = solar.data?.scales;
+  if (!sc) {
+    return (
+      <p className="mono px-3 py-2 text-[11px] font-light text-dim" role="status">
+        {solar.failed || solar.data ? "NOAA scales unavailable right now." : "LOADING NOAA SCALES"}
+      </p>
+    );
+  }
+  return (
+    <div className="flex gap-1.5 border-b border-line px-3 py-2" role="group" aria-label="NOAA space weather scales">
+      {(["G", "S", "R"] as const).map((k) => {
+        const level = sc[k].n;
+        const color = level >= 3 ? "var(--threat)" : level >= 1 ? "var(--geo)" : "var(--fg-dim)";
+        return (
+          <span key={k} className="mono flex-1 border px-2 py-1 text-center" style={{ borderColor: color, color }} title={`${k}${level}: ${sc[k].text}`}>
+            <span className="block text-sm font-bold">{k}{level}</span>
+            <span className="block text-[9px] font-light">{sc[k].text}</span>
+          </span>
+        );
+      })}
+    </div>
   );
 }

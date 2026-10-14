@@ -4,6 +4,7 @@ import { useEffect, useRef, type MutableRefObject } from "react";
 import type { GeoJSONSource, Map as MlMap, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { greatCircle } from "@/lib/arcs";
+import { BLAST_RINGS, EXAMPLE_YIELD_KT, circle } from "@/lib/blast";
 import { DOMAIN_BY_ID } from "@/lib/domains";
 import type { DyadLine, Entity, OutbreakGroup } from "@/lib/entities";
 import type { ArsenalCountry, ConflictCell, MonitorEvent, Plant, VolcanoStatus } from "@/lib/types";
@@ -33,6 +34,21 @@ export type MapData = {
   cyclones: { type: "FeatureCollection"; features: unknown[] } | null;
   /** gridded fire detections (weather scenario) */
   fires: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** night side of the Earth and the Sun and Moon markers (3D globe, every scenario) */
+  night: { type: "FeatureCollection"; features: unknown[] } | null;
+  sky: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** nuclear scenario: illustrative reference sites */
+  targets: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** solar scenario: aurora oval nowcast */
+  aurora: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** bio scenario: air-travel hubs and BSL-4 reference labs */
+  hubs: { type: "FeatureCollection"; features: unknown[] } | null;
+  labs: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** country outlines for the shaded layers, and what to shade them by */
+  countries: { type: "FeatureCollection"; features: unknown[] } | null;
+  fill: { mode: "reports" | "exposure" | null; values: Record<string, number>; reports: Record<string, { title: string; date: string; url?: string }[]> };
+  /** show every submarine cable, not only those crossing the 50 degree geomagnetic band */
+  allCables: boolean;
 };
 
 /** Imperative controls for the on-map view buttons (bottom right). */
@@ -49,6 +65,8 @@ type Props = {
   globe: boolean;
   camera?: Camera;
   controlsRef?: MutableRefObject<MapControls | null>;
+  /** called whenever the zoom changes (the asteroid plot sizes itself from the real globe radius) */
+  onZoom?: (zoom: number) => void;
 };
 
 type FC = { type: "FeatureCollection"; features: unknown[] };
@@ -80,6 +98,13 @@ function buildSources(d: MapData): Record<string, FC> {
     orbit: d.orbit ?? fc([]),
     cyclones: d.cyclones ?? fc([]),
     fires: d.fires ?? fc([]),
+    night: d.night ?? fc([]),
+    sky: d.sky ?? fc([]),
+    targets: d.targets ?? fc([]),
+    aurora: d.aurora ?? fc([]),
+    hubs: d.hubs ?? fc([]),
+    labs: d.labs ?? fc([]),
+    countries: d.countries ?? fc([]),
   };
 }
 
@@ -111,16 +136,43 @@ function popupBox(e: Entity) {
   return box;
 }
 
+const TARGET_CATEGORY_LABEL: Record<string, string> = {
+  "strategic-forces": "Strategic forces site",
+  "weapons-storage": "Weapons storage or production site",
+  command: "Command site",
+  capital: "National capital",
+};
+
+/** Marker shapes for the nuclear reference sites, drawn once on a canvas: diamond, square, triangle, ring. */
+const TARGET_SHAPES: Record<string, (c: CanvasRenderingContext2D) => void> = {
+  "strategic-forces": (c) => { c.moveTo(14, 2); c.lineTo(26, 14); c.lineTo(14, 26); c.lineTo(2, 14); c.closePath(); },
+  "weapons-storage": (c) => { c.rect(4, 4, 20, 20); },
+  command: (c) => { c.moveTo(14, 2); c.lineTo(26, 25); c.lineTo(2, 25); c.closePath(); },
+  capital: (c) => { c.arc(14, 14, 10, 0, Math.PI * 2); },
+};
+function shapeImage(draw: (c: CanvasRenderingContext2D) => void): ImageData {
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = 28;
+  const c = cv.getContext("2d")!;
+  c.beginPath();
+  draw(c);
+  c.fillStyle = "rgba(255,0,60,0.85)";
+  c.strokeStyle = "#ffffff";
+  c.lineWidth = 2.2;
+  c.fill();
+  c.stroke();
+  return c.getImageData(0, 0, 28, 28);
+}
+
 const CLICKABLE = [
   "events-core",
   "plants-core",
   "volcanoes-ring",
-  "outbreaks-core",
   "cells-core",
   "dyads",
 ];
 
-export default function MapView({ data, entities, selectedId, onSelect, globe, camera, controlsRef }: Props) {
+export default function MapView({ data, entities, selectedId, onSelect, globe, camera, controlsRef, onZoom }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const readyRef = useRef(false);
@@ -129,11 +181,11 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
   const applyDataRef = useRef<() => void>(() => {});
   const applyArsenalsRef = useRef<() => void>(() => {});
   const applySelectionRef = useRef<() => void>(() => {});
-  const latest = useRef({ data, entities, selectedId, onSelect, globe, camera });
+  const latest = useRef({ data, entities, selectedId, onSelect, globe, camera, onZoom });
   // Keep map callbacks pointed at current props. Declared first so it runs before the
   // other effects in the same commit.
   useEffect(() => {
-    latest.current = { data, entities, selectedId, onSelect, globe, camera };
+    latest.current = { data, entities, selectedId, onSelect, globe, camera, onZoom };
   });
 
   // init once
@@ -173,13 +225,57 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         };
       }
 
+      map.on("zoom", () => latest.current.onZoom?.(map!.getZoom()));
       map.on("load", () => {
         if (!map) return;
+        latest.current.onZoom?.(map.getZoom());
         const src = buildSources(latest.current.data);
-        for (const [id, data] of Object.entries(src)) map.addSource(id, { type: "geojson", data: data as never });
+        for (const [id, data] of Object.entries(src)) {
+          map.addSource(id, {
+            type: "geojson",
+            data: data as never,
+            // bases are drawn as counted clusters below zoom 5 and as single points above it
+            ...(id === "bases" ? { cluster: true, clusterRadius: 45, clusterMaxZoom: 4 } : {}),
+            ...(id === "countries" ? { promoteId: "iso3" } : {}),
+          });
+        }
+        map.addSource("target-rings", { type: "geojson", data: fc([]) as never });
+        // one marker shape per category, so colour is never the only cue
+        for (const [name, draw] of Object.entries(TARGET_SHAPES)) map.addImage(`target-${name}`, shapeImage(draw));
         map.addSource("selected", { type: "geojson", data: fc([]) as never });
 
         // ---- layers, bottom to top
+        map.addLayer({
+          id: "fill-reports", type: "fill", source: "countries", layout: { visibility: "none" },
+          paint: {
+            // one hue (the Bio colour), more reports = more opaque
+            "fill-color": "#b026ff",
+            "fill-opacity": ["interpolate", ["linear"], ["coalesce", ["feature-state", "reports"], 0], 0, 0, 1, 0.2, 3, 0.4, 6, 0.65],
+          },
+        });
+        map.addLayer({
+          id: "fill-exposure", type: "fill", source: "countries", layout: { visibility: "none" },
+          paint: {
+            "fill-color": "#c9d1ff",
+            "fill-opacity": ["interpolate", ["linear"], ["coalesce", ["feature-state", "exposure"], 0], 0, 0, 0.05, 0.1, 0.3, 0.28, 0.7, 0.45],
+          },
+        });
+        map.addLayer({
+          id: "country-lines", type: "line", source: "countries", layout: { visibility: "none" },
+          paint: { "line-color": "#7d8c97", "line-width": 0.5, "line-opacity": 0.6 },
+        });
+        map.addLayer({
+          id: "night-fill", type: "fill", source: "night",
+          paint: { "fill-color": "#000000", "fill-opacity": 0.4 },
+        });
+        map.addLayer({
+          id: "aurora-core", type: "circle", source: "aurora",
+          paint: {
+            "circle-color": "#c9d1ff",
+            "circle-opacity": ["interpolate", ["linear"], ["get", "a"], 5, 0.12, 30, 0.45, 80, 0.85],
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, 2.2, 4, 6],
+          },
+        });
         map.addLayer({
           id: "cables-lines", type: "line", source: "cables",
           paint: {
@@ -226,13 +322,31 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           },
         });
         map.addLayer({
-          id: "bases-core", type: "circle", source: "bases",
+          id: "bases-cluster", type: "circle", source: "bases", filter: ["has", "point_count"],
+          paint: {
+            "circle-color": "rgba(255,255,0,0.22)",
+            "circle-stroke-color": "#FFFF00",
+            "circle-stroke-width": 1.2,
+            "circle-radius": ["step", ["get", "point_count"], 11, 25, 15, 100, 20],
+          },
+        });
+        map.addLayer({
+          id: "bases-cluster-count", type: "symbol", source: "bases", filter: ["has", "point_count"],
+          layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["Montserrat Medium", "Open Sans Bold", "Noto Sans Regular"], "text-size": 11 },
+          paint: { "text-color": "#FFFF00" },
+        });
+        map.addLayer({
+          id: "bases-core", type: "circle", source: "bases", filter: ["!", ["has", "point_count"]],
           paint: {
             "circle-color": "#FFFF00",
             "circle-radius": ["match", ["get", "kind"], "naval", 3.5, 3],
             "circle-stroke-color": "#050505",
             "circle-stroke-width": 0.8,
           },
+        });
+        map.addLayer({
+          id: "bases-nuc", type: "circle", source: "bases", filter: ["all", ["!", ["has", "point_count"]], ["==", ["get", "nuc"], 1]],
+          paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": 7.5, "circle-stroke-color": "#ff003c", "circle-stroke-width": 1.5 },
         });
         map.addLayer({
           id: "gm-lines", type: "line", source: "gm",
@@ -276,15 +390,6 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           },
         });
         map.addLayer({
-          id: "outbreaks-core", type: "circle", source: "outbreaks",
-          paint: {
-            "circle-color": "rgba(176,38,255,0.30)",
-            "circle-stroke-color": DOMAIN_BY_ID.health.color,
-            "circle-stroke-width": 2,
-            "circle-radius": ["interpolate", ["linear"], ["get", "count"], 1, 8, 5, 14],
-          },
-        });
-        map.addLayer({
           id: "events-core", type: "circle", source: "events",
           paint: {
             "circle-color": DOMAIN_BY_ID.geophysical.color,
@@ -311,6 +416,46 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         map.addLayer({
           id: "volcanoes-dot", type: "circle", source: "volcanoes",
           paint: { "circle-color": DOMAIN_BY_ID.geophysical.color, "circle-radius": 3 },
+        });
+        map.addLayer({
+          id: "hubs-core", type: "circle", source: "hubs",
+          paint: {
+            "circle-color": "rgba(176,38,255,0.25)",
+            "circle-stroke-color": "#b026ff",
+            "circle-stroke-width": 1.5,
+            "circle-radius": ["interpolate", ["linear"], ["get", "routes"], 100, 4, 600, 9, 1200, 14],
+          },
+        });
+        map.addLayer({
+          id: "hubs-label", type: "symbol", source: "hubs", minzoom: 2.5,
+          layout: { "text-field": ["get", "iata"], "text-font": ["Montserrat Medium", "Open Sans Bold", "Noto Sans Regular"], "text-size": 10, "text-offset": [0, 1.4] },
+          paint: { "text-color": "#d7e2ea", "text-halo-color": "#050505", "text-halo-width": 1 },
+        });
+        map.addLayer({
+          id: "labs-core", type: "circle", source: "labs",
+          paint: { "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": "#ff6ad5", "circle-stroke-width": 2, "circle-radius": 5 },
+        });
+        map.addLayer({
+          id: "target-rings-line", type: "line", source: "target-rings",
+          layout: { "line-cap": "butt" },
+          paint: { "line-color": ["get", "color"], "line-width": 1.6, "line-dasharray": [2, 2] },
+        });
+        map.addLayer({
+          id: "targets-core", type: "symbol", source: "targets",
+          layout: {
+            "icon-image": ["concat", "target-", ["get", "cat"]],
+            "icon-size": 0.6,
+            "icon-allow-overlap": true,
+          },
+        });
+        map.addLayer({
+          id: "sky-core", type: "circle", source: "sky",
+          paint: {
+            "circle-color": ["match", ["get", "kind"], "sun", "#ffd24a", "#d7e2ea"],
+            "circle-radius": ["match", ["get", "kind"], "sun", 8, 6],
+            "circle-stroke-color": "#050505",
+            "circle-stroke-width": 1.2,
+          },
         });
         map.addLayer({
           id: "selected-ring", type: "circle", source: "selected",
@@ -348,6 +493,19 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           String(p.name),
           `${Number(p.trend) > 0 ? "+" : ""}${Number(p.trend).toFixed(1)} mm/yr relative sea level (${p.years} yr of data to ${p.last}). Includes land rising or sinking at this gauge.`,
         ]);
+        simple("hubs-core", (p) => [
+          `${p.name} (${p.iata})`,
+          `${p.routes} airline routes in the OpenFlights data (mostly 2017). A hub is a place a new pathogen could reach many others from quickly; this is a count of routes, not a forecast of spread. Explore it on the Pandemic X page.`,
+        ]);
+        simple("labs-core", (p) => [
+          String(p.name),
+          `${p.country}. Reference data: a laboratory listed as BSL-4 in its public source. Not a risk ranking and not a complete list. ${p.source}`,
+        ]);
+        simple("sky-core", (p) => [String(p.title), String(p.text)]);
+        simple("bases-core", (p) => [
+          String(p.name),
+          `${p.kind === "naval" ? "Naval base" : p.kind === "air" ? "Airbase" : "Military base"}${p.country ? `, ${p.country}` : ""}${p.nuc ? ". Also appears in the nuclear reference list." : ""}. Wikidata entry: coverage is uneven and entries may be historical.`,
+        ]);
         simple("fires-core", (p) => [
           `${p.n} fire detection${Number(p.n) === 1 ? "" : "s"}`,
           `In a 0.5 degree cell over the last 24 h${p.frp ? `, strongest ${p.frp} MW` : ""}. A hot pixel seen by a satellite: it can be a burn or a gas flare, not only a wildfire.`,
@@ -356,14 +514,98 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           `${p.name} (${p.cls})`,
           `${p.wind} kt sustained wind${p.pressure ? `, ${p.pressure} mb` : ""}. Position from the NHC advisory of ${String(p.updated).slice(0, 16).replace("T", " ")} UTC; the storm has moved since.`,
         ]);
-        simple("bases-core", (p) => [
-          String(p.name),
-          `${p.kind === "naval" ? "Naval base" : p.kind === "air" ? "Airbase" : "Military base"}${p.country ? `, ${p.country}` : ""}. Wikidata entry: coverage is uneven and entries may be historical.`,
-        ]);
         simple("orbit-core", (p) => [
           p.name ? String(p.name) : ["Satellite", "Starlink satellite", "Tracked debris", "Space station"][Number(p.kind)] ?? "Object",
           `Altitude about ${p.alt} km at the snapshot time. Positions are a snapshot: objects move about 7 km/s.`,
         ]);
+
+        // a cluster of bases: zoom in on it
+        map.on("click", "bases-cluster", (ev) => {
+          const f = ev.features?.[0];
+          if (!f) return;
+          (map!.getSource("bases") as GeoJSONSource).getClusterExpansionZoom(f.properties.cluster_id as number).then((z) =>
+            map!.easeTo({ center: (f.geometry as unknown as { coordinates: [number, number] }).coordinates, zoom: z + 0.5 }),
+          );
+        });
+        map.on("mouseenter", "bases-cluster", () => (map!.getCanvas().style.cursor = "pointer"));
+        map.on("mouseleave", "bases-cluster", () => (map!.getCanvas().style.cursor = ""));
+
+        // shaded countries: a popup with the WHO reports behind the shade
+        map.on("click", "fill-reports", (ev) => {
+          const f = ev.features?.[0];
+          const iso = f?.properties?.iso3 as string | undefined;
+          const items = (iso && latest.current.data.fill.reports[iso]) || [];
+          if (!f || items.length === 0) return;
+          const box = document.createElement("div");
+          box.style.minWidth = "220px";
+          const t = document.createElement("div");
+          t.style.fontWeight = "600";
+          t.textContent = `${f.properties.name}: ${items.length} WHO report${items.length === 1 ? "" : "s"}, last 90 days`;
+          box.append(t);
+          for (const it of items.slice(0, 6)) {
+            const row = document.createElement("div");
+            row.style.cssText = "margin-top:4px;font-size:11px;line-height:1.4";
+            const d = document.createElement("span");
+            d.style.color = "#9aa8b3";
+            d.textContent = `${it.date} `;
+            row.append(d);
+            if (it.url) {
+              const a = document.createElement("a");
+              a.href = it.url;
+              a.target = "_blank";
+              a.rel = "noopener noreferrer";
+              a.style.color = "#00e5ff";
+              a.textContent = it.title;
+              row.append(a);
+            } else row.append(it.title);
+            box.append(row);
+          }
+          import("maplibre-gl").then((ml) => {
+            popupRef.current?.remove();
+            popupRef.current = new ml.Popup({ offset: 8, maxWidth: "320px" }).setLngLat(ev.lngLat).setDOMContent(box).addTo(map!);
+          });
+        });
+
+        // a reference site: popup plus dashed rings for the one fixed example (illustrative model)
+        map.on("click", "targets-core", (ev) => {
+          const f = ev.features?.[0];
+          if (!f) return;
+          const p = f.properties as Record<string, string>;
+          const [lon, lat] = (f.geometry as unknown as { coordinates: [number, number] }).coordinates;
+          (map!.getSource("target-rings") as GeoJSONSource).setData(
+            fc(BLAST_RINGS.map((r) => ({ type: "Feature", properties: { color: r.color }, geometry: { type: "LineString", coordinates: circle(lat, lon, r.km(EXAMPLE_YIELD_KT)) } }))) as never,
+          );
+          const box = document.createElement("div");
+          box.style.minWidth = "230px";
+          const badge = document.createElement("div");
+          badge.style.cssText = "font:700 10px monospace;letter-spacing:.1em;color:#ffb000";
+          badge.textContent = "ILLUSTRATIVE MODEL, NOT A FORECAST";
+          const t = document.createElement("div");
+          t.style.cssText = "font-weight:600;margin-top:3px";
+          t.textContent = p.name;
+          box.append(badge, t);
+          const lines = [
+            `${TARGET_CATEGORY_LABEL[p.cat] ?? p.cat}: ${p.role}. ${p.country}.`,
+            `Rings for an example ${EXAMPLE_YIELD_KT} kt airburst: ${BLAST_RINGS.map((r) => `${r.label.toLowerCase()} ${r.km(EXAMPLE_YIELD_KT).toFixed(1)} km`).join(", ")}.`,
+            "Example yield, not a prediction of what would be used. Listing a place says nothing about intentions or likelihood.",
+            `Source: ${p.source}`,
+          ];
+          for (const l of lines) {
+            const m = document.createElement("div");
+            m.style.cssText = "margin-top:4px;color:#9aa8b3;font-size:11px;line-height:1.4";
+            m.textContent = l;
+            box.append(m);
+          }
+          import("maplibre-gl").then((ml) => {
+            popupRef.current?.remove();
+            popupRef.current = new ml.Popup({ offset: 12, maxWidth: "320px" }).setLngLat([lon, lat]).setDOMContent(box).addTo(map!);
+            popupRef.current.on("close", () => (map!.getSource("target-rings") as GeoJSONSource | undefined)?.setData(fc([]) as never));
+          });
+        });
+        for (const layer of ["targets-core", "fill-reports", "bases-core"]) {
+          map.on("mouseenter", layer, () => (map!.getCanvas().style.cursor = "pointer"));
+          map.on("mouseleave", layer, () => (map!.getCanvas().style.cursor = ""));
+        }
 
         map.on("click", (ev) => {
           const box: [[number, number], [number, number]] = [
@@ -374,7 +616,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           const id = hit[0]?.properties?.id as string | undefined;
           latest.current.onSelect(id ?? null);
         });
-        const hoverable = ["events-core", "plants-core", "volcanoes-ring", "outbreaks-core", "cells-core", "dyads"];
+        const hoverable = ["events-core", "plants-core", "volcanoes-ring", "cells-core", "dyads"];
         for (const layer of hoverable) {
           map.on("mouseenter", layer, () => (map!.getCanvas().style.cursor = "pointer"));
           map.on("mouseleave", layer, () => (map!.getCanvas().style.cursor = ""));
@@ -394,6 +636,17 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
       for (const [id, data] of Object.entries(src)) {
         (map.getSource(id) as GeoJSONSource | undefined)?.setData(data as never);
       }
+      const { fill, allCables } = latest.current.data;
+      for (const [layer, mode] of [["fill-reports", "reports"], ["fill-exposure", "exposure"]] as const) {
+        map.setLayoutProperty(layer, "visibility", fill.mode === mode ? "visible" : "none");
+      }
+      map.setLayoutProperty("country-lines", "visibility", fill.mode ? "visible" : "none");
+      if (fill.mode) {
+        map.removeFeatureState({ source: "countries" });
+        for (const [iso, v] of Object.entries(fill.values)) map.setFeatureState({ source: "countries", id: iso }, { [fill.mode]: v });
+      }
+      // by default only the cables that cross the 50 degree geomagnetic band
+      map.setFilter("cables-lines", allCables ? null : ["==", ["get", "hi"], 1]);
     }
 
     function applySelection() {
@@ -465,7 +718,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
   const { quakes, plants, volcanoes, outbreaks, cells, dyads, connections, arsenals } = data;
   useEffect(() => {
     applyDataRef.current();
-  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide, data.bases, data.orbit, data.cyclones, data.fires]);
+  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide, data.bases, data.orbit, data.cyclones, data.fires, data.night, data.sky, data.targets, data.aurora, data.hubs, data.labs, data.countries, data.fill, data.allCables]);
 
   useEffect(() => {
     applyArsenalsRef.current();

@@ -3,9 +3,10 @@
 import { arsenals } from "@/lib/arsenals";
 import { relTime } from "@/lib/format";
 import type { Mode } from "@/lib/lenses";
-import type { AsteroidsFile, Counter, CyclonesFile, FiresFile, MonitorEvent, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
+import { nearestSite } from "@/lib/blast";
+import type { AsteroidsFile, Counter, CyclonesFile, FiresFile, SolarNow, TargetsFile, MonitorEvent, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
 import { AsteroidReadout, IceReadout, OrbitReadout, WeatherReadout } from "./ExtraReadouts";
-import { Bar, Big, Section } from "./parts";
+import { Bar, Big, Section, Spark } from "./parts";
 
 /**
  * Right panel, "Readout" tab: read-only analysis for the active scenario. Nothing here changes the map
@@ -91,6 +92,10 @@ export default function Readout({
   orbit,
   cyclones,
   fires,
+  solar,
+  targets,
+  userPlace,
+  onUseLocation,
 }: {
   mode: Mode;
   world: WorldState | null;
@@ -103,6 +108,10 @@ export default function Readout({
   orbit: OrbitFile | null;
   cyclones: CyclonesFile | null;
   fires: FiresFile | null | "off";
+  solar: { data: SolarNow | null; failed: boolean };
+  targets: { data: TargetsFile | null; failed: boolean };
+  userPlace: { lat: number; lon: number; label: string } | null;
+  onUseLocation: () => void;
 }) {
   if (!world) {
     return (
@@ -172,6 +181,34 @@ export default function Readout({
             ))}
           </ul>
         </Section>
+        <Section title="Possible target areas (illustrative)">
+          <p className="text-[11px] font-light leading-relaxed text-dim">
+            An illustrative model, not a forecast: sites that open sources associate with nuclear forces, plus capitals, so the map can show what one fixed example explosion (300 kt, an airburst) would reach. It says nothing about intentions or likelihood, and the list is partial. Switch the layer on and click a marker for the rings.
+          </p>
+          {targets.failed ? (
+            <p className="mt-2 text-[11px] text-dim">The reference list is unavailable right now.</p>
+          ) : targets.data ? (
+            (() => {
+              const near = userPlace ? nearestSite(userPlace.lat, userPlace.lon, targets.data.sites.map((x) => ({ name: x[0], lat: x[1], lon: x[2] }))) : null;
+              return (
+                <div className="mt-2">
+                  {near && userPlace ? (
+                    <p className="text-[12px] leading-relaxed">
+                      Distance from {userPlace.label} to the nearest listed site: <span className="mono font-bold">{Math.round(near.km).toLocaleString("en-US")} km</span> <span className="font-light text-dim">({near.site.name})</span>
+                    </p>
+                  ) : (
+                    <p className="text-[11px] font-light leading-relaxed text-dim">Pick a place in the search box on the left, or use your location, to see the distance to the nearest listed site.</p>
+                  )}
+                  <button type="button" className="btn mono mt-1.5 px-2 py-1 text-[11px] font-bold" onClick={onUseLocation} title="Uses this device location; it stays in your browser and is never sent anywhere">
+                    USE MY LOCATION
+                  </button>
+                </div>
+              );
+            })()
+          ) : (
+            <p className="mt-2 text-[11px] text-dim">Loading the list…</p>
+          )}
+        </Section>
       </>
     );
   }
@@ -179,14 +216,24 @@ export default function Readout({
   if (mode.id === "bio") {
     const seen = new Set<string>();
     const latest = outbreaks.filter((e) => (seen.has(e.title) ? false : (seen.add(e.title), true))).slice(0, 6);
-    const byCountry = new Map<string, number>();
-    for (const e of outbreaks) for (const iso of e.countries) byCountry.set(iso, (byCountry.get(iso) ?? 0) + 1);
+    const pheic = c("pheic");
+    const pheicDays = pheic?.eventDate && now !== null ? Math.floor((now - Date.parse(pheic.eventDate)) / 86_400_000) : null;
     return (
       <>
         <div className="grid grid-cols-2 gap-px border-b border-line bg-line">
           <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} color="var(--bio)" />
-          <Big label="COUNTRIES · 120D" value={String(countries.size)} color="var(--bio)" sub="named in a report" />
+          <Big
+            label="DAYS SINCE LAST WHO EMERGENCY CHANGE"
+            value={pheicDays === null ? "–" : String(pheicDays)}
+            color="var(--bio)"
+            sub={pheic ? `${pheic.value} ${pheic.unit ?? ""}; polio still in force` : "unavailable"}
+          />
         </div>
+        {latest[0] && (
+          <p className="border-b border-line px-3 py-2 text-[11px] font-light leading-relaxed text-dim">
+            Most recent report: <span className="font-bold text-fg">{latest[0].title}</span> ({latest[0].startedAt.slice(0, 10)})
+          </p>
+        )}
         <Section open title="Latest WHO reports">
           <ul className="divide-y divide-line border border-line">
             {latest.map((e) => (
@@ -199,7 +246,7 @@ export default function Readout({
             ))}
             {latest.length === 0 && <li className="px-2.5 py-2 text-xs text-dim">No reports in the last 120 days.</li>}
           </ul>
-          <p className="mt-2 text-[10px] font-light leading-relaxed text-dim">A count of published reports, not of outbreaks. Markers sit at country centres.</p>
+          <p className="mt-2 text-[10px] font-light leading-relaxed text-dim">A count of published reports, not of outbreaks. Countries are shaded by reports in the last 90 days; click one on the map for the list. The purple rings are the busiest airports (how fast a new pathogen can travel); the outlined rings are a partial list of BSL-4 laboratories, reference data and not a risk ranking.</p>
         </Section>
       </>
     );
@@ -271,15 +318,54 @@ export default function Readout({
   if (mode.id === "ice") return <IceReadout world={world} tide={tide} />;
   if (mode.id === "asteroid") return <AsteroidReadout world={world} file={asteroids} />;
 
-  // solar
-  const kp = c("kp");
+  return <SolarReadout kp={c("kp")} solar={solar} />;
+}
+
+/** Solar scenario readout: Kp, the NOAA scales, solar wind, flares, the Kp forecast (a projection), and why cables and grids matter. */
+function SolarReadout({ kp, solar }: { kp: Counter | undefined; solar: { data: SolarNow | null; failed: boolean } }) {
+  const d = solar.data;
+  const na = <span className="text-dim">unavailable</span>;
+  const forecast = (d?.kpForecast ?? []).filter((r) => r.kind === "predicted").slice(0, 24);
   return (
     <>
       <Section open title="Geomagnetic activity">{kp ? <KpGauge counter={kp} /> : <p className="text-xs text-dim">Kp unavailable.</p>}</Section>
+      <Section open title="Solar wind and flares (observed)" meta={solar.failed ? "unavailable" : undefined}>
+        {solar.failed && <p className="text-[11px] text-dim">NOAA space-weather products are unavailable right now.</p>}
+        {!solar.failed && !d && <p className="text-[11px] text-dim">Loading…</p>}
+        {d && (
+          <ul className="mono space-y-2 text-[11px]">
+            <li>
+              <div className="flex justify-between"><span className="text-dim">Wind speed</span><span className="font-bold">{d.wind ? `${d.wind.speed} km/s${d.wind.density !== null ? ` · ${d.wind.density} p/cm³` : ""}` : na}</span></div>
+              {d.wind && <Spark values={d.wind.speedHistory} color="var(--space)" label="Solar wind speed, last 3 hours" />}
+            </li>
+            <li>
+              <div className="flex justify-between">
+                <span className="text-dim" title="Bz pointing south (negative) lets the solar wind couple with the Earth's field">Bz (GSM)</span>
+                <span className="font-bold" style={{ color: d.bz && d.bz.value <= -10 ? "var(--threat)" : undefined }}>{d.bz ? `${d.bz.value.toFixed(1)} nT${d.bz.value < 0 ? " (south)" : ""}` : na}</span>
+              </div>
+              {d.bz && <Spark values={d.bz.history} color="var(--space)" label="Bz, last 3 hours" />}
+            </li>
+            <li className="flex justify-between"><span className="text-dim">X-ray flare class</span><span className="font-bold">{d.xray ? `${d.xray.current} now · peak ${d.xray.peak24h} (24 h)` : na}</span></li>
+          </ul>
+        )}
+      </Section>
+      <Section title="Kp forecast (NOAA projection)">
+        {forecast.length === 0 ? (
+          <p className="text-[11px] text-dim">{solar.failed ? "Unavailable right now." : "No forecast loaded."}</p>
+        ) : (
+          <>
+            <div className="flex h-12 items-end gap-0.5" role="img" aria-label="NOAA three-day Kp forecast">
+              {forecast.map((r) => (
+                <div key={r.time} className="flex-1" title={`${r.time.slice(0, 16).replace("T", " ")} UTC: Kp ${r.kp}`} style={{ height: `${Math.max(6, (r.kp / 9) * 100)}%`, border: "1px dashed var(--geo)", background: r.kp >= 5 ? "rgba(255,0,60,0.25)" : "transparent" }} />
+              ))}
+            </div>
+            <p className="mono mt-1 text-[10px] font-light text-dim">Dashed amber = NOAA projection for the next 3 days, 3-hour steps; not observed and not ours.</p>
+          </>
+        )}
+      </Section>
       <Section title="Why it matters">
         <p className="text-[12px] font-light leading-relaxed text-dim">
-          Storms induce currents in long power lines and pipelines, strongest near the magnetic poles. The amber and red lines on the map are 50° and
-          60° geomagnetic latitude; cyan cables cross the 50° band.
+          Storms induce currents in long conductors, strongest near the magnetic poles: power lines, pipelines and the powered repeaters of undersea internet cables. The map shades countries by the share of their power capacity at high geomagnetic latitude, and shows the cables that cross the 50° band.
         </p>
       </Section>
     </>

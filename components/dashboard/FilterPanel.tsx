@@ -55,6 +55,8 @@ export default function FilterPanel({
   onMinMag,
   showConnections,
   onConnections,
+  onPlace,
+  basesUi,
   points,
   selected,
   onFly,
@@ -72,6 +74,18 @@ export default function FilterPanel({
   onMinMag: (v: number) => void;
   showConnections: boolean;
   onConnections: (v: boolean) => void;
+  /** a place was picked in the search box (the nuclear readout measures distance from it) */
+  onPlace: (lon: number, lat: number, label: string) => void;
+  /** filters for the military bases layer; null while it is off or loading */
+  basesUi: {
+    kinds: Set<string>;
+    onKinds: (k: Set<string>) => void;
+    countries: string[];
+    country: string;
+    onCountry: (c: string) => void;
+    historical: boolean;
+    onHistorical: (v: boolean) => void;
+  } | null;
   points: MiniPoint[];
   selected: Entity | null;
   onFly: (lon: number, lat: number, zoom?: number) => void;
@@ -94,7 +108,7 @@ export default function FilterPanel({
       </div>
 
       <div className="px-3 pt-2">
-        <PlaceSearch onFly={onFly} />
+        <PlaceSearch onFly={(lon, lat, zoom, label) => { onFly(lon, lat, zoom); if (label) onPlace(lon, lat, label); }} />
       </div>
 
       <div className="px-3 pb-3">
@@ -128,6 +142,46 @@ export default function FilterPanel({
             );
           })}
         </ul>
+
+        {basesUi && (
+          <div className="mt-2 space-y-1.5 border border-line p-2">
+            <p className="label">Bases shown</p>
+            <div className="flex" role="group" aria-label="Base kinds">
+              {([["air", "Air"], ["naval", "Naval"], ["base", "Other"]] as const).map(([k, label], i) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={basesUi.kinds.has(k)}
+                  onClick={() => {
+                    const next = new Set(basesUi.kinds);
+                    if (next.has(k)) next.delete(k);
+                    else next.add(k);
+                    basesUi.onKinds(next);
+                  }}
+                  className={`btn mono flex-1 px-2 py-1 text-[11px] font-bold ${i > 0 ? "-ml-px" : ""}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <label className="sr-only" htmlFor="base-country">Country</label>
+            <select
+              id="base-country"
+              value={basesUi.country}
+              onChange={(e) => basesUi.onCountry(e.target.value)}
+              className="mono w-full border border-line bg-panel-solid px-1.5 py-1 text-[11px]"
+            >
+              <option value="">All countries</option>
+              {basesUi.countries.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <button type="button" aria-pressed={basesUi.historical} onClick={() => basesUi.onHistorical(!basesUi.historical)} className="btn mono flex w-full items-center justify-between px-2 py-1 text-left text-[11px] font-bold">
+              <span>Show historical</span>
+              <span>{basesUi.historical ? "ON" : "OFF"}</span>
+            </button>
+          </div>
+        )}
 
         {hasQuakes && (
           <div className="mt-2 grid grid-cols-2 gap-1.5">
@@ -200,7 +254,7 @@ export default function FilterPanel({
         )}
       </Section>
 
-      <Section title="Legend">
+      <Section open={layersOn.has("targets") || layersOn.has("bases")} title="Legend">
         <div className="space-y-1 text-[11px] font-light text-dim">{legend}</div>
       </Section>
     </div>

@@ -3,16 +3,23 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { arsenals } from "@/lib/arsenals";
+import { FORMER_STATES, filterBases, nuclearBaseIds } from "@/lib/bases";
 import { buildEntityIndex, dyadLines, groupOutbreaks, type Entity } from "@/lib/entities";
 import { isStale } from "@/lib/format";
 import { geomagLat, geomagLines } from "@/lib/geomag";
-import { GROUPS, LAYER_INFO, MODES, MODE_BY_ID, type GroupId, type LayerId } from "@/lib/lenses";
+import { GROUPS, LAYER_INFO, MODES, MODE_BY_ID, defaultLayers, type GroupId, type LayerId } from "@/lib/lenses";
+import { moon, moonPhase, nightPolygon, sun } from "@/lib/sky";
+import { useLazyJson } from "@/lib/useLazyJson";
 import { useAlarmSound } from "@/lib/alarmTone";
 import type { Alert } from "@/lib/alerts";
 import { overdueReviews } from "@/lib/reviews";
 import { useAlerts } from "@/lib/useAlerts";
 import type {
   AsteroidsFile,
+  AuroraFile,
+  BslLabsFile,
+  SolarNow,
+  TargetsFile,
   CyclonesFile,
   FiresFile,
   MilitaryBasesFile,
@@ -35,6 +42,7 @@ import MapHud from "./dashboard/MapHud";
 import Readout from "./dashboard/Readout";
 import StatusBar from "./dashboard/StatusBar";
 import TopBar from "./dashboard/TopBar";
+import { ScaleChips } from "./dashboard/ExtraReadouts";
 import LinksPanel, { linksFor } from "./LinksPanel";
 import FreshnessTable from "./FreshnessTable";
 import AlarmBar from "./dashboard/AlarmBar";
@@ -59,6 +67,7 @@ function readUrl() {
   return {
     mode: sc && MODE_BY_ID[sc] ? sc : "overview",
     off: (p.get("off") ?? "").split(",").filter((l): l is LayerId => ALL_LAYERS.includes(l as LayerId)),
+    on: (p.get("on") ?? "").split(",").filter((l): l is LayerId => ALL_LAYERS.includes(l as LayerId)),
     range: (p.get("range") === "24h" ? "24h" : "7d") as Range,
     minMag: p.get("mag") === "4.5" ? 4.5 : 5,
     globe: p.get("view") === "3d",
@@ -78,7 +87,7 @@ export default function Dashboard() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [now, setNow] = useState<number | null>(null);
   const [modeId, setModeId] = useState("overview");
-  const [layersOn, setLayersOn] = useState<Set<LayerId>>(new Set(MODE_BY_ID.overview.layers));
+  const [layersOn, setLayersOn] = useState<Set<LayerId>>(new Set(defaultLayers(MODE_BY_ID.overview)));
   const [range, setRange] = useState<Range>("7d");
   const [minMag, setMinMag] = useState<number>(5);
   const [globe, setGlobe] = useState(false);
@@ -98,7 +107,12 @@ export default function Dashboard() {
   const [cycloneFile, setCycloneFile] = useState<CyclonesFile | null>(null);
   const [fireFile, setFireFile] = useState<FiresFile | null | "off">(null);
   const [freshnessOpen, setFreshnessOpen] = useState(false);
+  const [baseKinds, setBaseKinds] = useState<Set<string>>(new Set(["air", "naval", "base"]));
+  const [baseCountry, setBaseCountry] = useState("");
+  const [showHistorical, setShowHistorical] = useState(false);
+  const [userPlace, setUserPlace] = useState<{ lat: number; lon: number; label: string } | null>(null);
   const controlsRef = useRef<MapControls | null>(null);
+  const [mapZoom, setMapZoom] = useState<number | null>(null);
   const lastInGroup = useRef<Partial<Record<GroupId, string>>>({}); // the scenario last open in each group
 
   const mode = MODE_BY_ID[modeId];
@@ -110,7 +124,7 @@ export default function Dashboard() {
     /* eslint-disable react-hooks/set-state-in-effect */
     setModeId(u.mode);
     lastInGroup.current[MODE_BY_ID[u.mode].group] = u.mode;
-    setLayersOn(new Set(MODE_BY_ID[u.mode].layers.filter((l) => !u.off.includes(l))));
+    setLayersOn(new Set([...defaultLayers(MODE_BY_ID[u.mode]).filter((l) => !u.off.includes(l)), ...u.on.filter((l) => MODE_BY_ID[u.mode].layers.includes(l))]));
     setRange(u.range);
     setMinMag(u.minMag);
     setGlobe(u.globe);
@@ -125,8 +139,10 @@ export default function Dashboard() {
     if (!hydrated) return;
     const p = new URLSearchParams();
     if (modeId !== "overview") p.set("sc", modeId);
-    const off = MODE_BY_ID[modeId].layers.filter((l) => !layersOn.has(l));
+    const off = defaultLayers(MODE_BY_ID[modeId]).filter((l) => !layersOn.has(l));
     if (off.length) p.set("off", off.join(","));
+    const on = (MODE_BY_ID[modeId].defaultOff ?? []).filter((l) => layersOn.has(l));
+    if (on.length) p.set("on", on.join(","));
     if (range !== "7d") p.set("range", range);
     if (minMag !== 5) p.set("mag", String(minMag));
     if (globe) p.set("view", "3d");
@@ -166,7 +182,7 @@ export default function Dashboard() {
   // heavier, rarely changing layers are fetched only when first switched on
   const plantsOn = layersOn.has("plants");
   const conflictOn = layersOn.has("conflict");
-  const cablesOn = layersOn.has("cables");
+  const cablesOn = layersOn.has("cables") || layersOn.has("cablesAll");
   useEffect(() => {
     if (!plantsOn || plants.length > 0) return;
     let cancelled = false;
@@ -271,19 +287,31 @@ export default function Dashboard() {
     if (modeId !== "orbit" || orbitFile) return;
     getJson<OrbitFile>("/data/orbit.json").then(setOrbitFile).catch(() => {});
   }, [modeId, orbitFile]);
+  // reference sites for the nuclear scenario also mark the bases that sit on them
+  const targetsOn = layersOn.has("targets");
+  const targets = useLazyJson<TargetsFile>("/data/nuclear_targets.json", targetsOn || basesOn || modeId === "nuclear");
+  const shownBases = useMemo(
+    () => (basesFile ? filterBases(basesFile.bases, { kinds: baseKinds, country: baseCountry, historical: showHistorical }) : []),
+    [basesFile, baseKinds, baseCountry, showHistorical],
+  );
+  const nuclearIds = useMemo(() => (basesFile && targets.data ? nuclearBaseIds(basesFile.bases, targets.data.sites) : new Set<string>()), [basesFile, targets.data]);
+  const baseCountries = useMemo(
+    () => (basesFile ? [...new Set(basesFile.bases.map((b) => b[4]).filter((c) => c && (showHistorical || !FORMER_STATES.has(c))))].sort() : []),
+    [basesFile, showHistorical],
+  );
   const basesFc = useMemo<Fc | null>(
     () =>
       basesOn && basesFile
         ? {
             type: "FeatureCollection",
-            features: basesFile.bases.map(([id, name, lat, lon, country, kind]) => ({
+            features: shownBases.map(([id, name, lat, lon, country, kind]) => ({
               type: "Feature",
-              properties: { id: `base:${id}`, name, country, kind },
+              properties: { id: `base:${id}`, name, country, kind, nuc: nuclearIds.has(id) ? 1 : 0 },
               geometry: { type: "Point", coordinates: [lon, lat] },
             })),
           }
         : null,
-    [basesOn, basesFile],
+    [basesOn, basesFile, shownBases, nuclearIds],
   );
   const orbitFc = useMemo<Fc | null>(() => {
     if (!orbitFile || modeId !== "orbit") return null;
@@ -311,6 +339,99 @@ export default function Dashboard() {
         : null,
     [tideOn, tideFile],
   );
+
+  const targetsFc = useMemo<Fc | null>(
+    () =>
+      targetsOn && targets.data
+        ? {
+            type: "FeatureCollection",
+            features: targets.data.sites.map(([name, lat, lon, cat, country, role, source]) => ({
+              type: "Feature",
+              properties: { name, cat, country, role, source },
+              geometry: { type: "Point", coordinates: [lon, lat] },
+            })),
+          }
+        : null,
+    [targetsOn, targets.data],
+  );
+
+  // shaded countries: WHO reports (bio, overview) or grid exposure (solar)
+  const fillMode: MapData["fill"]["mode"] = layersOn.has("outbreaks") ? "reports" : layersOn.has("exposure") ? "exposure" : null;
+  const countries = useLazyJson<Fc>("/data/countries.geo.json", fillMode !== null);
+  const exposure = useLazyJson<{ countries: { iso3: string; share: number }[] }>("/data/solar_exposure.json", layersOn.has("exposure"));
+  const day = now === null ? 0 : Math.floor(now / 86_400_000);
+  const reportsByIso = useMemo(() => {
+    const out: Record<string, { title: string; date: string; url?: string }[]> = {};
+    const since = (day - 90) * 86_400_000;
+    for (const e of world?.events ?? []) {
+      if (e.domain !== "health" || new Date(e.startedAt).getTime() < since) continue;
+      for (const iso of e.countries) (out[iso] ??= []).push({ title: e.title, date: e.startedAt.slice(0, 10), url: e.url });
+    }
+    return out;
+  }, [world, day]);
+  const fill = useMemo<MapData["fill"]>(
+    () =>
+      fillMode === "reports"
+        ? { mode: "reports", values: Object.fromEntries(Object.entries(reportsByIso).map(([k, v]) => [k, v.length])), reports: reportsByIso }
+        : fillMode === "exposure" && exposure.data
+          ? { mode: "exposure", values: Object.fromEntries(exposure.data.countries.map((c) => [c.iso3, c.share])), reports: {} }
+          : { mode: null, values: {}, reports: {} },
+    [fillMode, reportsByIso, exposure.data],
+  );
+
+  const aurora = useLazyJson<AuroraFile>("/data/aurora.json", layersOn.has("aurora"));
+  const solarNow = useLazyJson<SolarNow>("/data/solar_now.json", modeId === "solar");
+  const airports = useLazyJson<{ airports: [string, string, string, string, number, number, number][] }>("/data/airports.json", layersOn.has("hubs"));
+  const labs = useLazyJson<BslLabsFile>("/data/bsl4_labs.json", layersOn.has("labs"));
+  const auroraFc = useMemo<Fc | null>(
+    () =>
+      layersOn.has("aurora") && aurora.data
+        ? { type: "FeatureCollection", features: aurora.data.points.map(([lon, lat, a]) => ({ type: "Feature", properties: { a }, geometry: { type: "Point", coordinates: [lon, lat] } })) }
+        : null,
+    [layersOn, aurora.data],
+  );
+  const hubsFc = useMemo<Fc | null>(
+    () =>
+      layersOn.has("hubs") && airports.data
+        ? {
+            type: "FeatureCollection",
+            // the 50 airports with the most routes: the file is sorted by route count
+            features: airports.data.airports.slice(0, 50).map(([iata, name, , , lat, lon, routes]) => ({ type: "Feature", properties: { iata, name, routes }, geometry: { type: "Point", coordinates: [lon, lat] } })),
+          }
+        : null,
+    [layersOn, airports.data],
+  );
+  const labsFc = useMemo<Fc | null>(
+    () =>
+      layersOn.has("labs") && labs.data
+        ? {
+            type: "FeatureCollection",
+            features: labs.data.labs.map(([name, lat, lon, country, , statement]) => ({ type: "Feature", properties: { name, country, source: `Source: Wikipedia. ${statement}` }, geometry: { type: "Point", coordinates: [lon, lat] } })),
+          }
+        : null,
+    [layersOn, labs.data],
+  );
+
+  // Sun, Moon and the night side: computed from the clock, refreshed once a minute, drawn whenever the globe is on
+  const globeEff = globe || !!mode.globe;
+  const minute = now === null ? null : Math.floor(now / 60_000);
+  const sky = useMemo(() => {
+    if (minute === null || !globeEff) return null;
+    const t = minute * 60_000;
+    const s = sun(t);
+    const m = moon(t);
+    const ph = moonPhase(t);
+    const at = (p: { lat: number; lon: number }) => `(${p.lat.toFixed(1)}°, ${p.lon.toFixed(1)}°)`;
+    const night: Fc = { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [nightPolygon(s.lat, s.lon)] } }] };
+    const points: Fc = {
+      type: "FeatureCollection",
+      features: [
+        { type: "Feature", properties: { kind: "sun", title: "Sun: subsolar point", text: `The Sun is straight overhead at ${at(s)} now. Computed from the clock with a low-precision formula; the dark area is where it is night.` }, geometry: { type: "Point", coordinates: [s.lon, s.lat] } },
+        { type: "Feature", properties: { kind: "moon", title: `Moon: ${ph.name}, ${Math.round(ph.lit * 100)}% lit`, text: `The Moon is straight overhead at ${at(m)} now. Computed from the clock with a low-precision formula (about 0.3 degrees).` }, geometry: { type: "Point", coordinates: [m.lon, m.lat] } },
+      ],
+    };
+    return { night, points };
+  }, [minute, globeEff]);
 
   // live alarms: poll the alert feeds, sound and flash while a CRITICAL alert is unacknowledged
   const { critical, notices, acknowledge } = useAlerts(now);
@@ -398,8 +519,17 @@ export default function Dashboard() {
       orbit: orbitFc,
       cyclones: cycloneFc,
       fires: fireFc,
+      night: sky?.night ?? null,
+      sky: sky?.points ?? null,
+      targets: targetsFc,
+      aurora: auroraFc,
+      hubs: hubsFc,
+      labs: labsFc,
+      countries: fillMode ? countries.data : null,
+      fill,
+      allCables: layersOn.has("cablesAll"),
     }),
-    [layersOn, tideFc, basesFc, orbitFc, cycloneFc, fireFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
+    [layersOn, tideFc, basesFc, orbitFc, cycloneFc, fireFc, sky, targetsFc, auroraFc, hubsFc, labsFc, countries.data, fillMode, fill, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
   );
 
   // left panel: live counts per layer, and every drawn point for the mini context map
@@ -413,7 +543,11 @@ export default function Dashboard() {
     conflict: cells.length || undefined,
     cables: cables?.features.length,
     tide: tideFile?.stations.length,
-    bases: basesFile?.bases.length,
+    bases: basesFile ? shownBases.length : undefined,
+    targets: targets.data?.sites.length,
+    aurora: aurora.data?.points.length,
+    hubs: hubsFc?.features.length,
+    labs: labs.data?.labs.length,
     satellites: orbitFile?.counts.satellites,
     starlink: orbitFile?.counts.starlink,
     debris: orbitFile?.counts.debris,
@@ -449,6 +583,14 @@ export default function Dashboard() {
       return next;
     });
 
+  /** Browser location, only when asked for; it is used here in the page and never sent anywhere. */
+  const useMyLocation = () =>
+    navigator.geolocation?.getCurrentPosition(
+      (p) => setUserPlace({ lat: p.coords.latitude, lon: p.coords.longitude, label: "your location" }),
+      () => {},
+      { timeout: 10_000 },
+    );
+
   const select = (id: string | null) => {
     setSelectedId(id);
     if (id) setTab((t) => (t === "readout" ? "links" : t));
@@ -459,7 +601,7 @@ export default function Dashboard() {
     if (!MODE_BY_ID[id]) return;
     lastInGroup.current[MODE_BY_ID[id].group] = id;
     setModeId(id);
-    setLayersOn(new Set(MODE_BY_ID[id].layers));
+    setLayersOn(new Set(defaultLayers(MODE_BY_ID[id])));
     setSelectedId(null);
     setTab("readout");
   }, []);
@@ -521,9 +663,25 @@ export default function Dashboard() {
     <>
       {layersOn.has("dyads") && <p><span style={{ color: "var(--threat)" }}>━</span> curves: country pairs; thicker and redder is more tense coverage</p>}
       {conflictOn && <p><span style={{ color: "var(--conflict)" }}>●</span> news-reported armed conflict, last 7 days</p>}
-      {layersOn.has("outbreaks") && <p><span style={{ color: "var(--bio)" }}>◯</span> WHO report (country centre)</p>}
       {layersOn.has("volcanoes") && <p>◉ supervolcano: white normal, red above baseline, grey no feed</p>}
-      {layersOn.has("bases") && <p><span style={{ color: "#FFFF00" }}>●</span> military base (Wikidata; coverage uneven, not an order of battle)</p>}
+      {layersOn.has("bases") && (
+        <p>
+          <span style={{ color: "#FFFF00" }}>●</span> military base (Wikidata; coverage uneven, not an order of battle).{" "}
+          {basesFile ? `Showing ${shownBases.length.toLocaleString("en-US")} of ${basesFile.bases.length.toLocaleString("en-US")}${showHistorical ? "" : " (former states hidden)"}. A red ring marks a base that is also in the nuclear reference list.` : "Loading bases…"}
+        </p>
+      )}
+      {layersOn.has("targets") && (
+        <p>
+          <span style={{ color: "var(--threat)" }}>◆ ■ ▲ ○</span> strategic forces, storage, command, capital. ILLUSTRATIVE MODEL, not a forecast: click one to draw the dashed rings of an example 300 kt explosion. Example yield, not a prediction of what would be used. {targets.failed ? "The list is unavailable right now." : ""}
+        </p>
+      )}
+      {layersOn.has("aurora") && <p>Aurora oval: NOAA OVATION nowcast (brighter = likelier). {aurora.failed ? "Nowcast unavailable right now. " : ""}Dashed bands: fixed 50° and 60° geomagnetic latitude, for reference (illustrative).</p>}
+      {layersOn.has("exposure") && <p>Shaded countries: share of power capacity at 50° or more geomagnetic latitude (WRI plant data). {exposure.failed ? "Exposure data unavailable. " : ""}{countries.failed ? "Country outlines unavailable." : ""}</p>}
+      {(layersOn.has("cables") || layersOn.has("cablesAll")) && <p>Long undersea internet cables need powered repeaters. A strong geomagnetic storm can induce currents that damage them, cutting internet links between continents.</p>}
+      {layersOn.has("outbreaks") && <p><span style={{ color: "var(--bio)" }}>■</span> darker purple: more WHO reports in the last 90 days (reports, not outbreaks). {countries.failed ? "Country outlines unavailable, so no shading." : ""}</p>}
+      {layersOn.has("hubs") && <p><span style={{ color: "var(--bio)" }}>◯</span> How fast a new pathogen can travel: the 50 busiest airports by route count. {airports.failed ? "Airport data unavailable. " : ""}<Link href="/scenarios/pandemic-x" className="underline">Pandemic explorer</Link></p>}
+      {layersOn.has("labs") && <p><span style={{ color: "#ff6ad5" }}>◯</span> BSL-4 labs: partial reference list, not a risk ranking. {labs.failed ? "Unavailable right now." : ""}</p>}
+      {globeEff && <p>3D: the shaded side is night; the Sun and Moon markers are computed from the clock.</p>}
       {modeId === "orbit" && <p>Dots are positions at the snapshot time; objects move about 7 km/s</p>}
       {layersOn.has("geomag") && <p><span style={{ color: "var(--geo)" }}>┄</span> 50° <span style={{ color: "var(--threat)" }}>┄</span> 60° geomagnetic latitude</p>}
       <p className="pt-1">Only observations and published figures; nothing here is a forecast.</p>
@@ -550,6 +708,7 @@ export default function Dashboard() {
           <p className="mt-1.5 text-[11px] font-light leading-relaxed text-dim">{signal.basis}</p>
         </div>
         <CounterPanel counters={orderedCounters.slice(0, 1)} today={today} />
+        {mode.id === "solar" && <ScaleChips solar={solarNow} />}
 
         <details className="group border-t border-line">
           <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2 hover:bg-accent/5 [&::-webkit-details-marker]:hidden">
@@ -582,7 +741,7 @@ export default function Dashboard() {
 
           <div role="tabpanel" key={`${mode.id}-${tab}`}>
             {tab === "readout" && (
-              <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} fires={fireFile} />
+              <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} fires={fireFile} solar={solarNow} targets={targets} userPlace={userPlace} onUseLocation={useMyLocation} />
             )}
             {tab === "metrics" && (
               <>
@@ -635,6 +794,20 @@ export default function Dashboard() {
           onMinMag={setMinMag}
           showConnections={showConnections}
           onConnections={setShowConnections}
+          onPlace={(lon, lat, label) => setUserPlace({ lat, lon, label })}
+          basesUi={
+            basesOn && basesFile
+              ? {
+                  kinds: baseKinds,
+                  onKinds: setBaseKinds,
+                  countries: baseCountries,
+                  country: baseCountry,
+                  onCountry: setBaseCountry,
+                  historical: showHistorical,
+                  onHistorical: setShowHistorical,
+                }
+              : null
+          }
           legend={legend}
         />
       }
@@ -663,13 +836,14 @@ export default function Dashboard() {
           globe={globe || !!mode.globe}
           camera={{ ...mode.camera, key: mode.id }}
           controlsRef={controlsRef}
+          onZoom={(z) => setMapZoom((prev) => (prev !== null && Math.abs(prev - z) < 0.01 ? prev : z))}
         />
       }
       controls={<ViewControls globe={globe || !!mode.globe} locked={!!mode.globe} onGlobe={setGlobe} controls={controlsRef} />}
       mapOverlay={
         <>
           <MapHud color={mode.color} id={mode.id} />
-          {mode.id === "asteroid" && <AsteroidOrbit file={asteroids} now={now} />}
+          {mode.id === "asteroid" && <AsteroidOrbit file={asteroids} now={now} zoom={mapZoom} />}
           {freshnessOpen && world && (
             <section className="panel-scn absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-12 lg:left-[270px] lg:w-[min(760px,calc(100%-660px))]" aria-label="Data freshness">
               <div className="mb-2 flex items-center justify-between">

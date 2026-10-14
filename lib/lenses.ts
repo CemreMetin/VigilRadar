@@ -24,7 +24,13 @@ export type LayerId =
   | "starlink"
   | "debris"
   | "cyclones"
-  | "fires";
+  | "fires"
+  | "targets"
+  | "aurora"
+  | "exposure"
+  | "hubs"
+  | "labs"
+  | "cablesAll";
 
 export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: string }> = {
   quakes: { label: "Earthquakes", blurb: "Magnitude 4.5+ from USGS", color: "var(--geo)" },
@@ -32,14 +38,20 @@ export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: 
   arsenals: { label: "Arsenals", blurb: "Warheads by country (SIPRI)", color: "var(--threat)" },
   plants: { label: "Nuclear plants", blurb: "Civil power reactors, ~2019 data", color: "var(--threat)" },
   dyads: { label: "Tension pairs", blurb: "Media tension between countries", color: "var(--threat)" },
-  outbreaks: { label: "WHO reports", blurb: "Marked at the country centre", color: "var(--bio)" },
+  outbreaks: { label: "WHO reports", blurb: "Countries shaded by reports, last 90 days", color: "var(--bio)" },
   conflict: { label: "Conflict coverage", blurb: "Armed conflict in the news, 7 d", color: "var(--conflict)" },
   geomag: { label: "Geomagnetic latitude", blurb: "50° and 60° bands: storms hit hardest", color: "var(--space)" },
-  cables: { label: "Submarine cables", blurb: "Cyan crosses the 50° band", color: "var(--accent)" },
+  cables: { label: "Cables at risk", blurb: "Submarine cables that cross the 50° band", color: "var(--accent)" },
   bases: { label: "Military bases", blurb: "Wikidata reference layer; not an order of battle", color: "#FFFF00" },
   satellites: { label: "Satellites", blurb: "Active, non-Starlink (CelesTrak)", color: "#00e5ff" },
   starlink: { label: "Starlink", blurb: "The largest constellation", color: "#7d8c97" },
   debris: { label: "Tracked debris", blurb: "Four major breakup events", color: "#ffb000" },
+  targets: { label: "Possible target areas", blurb: "Illustrative reference sites, not a forecast", color: "var(--threat)" },
+  aurora: { label: "Aurora oval", blurb: "NOAA OVATION nowcast, 30 min ahead", color: "var(--space)" },
+  exposure: { label: "Grid exposure", blurb: "Share of power capacity at high geomagnetic latitude", color: "var(--space)" },
+  hubs: { label: "Air-travel hubs", blurb: "How fast a new pathogen can travel", color: "var(--bio)" },
+  labs: { label: "BSL-4 labs", blurb: "Partial reference list, not a risk ranking", color: "var(--bio)" },
+  cablesAll: { label: "All other cables", blurb: "Those that do not cross the 50° band", color: "var(--accent)" },
   fires: { label: "Active fires", blurb: "NASA FIRMS hot pixels, 24 h, needs a key", color: "#ff6a00" },
   cyclones: { label: "Tropical cyclones", blurb: "Current position and wind (NHC)", color: "#2fd4b0" },
   tide: { label: "Tide gauges", blurb: "Relative sea-level trend, last 30 yr (PSMSL)", color: "var(--accent)" },
@@ -65,6 +77,8 @@ export type Mode = {
   group: GroupId;
   color: string; // the group's colour: tints the tab, the panel borders, the map frame and the readout
   layers: LayerId[];
+  /** layers on offer but switched off when the scenario opens */
+  defaultOff?: LayerId[];
   camera: { center: [number, number]; zoom: number; minZoom?: number };
   /** the scenario only makes sense on the 3D globe: the map switches to it and the 2D/3D button has no effect */
   globe?: boolean;
@@ -122,11 +136,12 @@ const RAW_MODES: Omit<Mode, "color">[] = [
     id: "nuclear",
     title: "Nuclear",
     group: "human",
-    layers: ["arsenals", "plants", "dyads"],
+    layers: ["arsenals", "plants", "dyads", "targets"],
+    defaultOff: ["targets"],
     camera: { center: [48, 38], zoom: 1.9 },
     page: "/scenarios/nuclear-winter",
     pageLabel: "Nuclear war scenario",
-    blurb: "Arsenals, power plants and the media tension between nuclear-armed pairs.",
+    blurb: "Arsenals, power plants and the media tension between nuclear-armed pairs. An opt-in layer shows illustrative reference sites and the reach of one fixed example explosion; it is a model, not a forecast.",
     counterIds: ["doomsday-clock", "warheads"],
     stat: (w) => {
       const c = counter(w, "doomsday-clock");
@@ -154,12 +169,13 @@ const RAW_MODES: Omit<Mode, "color">[] = [
     id: "bio",
     title: "Bio",
     group: "human",
-    layers: ["outbreaks"],
+    layers: ["outbreaks", "hubs", "labs"],
+    defaultOff: ["labs"],
     camera: { center: [20, 15], zoom: 1.5 },
     page: "/scenarios/pandemic-x",
     pageLabel: "Pandemic explorer",
     blurb: "WHO outbreak reports by country, and how a new pathogen could spread by air travel.",
-    counterIds: ["outbreaks"],
+    counterIds: ["outbreaks", "pheic"],
     stat: (w) => {
       const c = counter(w, "outbreaks");
       return c ? `${c.value} WHO reports, 90 d` : "WHO reports";
@@ -227,12 +243,13 @@ const RAW_MODES: Omit<Mode, "color">[] = [
     id: "solar",
     title: "Solar",
     group: "space",
-    layers: ["geomag", "cables"],
+    layers: ["aurora", "exposure", "geomag", "cables", "cablesAll"],
+    defaultOff: ["cablesAll"],
     camera: { center: [-20, 52], zoom: 1.7 },
     page: "/scenarios/solar-superstorm",
     pageLabel: "Solar superstorm scenario",
-    blurb: "Space weather right now. Storms are strongest near the magnetic poles, where much of the grid and many cables sit.",
-    counterIds: ["kp"],
+    blurb: "Space weather right now: the aurora oval NOAA nowcasts, the current G, S and R scales, solar wind and flares. Storms are strongest near the magnetic poles, where much of the grid and many long cables sit.",
+    counterIds: ["kp", "space-scales"],
     stat: (w) => {
       const c = counter(w, "kp");
       return c ? `Kp ${c.value}` : "Space weather";
@@ -277,5 +294,8 @@ const RAW_MODES: Omit<Mode, "color">[] = [
 
 /** The scenario tab colour is its group's colour. */
 export const MODES: Mode[] = RAW_MODES.map((m) => ({ ...m, color: GROUP_BY_ID[m.group].color }));
+
+/** The layers that are on when a scenario opens. */
+export const defaultLayers = (m: Mode): LayerId[] => m.layers.filter((l) => !m.defaultOff?.includes(l));
 
 export const MODE_BY_ID = Object.fromEntries(MODES.map((m) => [m.id, m])) as Record<string, Mode>;
