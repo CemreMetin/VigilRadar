@@ -13,6 +13,7 @@ import { overdueReviews } from "@/lib/reviews";
 import { useAlerts } from "@/lib/useAlerts";
 import type {
   AsteroidsFile,
+  CyclonesFile,
   MilitaryBasesFile,
   OrbitFile,
   ConflictCell,
@@ -94,6 +95,7 @@ export default function Dashboard() {
   const [asteroids, setAsteroids] = useState<AsteroidsFile | null>(null);
   const [orbitFile, setOrbitFile] = useState<OrbitFile | null>(null);
   const [basesFile, setBasesFile] = useState<MilitaryBasesFile | null>(null);
+  const [cycloneFile, setCycloneFile] = useState<CyclonesFile | null>(null);
   const [freshnessOpen, setFreshnessOpen] = useState(false);
   const controlsRef = useRef<MapControls | null>(null);
 
@@ -216,6 +218,24 @@ export default function Dashboard() {
     if (modeId !== "asteroid" || asteroids) return;
     getJson<AsteroidsFile>("/data/asteroids.json").then(setAsteroids).catch(() => {});
   }, [modeId, asteroids]);
+  useEffect(() => {
+    if (modeId !== "weather" || cycloneFile) return;
+    getJson<CyclonesFile>("/data/cyclones.json").then(setCycloneFile).catch(() => {});
+  }, [modeId, cycloneFile]);
+  const cycloneFc = useMemo<Fc | null>(
+    () =>
+      cycloneFile && layersOn.has("cyclones")
+        ? {
+            type: "FeatureCollection",
+            features: cycloneFile.storms.map((s) => ({
+              type: "Feature",
+              properties: { id: `cyclone:${s.id}`, name: s.name, cls: s.cls, wind: s.windKt, pressure: s.pressureMb, updated: s.updated },
+              geometry: { type: "Point", coordinates: [s.lon, s.lat] },
+            })),
+          }
+        : null,
+    [cycloneFile, layersOn],
+  );
   const basesOn = layersOn.has("bases");
   useEffect(() => {
     if (!basesOn || basesFile) return;
@@ -354,8 +374,9 @@ export default function Dashboard() {
       tide: tideFc,
       bases: basesFc,
       orbit: orbitFc,
+      cyclones: cycloneFc,
     }),
-    [layersOn, tideFc, basesFc, orbitFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
+    [layersOn, tideFc, basesFc, orbitFc, cycloneFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
   );
 
   // left panel: live counts per layer, and every drawn point for the mini context map
@@ -373,6 +394,7 @@ export default function Dashboard() {
     satellites: orbitFile?.counts.satellites,
     starlink: orbitFile?.counts.starlink,
     debris: orbitFile?.counts.debris,
+    cyclones: cycloneFile?.storms.length,
   };
   const miniPoints = useMemo<MiniPoint[]>(() => {
     const out: MiniPoint[] = [];
@@ -428,7 +450,7 @@ export default function Dashboard() {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
-      const i = Number(e.key) - 1;
+      const i = e.key === "0" ? 9 : Number(e.key) - 1; // 1-9, then 0 for the tenth
       if (Number.isInteger(i) && i >= 0 && i < MODES.length) selectMode(MODES[i].id);
     };
     window.addEventListener("keydown", onKey);
@@ -523,7 +545,7 @@ export default function Dashboard() {
 
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto" role="tabpanel" key={`${mode.id}-${tab}`}>
         {tab === "readout" && (
-          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} />
+          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} />
         )}
         {tab === "metrics" && (
           <>
@@ -568,7 +590,7 @@ export default function Dashboard() {
           counts={counts}
           points={miniPoints}
           selected={selected}
-          onFly={(lon, lat) => controlsRef.current?.flyTo(lon, lat)}
+          onFly={(lon, lat, zoom) => controlsRef.current?.flyTo(lon, lat, zoom)}
           onClearSelection={() => select(null)}
           range={range}
           onRange={setRange}

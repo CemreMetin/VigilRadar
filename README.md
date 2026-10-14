@@ -49,7 +49,7 @@ Theme: an underground analysis room. Ultra-dark, flat, monospace.
 
 The map view uses three strict zones around a full-window map, read top-left to bottom-right:
 
-1. Top bar: macro context. Mutually exclusive scenario tabs (Overview, Nuclear, Bio, Volcano, Conflict, Solar, Orbit, Ice & Sea, Asteroid; keys 1 to 9).
+1. Top bar: macro context. Mutually exclusive scenario tabs (Overview, Nuclear, Bio, Volcano, Conflict, Solar, Weather, Orbit, Ice & Sea, Asteroid; keys 1 to 9, then 0).
 2. Left panel: micro control. Only the map layers of the active scenario, their filters and view options. It never switches scenarios.
 3. Right panel: analysis and action. Read-only readouts, metrics and links, plus the survival card. It holds no map controls.
 
@@ -61,7 +61,7 @@ A status line at the bottom reports system state in plain terms (`UPLINK NOMINAL
 Layers, each fed by the data pipeline: earthquakes (USGS), supervolcano watchlist, nuclear arsenals and power plants, tension arcs between country pairs, WHO outbreak reports, armed-conflict coverage, geomagnetic latitude bands and submarine cables. Selecting any object draws great-circle lines to what it is linked to, and the right panel lists the links.
 
 ### Scenario top bar
-Nine exclusive tabs, each with a live statistic (for example the Doomsday Clock reading or the number of watchlist volcanoes above baseline). A signal chip (`NOMINAL`, `ELEVATED`, `CRITICAL`) is derived from the status of the scenario's live metrics, with its basis printed beneath it. It is a reading, not a forecast.
+Ten exclusive tabs, each with a live statistic (for example the Doomsday Clock reading or the number of watchlist volcanoes above baseline). A signal chip (`NOMINAL`, `ELEVATED`, `CRITICAL`) is derived from the status of the scenario's live metrics, with its basis printed beneath it. It is a reading, not a forecast.
 
 ### Context-aware layer panel
 Layers on offer depend on the scenario, for example arsenals, plants and tension pairs for Nuclear, or geomagnetic bands and cables for Solar. Quake time and magnitude filters appear only when the quake layer exists.
@@ -215,3 +215,9 @@ Licence note: the submarine-cable dataset is CC BY-NC-SA 3.0, so the project is 
 - Telegram: new CRITICAL alerts are posted to a channel with type, severity, coordinates, time, source and a link to the dashboard tab. Add repository secrets `TELEGRAM_BOT_TOKEN` (from @BotFather, bot added as channel administrator) and `TELEGRAM_CHAT_ID`. No subscriber list is kept; sent ids live in the Actions cache.
 - Browser: the dashboard polls `/data/alerts.json` and the fast feed on the `alerts-feed` branch every minute. A CRITICAL alert turns the top bar and screen edge red (slow pulse, static with reduced motion) and plays a quiet tone with a mute button.
 - No DEFCON: it is not public data, so it is not shown.
+
+## Weather tab and place search
+
+- Weather tab: active tropical cyclones from the National Hurricane Center (`worker/feeds/cyclones.ts`, `public/data/cyclones.json`): current position, sustained wind, pressure and movement from the latest advisory. NHC forecast tracks are not drawn (the site shows observations only). Atlantic, East and Central Pacific only.
+- Place search (left panel): coordinates or a name from a bundled list of countries and cities of 100,000+ people (`public/data/places.json`, GeoNames CC BY 4.0, built by `scripts/build-places.py`). No geocoding service is called.
+- Ideas taken from God's Eye View (MIT); no code was copied. Not done on purpose: plate-reader camera maps, live public-camera video, sensor-look filters.

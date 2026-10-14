@@ -22,7 +22,8 @@ export type LayerId =
   | "bases"
   | "satellites"
   | "starlink"
-  | "debris";
+  | "debris"
+  | "cyclones";
 
 export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: string }> = {
   quakes: { label: "Earthquakes", blurb: "Magnitude 4.5+ from USGS", color: "var(--geo)" },
@@ -38,6 +39,7 @@ export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: 
   satellites: { label: "Satellites", blurb: "Active, non-Starlink (CelesTrak)", color: "#00e5ff" },
   starlink: { label: "Starlink", blurb: "The largest constellation", color: "#7d8c97" },
   debris: { label: "Tracked debris", blurb: "Four major breakup events", color: "#ffb000" },
+  cyclones: { label: "Tropical cyclones", blurb: "Current position and wind (NHC)", color: "#2fd4b0" },
   tide: { label: "Tide gauges", blurb: "Relative sea-level trend, last 30 yr (PSMSL)", color: "var(--accent)" },
 };
 
@@ -190,6 +192,22 @@ export const MODES: Mode[] = [
       return c ? `Kp ${c.value}` : "Space weather";
     },
     signal: (w) => fromCounters(w, ["kp"], (x) => describe(x, "kp", "Planetary Kp index")),
+  },
+  {
+    id: "weather",
+    title: "Weather",
+    color: "#2fd4b0",
+    layers: ["cyclones"],
+    camera: { center: [-60, 18], zoom: 1.5 },
+    page: "/scenarios/climate-tipping",
+    pageLabel: "Climate tipping points",
+    blurb: "Active tropical cyclones as the US National Hurricane Center reports them right now: position, sustained wind and pressure. Its forecast tracks are not drawn, and storms outside the Atlantic and East and Central Pacific are not covered.",
+    counterIds: ["cyclones"],
+    stat: (w) => {
+      const c = counter(w, "cyclones");
+      return c ? `${c.value} active ${c.numeric === 1 ? "storm" : "storms"}` : "Cyclones";
+    },
+    signal: (w) => fromCounters(w, ["cyclones"], (x) => describe(x, "cyclones", "Active tropical cyclones")),
   },
   {
     id: "orbit",

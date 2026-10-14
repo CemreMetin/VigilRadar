@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import type { Entity } from "@/lib/entities";
 import { LAYER_INFO, type LayerId, type Mode } from "@/lib/lenses";
 import MiniContext, { type MiniPoint } from "./MiniContext";
+import PlaceSearch from "./PlaceSearch";
 import { Section } from "./parts";
 
 type Option<T> = { value: T; label: string };
@@ -73,7 +74,7 @@ export default function FilterPanel({
   onConnections: (v: boolean) => void;
   points: MiniPoint[];
   selected: Entity | null;
-  onFly: (lon: number, lat: number) => void;
+  onFly: (lon: number, lat: number, zoom?: number) => void;
   onClearSelection: () => void;
   legend: ReactNode;
 }) {
@@ -90,6 +91,10 @@ export default function FilterPanel({
             {allOn ? "ALL OFF" : "ALL ON"}
           </button>
         )}
+      </div>
+
+      <div className="px-3 pt-2">
+        <PlaceSearch onFly={onFly} />
       </div>
 
       <div className="px-3 pb-3">

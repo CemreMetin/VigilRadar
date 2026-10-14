@@ -263,6 +263,24 @@ export type OrbitFile = {
   source: SourceRef;
 };
 
+export type CyclonesFile = {
+  generatedAt: string;
+  storms: {
+    id: string;
+    name: string;
+    cls: string; // NHC classification: TD, TS, HU, STD, STS, PTC ...
+    windKt: number;
+    pressureMb: number | null;
+    lat: number;
+    lon: number;
+    dir: number | null; // movement direction, degrees
+    speedKt: number | null;
+    updated: string;
+    url: string;
+  }[];
+  source: SourceRef;
+};
+
 export type MilitaryBasesFile = {
   source: SourceRef;
   retrieved: string;

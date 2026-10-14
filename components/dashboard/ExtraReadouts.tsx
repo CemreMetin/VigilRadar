@@ -1,6 +1,6 @@
 "use client";
 
-import type { AsteroidsFile, Counter, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
+import type { AsteroidsFile, Counter, CyclonesFile, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
 import { Bar, Big, Section } from "./parts";
 
 /** Readouts for the Ice & Sea and Asteroid tabs. Published figures and observations only. */
@@ -224,6 +224,76 @@ export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFi
       <Section title="About this snapshot">
         <p className="text-[11px] font-light leading-relaxed text-dim">
           Positions are computed (SGP4) from published orbital elements for {file.generatedAt.slice(0, 16).replace("T", " ")} UTC. Satellites move about 7 km/s, so the dots show where objects were at that time, not where they are now. Debris covers four major breakups only, and small objects are not tracked.{" "}
+          {ctr ? `Source: ${ctr.source.name}.` : ""}
+        </p>
+      </Section>
+    </>
+  );
+}
+
+const CLASS_LABEL: Record<string, string> = {
+  TD: "Tropical depression",
+  TS: "Tropical storm",
+  HU: "Hurricane",
+  STD: "Subtropical depression",
+  STS: "Subtropical storm",
+  PTC: "Post-tropical cyclone",
+  PC: "Post-tropical cyclone",
+  TY: "Typhoon",
+};
+const step = (kt: number) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
+
+export function WeatherReadout({ world, file }: { world: WorldState; file: CyclonesFile | null }) {
+  const ctr = c(world, "cyclones");
+  if (!file) {
+    return (
+      <p className="mono caret p-4 text-xs font-light text-dim" role="status">
+        LOADING ADVISORIES
+      </p>
+    );
+  }
+  const storms = [...file.storms].sort((a, b) => b.windKt - a.windKt);
+  const top = storms[0];
+  return (
+    <>
+      <div className="flex items-stretch gap-px border-b border-line bg-line">
+        <div className="flex-1 bg-panel-solid px-3 py-2">
+          <p className="label">Active</p>
+          <p className="mono text-xl font-bold leading-tight" style={{ color: "#2fd4b0" }}>{storms.length}</p>
+        </div>
+        <div className="flex-[1.6] bg-panel-solid px-3 py-2">
+          <p className="label">Strongest</p>
+          <p className="mono text-xl font-bold leading-tight">{top ? `${top.windKt} kt` : "–"}</p>
+          <p className="mono truncate text-[10px] font-light text-dim">{top ? `${top.name}${step(top.windKt) ? ` · category ${step(top.windKt)}` : ""}` : "no active storms"}</p>
+        </div>
+      </div>
+      <Section open title="Storms" meta="NHC advisories">
+        {storms.length === 0 ? (
+          <p className="text-[12px] font-light leading-relaxed text-dim">
+            NHC has no active tropical cyclones in the Atlantic, East Pacific or Central Pacific right now. That is normal outside the main seasons.
+          </p>
+        ) : (
+          <table className="mono w-full text-[11px]">
+            <thead className="text-[9px] font-light text-dim">
+              <tr className="text-left"><th className="pb-1 font-light">NAME</th><th className="font-light">CLASS</th><th className="text-right font-light">WIND</th><th className="text-right font-light">MB</th><th className="text-right font-light">MOVING</th></tr>
+            </thead>
+            <tbody>
+              {storms.map((s) => (
+                <tr key={s.id} className="border-t border-line/50">
+                  <td className="py-0.5 font-bold"><a href={s.url} target="_blank" rel="noopener noreferrer" className="underline">{s.name}</a></td>
+                  <td className="font-light text-dim" title={CLASS_LABEL[s.cls] ?? s.cls}>{s.cls}</td>
+                  <td className="text-right font-bold" style={{ color: step(s.windKt) >= 3 ? "var(--threat)" : step(s.windKt) >= 1 ? "var(--geo)" : "var(--fg)" }}>{s.windKt} kt</td>
+                  <td className="text-right font-light text-dim">{s.pressureMb ?? "–"}</td>
+                  <td className="text-right font-light text-dim">{s.dir !== null && s.speedKt !== null ? `${s.dir}° ${s.speedKt} kt` : "–"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Section>
+      <Section title="About these numbers">
+        <p className="text-[11px] font-light leading-relaxed text-dim">
+          Sustained one-minute wind in knots (1 kt = 1.15 mph = 1.85 km/h) and the position from the latest NHC advisory, issued about every six hours; the storm has moved since. Colour steps follow the Saffir-Simpson scale. NHC forecast tracks are not drawn here. Only the Atlantic, East Pacific and Central Pacific are covered; West Pacific typhoons and Indian Ocean cyclones are not.{" "}
           {ctr ? `Source: ${ctr.source.name}.` : ""}
         </p>
       </Section>

@@ -29,10 +29,12 @@ export type MapData = {
   /** military bases (conflict scenario) and catalogued objects in orbit (orbit scenario) */
   bases: { type: "FeatureCollection"; features: unknown[] } | null;
   orbit: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** active tropical cyclones (weather scenario) */
+  cyclones: { type: "FeatureCollection"; features: unknown[] } | null;
 };
 
 /** Imperative controls for the on-map view buttons (bottom right). */
-export type MapControls = { zoomIn: () => void; zoomOut: () => void; reset: () => void; flyTo: (lon: number, lat: number) => void };
+export type MapControls = { zoomIn: () => void; zoomOut: () => void; reset: () => void; flyTo: (lon: number, lat: number, zoom?: number) => void };
 
 /** Where the camera should go when the scenario changes. `key` identifies the scenario. */
 export type Camera = { center: [number, number]; zoom: number; key: string; minZoom?: number };
@@ -74,6 +76,7 @@ function buildSources(d: MapData): Record<string, FC> {
     tide: d.tide ?? fc([]),
     bases: d.bases ?? fc([]),
     orbit: d.orbit ?? fc([]),
+    cyclones: d.cyclones ?? fc([]),
   };
 }
 
@@ -163,7 +166,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           zoomIn: () => map?.zoomIn({ duration: 300 }),
           zoomOut: () => map?.zoomOut({ duration: 300 }),
           reset: () => map?.flyTo({ ...home(), duration: 900 }),
-          flyTo: (lon, lat) => map?.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 2.5), duration: 900 }),
+          flyTo: (lon, lat, zoom) => map?.flyTo({ center: [lon, lat], zoom: zoom ?? Math.max(map.getZoom(), 2.5), duration: 900 }),
         };
       }
 
@@ -199,6 +202,16 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
             "circle-color": ["match", ["get", "kind"], 1, "#7d8c97", 2, "#ffb000", 3, "#ffffff", "#00e5ff"],
             "circle-radius": ["match", ["get", "kind"], 3, 4, 2, 1.6, 1.4],
             "circle-opacity": ["match", ["get", "kind"], 1, 0.55, 0.9],
+          },
+        });
+        map.addLayer({
+          id: "cyclones-core", type: "circle", source: "cyclones",
+          paint: {
+            // colour by Saffir-Simpson step from sustained wind in knots; size grows with wind
+            "circle-color": ["step", ["get", "wind"], "#7fd3ff", 34, "#2fd4b0", 64, "#ffb000", 96, "#ff6a00", 113, "#ff003c"],
+            "circle-radius": ["interpolate", ["linear"], ["get", "wind"], 20, 6, 64, 9, 140, 14],
+            "circle-stroke-color": "#ffffff",
+            "circle-stroke-width": 1.5,
           },
         });
         map.addLayer({
@@ -324,6 +337,10 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           String(p.name),
           `${Number(p.trend) > 0 ? "+" : ""}${Number(p.trend).toFixed(1)} mm/yr relative sea level (${p.years} yr of data to ${p.last}). Includes land rising or sinking at this gauge.`,
         ]);
+        simple("cyclones-core", (p) => [
+          `${p.name} (${p.cls})`,
+          `${p.wind} kt sustained wind${p.pressure ? `, ${p.pressure} mb` : ""}. Position from the NHC advisory of ${String(p.updated).slice(0, 16).replace("T", " ")} UTC; the storm has moved since.`,
+        ]);
         simple("bases-core", (p) => [
           String(p.name),
           `${p.kind === "naval" ? "Naval base" : p.kind === "air" ? "Airbase" : "Military base"}${p.country ? `, ${p.country}` : ""}. Wikidata entry: coverage is uneven and entries may be historical.`,
@@ -433,7 +450,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
   const { quakes, plants, volcanoes, outbreaks, cells, dyads, connections, arsenals } = data;
   useEffect(() => {
     applyDataRef.current();
-  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide, data.bases, data.orbit]);
+  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide, data.bases, data.orbit, data.cyclones]);
 
   useEffect(() => {
     applyArsenalsRef.current();

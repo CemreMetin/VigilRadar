@@ -29,6 +29,7 @@ import { volcanoWatch } from "./feeds/volcanoes";
 import { worldBankIndicators } from "./feeds/worldbank";
 import { buildLinks } from "./links";
 import arsenalsRaw from "../data/arsenals.json";
+import { cycloneFeed } from "./feeds/cyclones";
 import { orbitFeed } from "./feeds/orbit";
 import { overdueReviews } from "../lib/reviews";
 
@@ -115,6 +116,14 @@ const FEEDS: Feed[] = [
     },
   },
   {
+    counterIds: ["cyclones"],
+    meta: { id: "nhc-cyclones", name: "NOAA National Hurricane Center: active tropical cyclones", domain: "climate", url: "https://www.nhc.noaa.gov/", license: "Public domain (US Government work)", cadence: "about every 6 hours" },
+    run: async () => {
+      const c = await cycloneFeed();
+      return { counters: c.counters, files: { cyclones: c.file } };
+    },
+  },
+  {
     counterIds: ["satellites"],
     meta: { id: "celestrak-orbit", name: "CelesTrak satellite catalogue (SGP4 positions)", domain: "space", url: "https://celestrak.org/", license: "Free; attribution, one download per group per 2 hours", cadence: "elements about every 2 hours" },
     run: async () => {
@@ -198,6 +207,7 @@ const ORDER = [
   "warming",
   "co2",
   "satellites",
+  "cyclones",
   "sea-level",
   "sea-ice",
   "glaciers",
@@ -216,6 +226,7 @@ const MAX_AGE_HOURS: Record<string, number> = {
   "swpc-kp": 8,
   "volcano-watch": 6,
   "jpl-cneos": 36,
+  "nhc-cyclones": 24, // advisories come every 6 h; a quiet basin still answers
   "celestrak-orbit": 24, // elements are cached for 2 h; their epochs are typically a few hours to a day old
   "gdelt-events": 72,
   "nsidc-sea-ice": 72,
