@@ -15,6 +15,35 @@ function fmtM(m: number): string {
   return `${Math.round(m)} m`;
 }
 
+const HORIZONS = "https://ssd.jpl.nasa.gov/api/horizons.api";
+const HORIZONS_MAX = 15; // the closest approaches only: one request each, and these are the ones the plot labels
+
+/** Geocentric right ascension and declination (degrees) of a small body at a UTC time, or null if Horizons cannot say. */
+async function horizonsDirection(des: string, date: string): Promise<{ ra: number; dec: number } | null> {
+  const t0 = new Date(date.replace(/-([A-Za-z]{3})-/, " $1 ") + " UTC");
+  if (Number.isNaN(t0.getTime())) return null;
+  const fmt = (d: Date) => d.toISOString().slice(0, 16).replace("T", " ");
+  const q = new URLSearchParams({
+    format: "json",
+    COMMAND: `'DES=${des};'`,
+    CENTER: "'500@399'", // the centre of the Earth
+    MAKE_EPHEM: "'YES'",
+    EPHEM_TYPE: "'OBSERVER'",
+    QUANTITIES: "'1'",
+    START_TIME: `'${fmt(t0)}'`,
+    STOP_TIME: `'${fmt(new Date(t0.getTime() + 60_000))}'`,
+    STEP_SIZE: "'1 m'",
+    ANG_FORMAT: "'DEG'",
+    CSV_FORMAT: "'YES'",
+  });
+  const json = (await (await fetchOpen(`${HORIZONS}?${q}`, 45_000)).json()) as { result?: string };
+  const block = json.result?.split("$$SOE")[1]?.split("$$EOE")[0];
+  const cols = block?.trim().split("\n")[0]?.split(",");
+  const ra = Number(cols?.[3]);
+  const dec = Number(cols?.[4]);
+  return Number.isFinite(ra) && Number.isFinite(dec) && cols?.[3]?.trim() ? { ra, dec } : null;
+}
+
 export async function asteroidFeed(): Promise<{ counters: Counter[]; file: AsteroidsFile }> {
   const from = new Date().toISOString().slice(0, 10);
   const to = new Date(Date.now() + 60 * 86_400_000).toISOString().slice(0, 10);
@@ -80,16 +109,32 @@ export async function asteroidFeed(): Promise<{ counters: Counter[]; file: Aster
       href: "/scenarios/asteroid",
     },
   ];
+  // Directions from Horizons for the closest few; any that fail keep today's data (no direction, drawn by date)
+  const dir = new Map<string, { ra: number; dec: number }>();
+  const todo = rows.slice(0, HORIZONS_MAX);
+  for (let i = 0; i < todo.length; i += 3) {
+    await Promise.all(
+      todo.slice(i, i + 3).map(async (r) => {
+        try {
+          const d = await horizonsDirection(r.des, r.date);
+          if (d) dir.set(r.des + r.date, d);
+        } catch {
+          /* leave this one without a direction */
+        }
+      }),
+    );
+  }
   const file: AsteroidsFile = {
     generatedAt: new Date().toISOString(),
     windowDays: 60,
     maxLd: 0.05 / AU_PER_LD,
     approaches: rows.map((r) => {
       const dia = r.h != null ? diameterRange(r.h) : null;
-      return { des: r.des, date: r.date, ld: Math.round(r.ld * 100) / 100, kms: r.v, h: r.h, dMinM: dia ? Math.round(dia[0]) : null, dMaxM: dia ? Math.round(dia[1]) : null };
+      const d = dir.get(r.des + r.date);
+      return { des: r.des, date: r.date, ld: Math.round(r.ld * 100) / 100, kms: r.v, h: r.h, dMinM: dia ? Math.round(dia[0]) : null, dMaxM: dia ? Math.round(dia[1]) : null, ...(d ? { raDeg: Math.round(d.ra * 1000) / 1000, decDeg: Math.round(d.dec * 1000) / 1000 } : {}) };
     }),
     sentry,
-    source: { name: "NASA/JPL Center for Near-Earth Object Studies", url: "https://cneos.jpl.nasa.gov/ca/", license: "Public domain (NASA)" },
+    source: { name: "NASA/JPL Center for Near-Earth Object Studies; directions from JPL Horizons", url: "https://cneos.jpl.nasa.gov/ca/", license: "Public domain (NASA)" },
   };
   return { counters, file };
 }

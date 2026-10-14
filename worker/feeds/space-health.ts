@@ -1,4 +1,4 @@
-import type { Counter, MonitorEvent, Tone } from "../../lib/types";
+import type { AuroraFile, Counter, MonitorEvent, SolarNow, Tone } from "../../lib/types";
 import { findCountry } from "../geo";
 import { fetchOpen } from "../http";
 
@@ -127,4 +127,109 @@ export async function donFeed(): Promise<{ counters: Counter[]; events: MonitorE
     },
   ];
   return { counters, events };
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Solar: aurora oval, NOAA scales, solar wind, X-ray flares, Kp forecast. All NOAA SWPC JSON products.
+
+const SWPC = "https://services.swpc.noaa.gov";
+const SCALE_NAME: Record<string, string> = { "0": "none", "1": "minor", "2": "moderate", "3": "strong", "4": "severe", "5": "extreme" };
+
+/** GOES X-ray class from flux in W/m2: A, B, C, M or X with a number (M1.2, X2.8). */
+export function flareClass(flux: number): string {
+  if (!(flux > 0)) return "n/a";
+  const bands: [string, number][] = [["X", 1e-4], ["M", 1e-5], ["C", 1e-6], ["B", 1e-7], ["A", 1e-8]];
+  const [letter, base] = bands.find(([, b]) => flux >= b) ?? ["A", 1e-8];
+  return `${letter}${(flux / base).toFixed(1)}`;
+}
+
+const finite = (x: unknown): x is number => typeof x === "number" && Number.isFinite(x);
+const byTime = <T extends { time_tag: string }>(rows: T[]) => [...rows].sort((a, b) => a.time_tag.localeCompare(b.time_tag));
+
+/** Each product is independent: one that fails leaves its own part null, the rest still publish. */
+export async function solarFeed(): Promise<{ counters: Counter[]; files: { aurora?: AuroraFile; solar_now: SolarNow } }> {
+  const source = { name: "NOAA Space Weather Prediction Center", url: "https://www.swpc.noaa.gov/", license: "Public domain (US Government work)" };
+  const get = async <T>(p: string): Promise<T> => (await (await fetchOpen(`${SWPC}/${p}`, 60_000)).json()) as T;
+  const [scalesR, windR, magR, xrayR, kpR, auroraR] = await Promise.allSettled([
+    get<Record<string, { G: { Scale: string }; S: { Scale: string }; R: { Scale: string } }>>("products/noaa-scales.json"),
+    get<{ time_tag: string; active: boolean; proton_speed: number | null; proton_density: number | null }[]>("json/rtsw/rtsw_wind_1m.json"),
+    get<{ time_tag: string; active: boolean; bz_gsm: number | null; bt: number | null }[]>("json/rtsw/rtsw_mag_1m.json"),
+    get<{ time_tag: string; flux: number; energy: string }[]>("json/goes/primary/xrays-1-day.json"),
+    get<{ time_tag: string; kp: number; observed: string }[]>("products/noaa-planetary-k-index-forecast.json"),
+    get<{ "Observation Time": string; "Forecast Time": string; coordinates: [number, number, number][] }>("json/ovation_aurora_latest.json"),
+  ]);
+  if ([scalesR, windR, magR, xrayR, kpR, auroraR].every((r) => r.status === "rejected")) throw new Error("no SWPC product answered");
+
+  const scaleOf = (s?: { Scale: string }) => ({ n: Number(s?.Scale ?? 0), text: SCALE_NAME[s?.Scale ?? "0"] ?? "none" });
+  const scales = scalesR.status === "fulfilled" && scalesR.value["0"] ? { G: scaleOf(scalesR.value["0"].G), S: scaleOf(scalesR.value["0"].S), R: scaleOf(scalesR.value["0"].R) } : null;
+
+  let wind: SolarNow["wind"] = null;
+  if (windR.status === "fulfilled") {
+    const rows = byTime(windR.value).filter((r) => finite(r.proton_speed));
+    const last = rows[rows.length - 1];
+    if (last) {
+      wind = {
+        speed: Math.round(last.proton_speed as number),
+        density: finite(last.proton_density) ? last.proton_density : null,
+        speedHistory: rows.slice(-180).filter((_, i) => i % 6 === 0).map((r) => Math.round(r.proton_speed as number)),
+        asOf: last.time_tag + "Z",
+      };
+    }
+  }
+  let bz: SolarNow["bz"] = null;
+  if (magR.status === "fulfilled") {
+    const rows = byTime(magR.value).filter((r) => finite(r.bz_gsm));
+    const last = rows[rows.length - 1];
+    if (last) {
+      bz = { value: last.bz_gsm as number, bt: finite(last.bt) ? last.bt : null, history: rows.slice(-180).filter((_, i) => i % 6 === 0).map((r) => r.bz_gsm as number), asOf: last.time_tag + "Z" };
+    }
+  }
+  let xray: SolarNow["xray"] = null;
+  if (xrayR.status === "fulfilled") {
+    const rows = byTime(xrayR.value.filter((r) => r.energy === "0.1-0.8nm" && finite(r.flux)));
+    const last = rows[rows.length - 1];
+    const peak = rows.reduce((m, r) => (r.flux > m.flux ? r : m), rows[0]);
+    if (last && peak) xray = { current: flareClass(last.flux), peak24h: flareClass(peak.flux), peakAt: peak.time_tag, asOf: last.time_tag };
+  }
+  let kpForecast: SolarNow["kpForecast"] = null;
+  if (kpR.status === "fulfilled") {
+    const cutoff = Date.now() - 24 * 3_600_000;
+    kpForecast = kpR.value.filter((r) => Date.parse(r.time_tag + "Z") >= cutoff).map((r) => ({ time: r.time_tag + "Z", kp: r.kp, kind: r.observed }));
+  }
+  let aurora: AuroraFile | undefined;
+  if (auroraR.status === "fulfilled") {
+    // 1-degree grid thinned to every second degree, keeping cells with a probability of 5% or more
+    const points = auroraR.value.coordinates
+      .filter(([lo, la, a]) => a >= 5 && lo % 2 === 0 && la % 2 === 0)
+      .map(([lo, la, a]): [number, number, number] => [lo > 180 ? lo - 360 : lo, la, a]);
+    aurora = { generatedAt: new Date().toISOString(), observed: auroraR.value["Observation Time"], forecast: auroraR.value["Forecast Time"], points, source };
+  }
+
+  const now = new Date().toISOString();
+  const worst = scales ? Math.max(scales.G.n, scales.S.n, scales.R.n) : 0;
+  const tone: Tone = worst >= 3 ? "high" : worst >= 1 ? "elevated" : "normal";
+  const rowTone = (n: number): Tone => (n >= 3 ? "high" : n >= 1 ? "elevated" : "normal");
+  const counters: Counter[] = scales
+    ? [
+        {
+          id: "space-scales",
+          label: "NOAA space weather scales",
+          domain: "space",
+          value: `G${scales.G.n} S${scales.S.n} R${scales.R.n}`,
+          tone,
+          basis: "Elevated when any of the three scales is 1 or more, critical from 3 (strong)",
+          trendLabel: `Geomagnetic ${scales.G.text}, radiation storm ${scales.S.text}, radio blackout ${scales.R.text}`,
+          note: "The current levels on the NOAA 1 to 5 scales: G for geomagnetic storms, S for solar radiation storms, R for radio blackouts from flares. 0 means none.",
+          asOf: now,
+          cadence: "minutes",
+          source,
+          rows: [
+            { label: "G geomagnetic storm", value: `G${scales.G.n} ${scales.G.text}`, tone: rowTone(scales.G.n) },
+            { label: "S solar radiation storm", value: `S${scales.S.n} ${scales.S.text}`, tone: rowTone(scales.S.n) },
+            { label: "R radio blackout", value: `R${scales.R.n} ${scales.R.text}`, tone: rowTone(scales.R.n) },
+          ],
+        },
+      ]
+    : [];
+  return { counters, files: { ...(aurora ? { aurora } : {}), solar_now: { generatedAt: now, scales, wind, bz, xray, kpForecast, source } } };
 }

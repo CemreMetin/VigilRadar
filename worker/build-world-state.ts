@@ -23,7 +23,7 @@ import { gdeltFeed } from "./feeds/gdelt";
 import { seaIceCounter, seaLevelCounter } from "./feeds/ice-sea";
 import { asteroidFeed } from "./feeds/jpl";
 import { portwatchCounter } from "./feeds/portwatch";
-import { DON_URL, donFeed, KP_URL, kpCounter } from "./feeds/space-health";
+import { DON_URL, donFeed, KP_URL, kpCounter, solarFeed } from "./feeds/space-health";
 import { USGS_URL, usgsQuakes } from "./feeds/usgs";
 import { volcanoWatch } from "./feeds/volcanoes";
 import { worldBankIndicators } from "./feeds/worldbank";
@@ -130,6 +130,14 @@ const FEEDS: Feed[] = [
       ]
     : []),
   {
+    counterIds: ["space-scales"],
+    meta: { id: "swpc-solar", name: "NOAA SWPC: aurora oval, scales, solar wind, X-rays, Kp forecast", domain: "space", url: "https://www.swpc.noaa.gov/", license: "Public domain (US Government work)", cadence: "minutes" },
+    run: async () => {
+      const f = await solarFeed();
+      return { counters: f.counters, files: f.files };
+    },
+  },
+  {
     counterIds: ["cyclones"],
     meta: { id: "nhc-cyclones", name: "NOAA National Hurricane Center: active tropical cyclones", domain: "climate", url: "https://www.nhc.noaa.gov/", license: "Public domain (US Government work)", cadence: "about every 6 hours" },
     run: async () => {
@@ -222,6 +230,7 @@ const ORDER = [
   "co2",
   "satellites",
   "cyclones",
+  "space-scales",
   "fires",
   "sea-level",
   "sea-ice",
@@ -229,6 +238,7 @@ const ORDER = [
   "ice-sheets",
   "overshoot-day",
   "outbreaks",
+  "pheic",
   "chokepoints",
   "conflict-news",
   "asteroids",
@@ -242,6 +252,7 @@ const MAX_AGE_HOURS: Record<string, number> = {
   "volcano-watch": 6,
   "jpl-cneos": 36,
   "nasa-firms": 24,
+  "swpc-solar": 3,
   "nhc-cyclones": 24, // advisories come every 6 h; a quiet basin still answers
   "celestrak-orbit": 24, // elements are cached for 2 h; their epochs are typically a few hours to a day old
   "gdelt-events": 72,

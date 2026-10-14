@@ -16,7 +16,7 @@
     "test:alerts": "tsx worker/alerts/rules.test.ts",
     "data:fast": "tsx worker/build-world-state.ts --fast",
     "postbuild": "node scripts/flatten-segments.mjs",
-    "test": "tsx worker/alerts/rules.test.ts && tsx lib/passes.test.ts && tsx worker/feeds/fires.test.ts"
+    "test": "tsx worker/alerts/rules.test.ts && tsx lib/passes.test.ts && tsx worker/feeds/fires.test.ts && tsx lib/blast.test.ts && tsx lib/sky.test.ts && tsx lib/bases.test.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

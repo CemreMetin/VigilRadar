@@ -64,6 +64,7 @@ export type Counter = {
   cadence: string;
   manual?: boolean; // hand-maintained annual value
   reviewBy?: string; // manual counters: when to re-check the source
+  eventDate?: string; // manual counters about a dated event: the readout shows the days since
   source: SourceRef;
   history?: number[]; // optional sparkline
   rows?: CounterRow[]; // optional expandable detail list
@@ -235,6 +236,9 @@ export type AsteroidApproach = {
   h: number | null; // absolute magnitude
   dMinM: number | null; // rough diameter range in metres from H (albedo 0.25 .. 0.05)
   dMaxM: number | null;
+  /** geocentric direction at closest approach from JPL Horizons (degrees); absent when Horizons did not answer */
+  raDeg?: number;
+  decDeg?: number;
 };
 
 export type AsteroidsFile = {
@@ -303,3 +307,33 @@ export type MilitaryBasesFile = {
   fields: string[];
   bases: [string, string, number, number, string, string][]; // id, name, lat, lon, country, kind
 };
+
+export type TargetsFile = {
+  model: "illustrative";
+  note: string;
+  fields: string[];
+  categories: string[];
+  retrieved: string;
+  sites: [string, number, number, string, string, string, string][]; // name, lat, lon, category, country, role, source
+};
+
+export type BslLabsFile = {
+  source: SourceRef;
+  context: { name: string; url: string; text: string };
+  note: string;
+  retrieved: string;
+  fields: string[];
+  labs: [string, number, number, string, string, string][]; // name, lat, lon, country, source url, statement
+};
+
+export type SolarNow = {
+  generatedAt: string;
+  scales: { G: { n: number; text: string }; S: { n: number; text: string }; R: { n: number; text: string } } | null;
+  wind: { speed: number; density: number | null; speedHistory: number[]; asOf: string } | null;
+  bz: { value: number; bt: number | null; history: number[]; asOf: string } | null;
+  xray: { current: string; peak24h: string; peakAt: string; asOf: string } | null;
+  kpForecast: { time: string; kp: number; kind: string }[] | null;
+  source: SourceRef;
+};
+
+export type AuroraFile = { generatedAt: string; observed: string; forecast: string; points: [number, number, number][]; source: SourceRef };

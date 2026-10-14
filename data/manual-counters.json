@@ -98,6 +98,27 @@
         "url": "https://imbie.org/",
         "license": "Open access with attribution"
       }
+    },
+    {
+      "id": "pheic",
+      "label": "Last WHO emergency declaration",
+      "domain": "health",
+      "value": "mpox ended",
+      "unit": "5 Sep 2025",
+      "tone": "normal",
+      "eventDate": "2025-09-05",
+      "trendLabel": "Most recent change: the mpox emergency (declared 14 Aug 2024) was ended. Polio has been an emergency since 2014.",
+      "note": "A Public Health Emergency of International Concern (PHEIC) is WHO's highest alert under the International Health Regulations. This shows the date of the most recent declaration or ending, and the days since. Updated by hand from WHO announcements; a new declaration would replace it.",
+      "basis": "No threshold: a date, so the status stays nominal",
+      "asOf": "2025-09-05",
+      "reviewBy": "2026-12-31",
+      "cadence": "when WHO declares or ends an emergency",
+      "manual": true,
+      "source": {
+        "name": "WHO IHR Emergency Committee on mpox (fifth meeting)",
+        "url": "https://www.who.int/news/item/30-10-2025-fifth-meeting-of-the-international-health-regulations-%282005%29-emergency-committee-regarding-the-upsurge-of-mpox-2024",
+        "license": "WHO web content, cited with attribution (CC BY-NC-SA 3.0 IGO where stated)"
+      }
     }
   ]
 }
