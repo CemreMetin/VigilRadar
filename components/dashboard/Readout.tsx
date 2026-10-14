@@ -3,7 +3,7 @@
 import { arsenals } from "@/lib/arsenals";
 import { relTime } from "@/lib/format";
 import type { Mode } from "@/lib/lenses";
-import type { AsteroidsFile, Counter, CyclonesFile, MonitorEvent, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
+import type { AsteroidsFile, Counter, CyclonesFile, FiresFile, MonitorEvent, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
 import { AsteroidReadout, IceReadout, OrbitReadout, WeatherReadout } from "./ExtraReadouts";
 import { Bar, Big, Section } from "./parts";
 
@@ -90,6 +90,7 @@ export default function Readout({
   tide,
   orbit,
   cyclones,
+  fires,
 }: {
   mode: Mode;
   world: WorldState | null;
@@ -101,6 +102,7 @@ export default function Readout({
   tide: TideGaugesFile | null;
   orbit: OrbitFile | null;
   cyclones: CyclonesFile | null;
+  fires: FiresFile | null | "off";
 }) {
   if (!world) {
     return (
@@ -264,7 +266,7 @@ export default function Readout({
     );
   }
 
-  if (mode.id === "weather") return <WeatherReadout world={world} file={cyclones} />;
+  if (mode.id === "weather") return <WeatherReadout world={world} file={cyclones} fires={fires} />;
   if (mode.id === "orbit") return <OrbitReadout world={world} file={orbit} />;
   if (mode.id === "ice") return <IceReadout world={world} tide={tide} />;
   if (mode.id === "asteroid") return <AsteroidReadout world={world} file={asteroids} />;

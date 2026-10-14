@@ -1,7 +1,7 @@
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { eciToGeodetic, degreesLat, degreesLong, gstime, json2satrec, propagate } from "satellite.js";
-import type { Counter, OrbitFile } from "../../lib/types";
+import type { Counter, OrbitElementsFile, OrbitFile } from "../../lib/types";
 import { fetchOpen } from "../http";
 
 /**
@@ -40,7 +40,7 @@ async function elements(group: string): Promise<Omm[]> {
   return rows;
 }
 
-export async function orbitFeed(): Promise<{ counters: Counter[]; file: OrbitFile }> {
+export async function orbitFeed(): Promise<{ counters: Counter[]; file: OrbitFile; elementsFile: OrbitElementsFile }> {
   const now = new Date();
   const gmst = gstime(now);
   const objects: ([number, number, number, number] | [number, number, number, number, string])[] = [];
@@ -48,6 +48,7 @@ export async function orbitFeed(): Promise<{ counters: Counter[]; file: OrbitFil
   const counts = { satellites: 0, starlink: 0, debris: 0 };
   let newestEpoch = 0;
   const seen = new Set<number>();
+  const watch: Omm[] = []; // objects offered by the pass finder
 
   for (const g of GROUPS) {
     const rows = await elements(g.group);
@@ -68,6 +69,7 @@ export async function orbitFeed(): Promise<{ counters: Counter[]; file: OrbitFil
       const epoch = new Date(omm.EPOCH + "Z").getTime();
       if (epoch > newestEpoch) newestEpoch = epoch;
 
+      if (/^(ISS \(ZARYA\)|CSS \(TIANHE\)|HST)$/.test(omm.OBJECT_NAME)) watch.push(omm);
       const station = /^(ISS \(ZARYA\)|CSS \(TIANHE\)|CSS \(WENTIAN\)|CSS \(MENGTIAN\))/.test(omm.OBJECT_NAME);
       const kind = station ? 3 : g.kind === 0 && omm.OBJECT_NAME.startsWith("STARLINK") ? 1 : g.kind;
       if (station) stations.push([omm.OBJECT_NAME, +lon.toFixed(2), +lat.toFixed(2), Math.round(geo.height)]);
@@ -115,5 +117,6 @@ export async function orbitFeed(): Promise<{ counters: Counter[]; file: OrbitFil
       { label: "Tracked debris (4 breakups)", value: counts.debris.toLocaleString("en-US") },
     ],
   };
-  return { counters: [counter], file };
+  const elementsFile: OrbitElementsFile = { generatedAt: now.toISOString(), objects: watch as never, source };
+  return { counters: [counter], file, elementsFile };
 }

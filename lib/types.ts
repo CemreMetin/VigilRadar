@@ -263,6 +263,21 @@ export type OrbitFile = {
   source: SourceRef;
 };
 
+export type OrbitElementsFile = {
+  generatedAt: string;
+  /** CelesTrak GP (OMM JSON) records for the few objects the pass finder offers */
+  objects: Record<string, unknown>[];
+  source: SourceRef;
+};
+
+export type FiresFile = {
+  generatedAt: string;
+  windowHours: number;
+  total: number;
+  cells: [number, number, number, number][]; // lat, lon, detections, strongest FRP (MW)
+  source: SourceRef;
+};
+
 export type CyclonesFile = {
   generatedAt: string;
   storms: {

@@ -1,7 +1,8 @@
 "use client";
 
-import type { AsteroidsFile, Counter, CyclonesFile, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
+import type { AsteroidsFile, Counter, CyclonesFile, FiresFile, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
 import { Bar, Big, Section } from "./parts";
+import PassFinder from "./PassFinder";
 
 /** Readouts for the Ice & Sea and Asteroid tabs. Published figures and observations only. */
 
@@ -221,6 +222,9 @@ export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFi
           ))}
         </ul>
       </Section>
+      <Section title="When is it overhead?">
+        <PassFinder />
+      </Section>
       <Section title="About this snapshot">
         <p className="text-[11px] font-light leading-relaxed text-dim">
           Positions are computed (SGP4) from published orbital elements for {file.generatedAt.slice(0, 16).replace("T", " ")} UTC. Satellites move about 7 km/s, so the dots show where objects were at that time, not where they are now. Debris covers four major breakups only, and small objects are not tracked.{" "}
@@ -243,7 +247,7 @@ const CLASS_LABEL: Record<string, string> = {
 };
 const step = (kt: number) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
 
-export function WeatherReadout({ world, file }: { world: WorldState; file: CyclonesFile | null }) {
+export function WeatherReadout({ world, file, fires }: { world: WorldState; file: CyclonesFile | null; fires: FiresFile | null | "off" }) {
   const ctr = c(world, "cyclones");
   if (!file) {
     return (
@@ -289,6 +293,17 @@ export function WeatherReadout({ world, file }: { world: WorldState; file: Cyclo
               ))}
             </tbody>
           </table>
+        )}
+      </Section>
+      <Section title="Active fires (NASA FIRMS)" meta={fires && fires !== "off" ? `${fires.total.toLocaleString("en-US")} hot pixels` : undefined}>
+        {fires && fires !== "off" ? (
+          <p className="text-[11px] font-light leading-relaxed text-dim">
+            {fires.total.toLocaleString("en-US")} satellite hot-pixel detections in the last 24 hours, summed on a 0.5 degree grid ({fires.cells.length.toLocaleString("en-US")} cells; low-confidence pixels removed). A detection is a hot spot, not a confirmed wildfire: it includes agricultural burns and gas flares.
+          </p>
+        ) : (
+          <p className="text-[11px] font-light leading-relaxed text-dim">
+            {fires === "off" ? "Fire detections are not enabled on this deployment: the data job needs a free NASA FIRMS key (FIRMS_MAP_KEY)." : "Loading…"}
+          </p>
         )}
       </Section>
       <Section title="About these numbers">

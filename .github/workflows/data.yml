@@ -62,13 +62,15 @@ jobs:
       # fast mode carrying over stale values from the committed copy of the data.
       - name: Refresh data
         run: npm run data
+        env:
+          FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }} # optional: enables the active-fires layer
 
       # Own copy of the alert list for the site (no Telegram here; the faster alerts workflow does the sending)
       - name: Evaluate alerts
         run: npm run alerts -- --no-send
 
-      - name: Alert rule tests
-        run: npm run test:alerts
+      - name: Tests
+        run: npm test
 
       - name: Lint and type-check
         run: |

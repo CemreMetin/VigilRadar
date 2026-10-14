@@ -31,6 +31,8 @@ export type MapData = {
   orbit: { type: "FeatureCollection"; features: unknown[] } | null;
   /** active tropical cyclones (weather scenario) */
   cyclones: { type: "FeatureCollection"; features: unknown[] } | null;
+  /** gridded fire detections (weather scenario) */
+  fires: { type: "FeatureCollection"; features: unknown[] } | null;
 };
 
 /** Imperative controls for the on-map view buttons (bottom right). */
@@ -77,6 +79,7 @@ function buildSources(d: MapData): Record<string, FC> {
     bases: d.bases ?? fc([]),
     orbit: d.orbit ?? fc([]),
     cyclones: d.cyclones ?? fc([]),
+    fires: d.fires ?? fc([]),
   };
 }
 
@@ -202,6 +205,14 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
             "circle-color": ["match", ["get", "kind"], 1, "#7d8c97", 2, "#ffb000", 3, "#ffffff", "#00e5ff"],
             "circle-radius": ["match", ["get", "kind"], 3, 4, 2, 1.6, 1.4],
             "circle-opacity": ["match", ["get", "kind"], 1, 0.55, 0.9],
+          },
+        });
+        map.addLayer({
+          id: "fires-core", type: "circle", source: "fires",
+          paint: {
+            "circle-color": "#ff6a00",
+            "circle-opacity": ["interpolate", ["linear"], ["get", "n"], 1, 0.45, 20, 0.9],
+            "circle-radius": ["interpolate", ["linear"], ["get", "n"], 1, 1.6, 20, 4, 200, 8],
           },
         });
         map.addLayer({
@@ -337,6 +348,10 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           String(p.name),
           `${Number(p.trend) > 0 ? "+" : ""}${Number(p.trend).toFixed(1)} mm/yr relative sea level (${p.years} yr of data to ${p.last}). Includes land rising or sinking at this gauge.`,
         ]);
+        simple("fires-core", (p) => [
+          `${p.n} fire detection${Number(p.n) === 1 ? "" : "s"}`,
+          `In a 0.5 degree cell over the last 24 h${p.frp ? `, strongest ${p.frp} MW` : ""}. A hot pixel seen by a satellite: it can be a burn or a gas flare, not only a wildfire.`,
+        ]);
         simple("cyclones-core", (p) => [
           `${p.name} (${p.cls})`,
           `${p.wind} kt sustained wind${p.pressure ? `, ${p.pressure} mb` : ""}. Position from the NHC advisory of ${String(p.updated).slice(0, 16).replace("T", " ")} UTC; the storm has moved since.`,
@@ -450,7 +465,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
   const { quakes, plants, volcanoes, outbreaks, cells, dyads, connections, arsenals } = data;
   useEffect(() => {
     applyDataRef.current();
-  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide, data.bases, data.orbit, data.cyclones]);
+  }, [quakes, plants, volcanoes, outbreaks, cells, dyads, connections, data.geomag, data.cables, data.tide, data.bases, data.orbit, data.cyclones, data.fires]);
 
   useEffect(() => {
     applyArsenalsRef.current();

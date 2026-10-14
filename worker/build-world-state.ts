@@ -30,6 +30,7 @@ import { worldBankIndicators } from "./feeds/worldbank";
 import { buildLinks } from "./links";
 import arsenalsRaw from "../data/arsenals.json";
 import { cycloneFeed } from "./feeds/cyclones";
+import { fireFeed } from "./feeds/fires";
 import { orbitFeed } from "./feeds/orbit";
 import { overdueReviews } from "../lib/reviews";
 
@@ -115,6 +116,19 @@ const FEEDS: Feed[] = [
       return { counters: a.counters, files: { asteroids: a.file } };
     },
   },
+  // fires need a free NASA FIRMS MAP_KEY in the FIRMS_MAP_KEY secret; without it the feed is not registered
+  ...(process.env.FIRMS_MAP_KEY
+    ? [
+        {
+          counterIds: ["fires"],
+          meta: { id: "nasa-firms", name: "NASA FIRMS: active fire detections (VIIRS)", domain: "climate" as const, url: "https://firms.modaps.eosdis.nasa.gov/", license: "Free; acknowledge NASA FIRMS", cadence: "about every 3 hours" },
+          run: async () => {
+            const f = await fireFeed(process.env.FIRMS_MAP_KEY as string);
+            return { counters: f.counters, files: { fires: f.file } };
+          },
+        },
+      ]
+    : []),
   {
     counterIds: ["cyclones"],
     meta: { id: "nhc-cyclones", name: "NOAA National Hurricane Center: active tropical cyclones", domain: "climate", url: "https://www.nhc.noaa.gov/", license: "Public domain (US Government work)", cadence: "about every 6 hours" },
@@ -128,7 +142,7 @@ const FEEDS: Feed[] = [
     meta: { id: "celestrak-orbit", name: "CelesTrak satellite catalogue (SGP4 positions)", domain: "space", url: "https://celestrak.org/", license: "Free; attribution, one download per group per 2 hours", cadence: "elements about every 2 hours" },
     run: async () => {
       const o = await orbitFeed();
-      return { counters: o.counters, files: { orbit: o.file } };
+      return { counters: o.counters, files: { orbit: o.file, orbit_elements: o.elementsFile } };
     },
   },
   {
@@ -208,6 +222,7 @@ const ORDER = [
   "co2",
   "satellites",
   "cyclones",
+  "fires",
   "sea-level",
   "sea-ice",
   "glaciers",
@@ -226,6 +241,7 @@ const MAX_AGE_HOURS: Record<string, number> = {
   "swpc-kp": 8,
   "volcano-watch": 6,
   "jpl-cneos": 36,
+  "nasa-firms": 24,
   "nhc-cyclones": 24, // advisories come every 6 h; a quiet basin still answers
   "celestrak-orbit": 24, // elements are cached for 2 h; their epochs are typically a few hours to a day old
   "gdelt-events": 72,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 type Place = [string, number, number, number, string]; // name, lat, lon, kind (0 country, 1 city), country iso2
 
@@ -53,8 +53,6 @@ export default function PlaceSearch({ onFly }: { onFly: (lon: number, lat: numbe
     return [...starts, ...contains].slice(0, 6).map((p) => ({ label: p[0], sub: p[3] === 0 ? "country" : `city, ${p[4]}`, lat: p[1], lon: p[2], zoom: p[3] === 0 ? 4 : 8 }));
   }, [q, places]);
 
-  useEffect(() => setActive(0), [q]);
-
   const pick = (i: number) => {
     const r = results[i];
     if (!r) return;
@@ -83,6 +81,7 @@ export default function PlaceSearch({ onFly }: { onFly: (lon: number, lat: numbe
         onBlur={() => setTimeout(() => setOpen(false), 120)}
         onChange={(e) => {
           setQ(e.target.value);
+          setActive(0);
           setOpen(true);
         }}
         onKeyDown={(e) => {

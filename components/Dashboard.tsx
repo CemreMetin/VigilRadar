@@ -14,6 +14,7 @@ import { useAlerts } from "@/lib/useAlerts";
 import type {
   AsteroidsFile,
   CyclonesFile,
+  FiresFile,
   MilitaryBasesFile,
   OrbitFile,
   ConflictCell,
@@ -96,6 +97,7 @@ export default function Dashboard() {
   const [orbitFile, setOrbitFile] = useState<OrbitFile | null>(null);
   const [basesFile, setBasesFile] = useState<MilitaryBasesFile | null>(null);
   const [cycloneFile, setCycloneFile] = useState<CyclonesFile | null>(null);
+  const [fireFile, setFireFile] = useState<FiresFile | null | "off">(null);
   const [freshnessOpen, setFreshnessOpen] = useState(false);
   const controlsRef = useRef<MapControls | null>(null);
 
@@ -222,6 +224,25 @@ export default function Dashboard() {
     if (modeId !== "weather" || cycloneFile) return;
     getJson<CyclonesFile>("/data/cyclones.json").then(setCycloneFile).catch(() => {});
   }, [modeId, cycloneFile]);
+  useEffect(() => {
+    if (modeId !== "weather" || fireFile) return;
+    // 404 means no FIRMS key is configured for the data job: remember that instead of retrying
+    getJson<FiresFile>("/data/fires.json").then(setFireFile).catch(() => setFireFile("off"));
+  }, [modeId, fireFile]);
+  const fireFc = useMemo<Fc | null>(
+    () =>
+      fireFile && fireFile !== "off" && layersOn.has("fires")
+        ? {
+            type: "FeatureCollection",
+            features: fireFile.cells.map(([lat, lon, n, frp]) => ({
+              type: "Feature",
+              properties: { n, frp },
+              geometry: { type: "Point", coordinates: [lon, lat] },
+            })),
+          }
+        : null,
+    [fireFile, layersOn],
+  );
   const cycloneFc = useMemo<Fc | null>(
     () =>
       cycloneFile && layersOn.has("cyclones")
@@ -375,8 +396,9 @@ export default function Dashboard() {
       bases: basesFc,
       orbit: orbitFc,
       cyclones: cycloneFc,
+      fires: fireFc,
     }),
-    [layersOn, tideFc, basesFc, orbitFc, cycloneFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
+    [layersOn, tideFc, basesFc, orbitFc, cycloneFc, fireFc, quakesFiltered, plantsOn, plants, world, outbreakGroups, conflictOn, cells, dyads, connections, geomagFc, cablesOn, cables],
   );
 
   // left panel: live counts per layer, and every drawn point for the mini context map
@@ -395,6 +417,7 @@ export default function Dashboard() {
     starlink: orbitFile?.counts.starlink,
     debris: orbitFile?.counts.debris,
     cyclones: cycloneFile?.storms.length,
+    fires: fireFile && fireFile !== "off" ? fireFile.cells.length : undefined,
   };
   const miniPoints = useMemo<MiniPoint[]>(() => {
     const out: MiniPoint[] = [];
@@ -545,7 +568,7 @@ export default function Dashboard() {
 
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto" role="tabpanel" key={`${mode.id}-${tab}`}>
         {tab === "readout" && (
-          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} />
+          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} fires={fireFile} />
         )}
         {tab === "metrics" && (
           <>
