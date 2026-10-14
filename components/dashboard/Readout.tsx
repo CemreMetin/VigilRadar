@@ -93,6 +93,7 @@ export default function Readout({
   cyclones,
   fires,
   solar,
+  scaleDetail,
   targets,
   userPlace,
   onUseLocation,
@@ -109,6 +110,7 @@ export default function Readout({
   cyclones: CyclonesFile | null;
   fires: FiresFile | null | "off";
   solar: { data: SolarNow | null; failed: boolean };
+  scaleDetail: "G" | "S" | "R" | null;
   targets: { data: TargetsFile | null; failed: boolean };
   userPlace: { lat: number; lon: number; label: string } | null;
   onUseLocation: () => void;
@@ -318,16 +320,40 @@ export default function Readout({
   if (mode.id === "ice") return <IceReadout world={world} tide={tide} />;
   if (mode.id === "asteroid") return <AsteroidReadout world={world} file={asteroids} />;
 
-  return <SolarReadout kp={c("kp")} solar={solar} />;
+  return <SolarReadout kp={c("kp")} solar={solar} scaleDetail={scaleDetail} />;
 }
 
+const SCALE_INFO = {
+  G: { what: "Geomagnetic storms, from the planetary Kp index. They disturb power grids, satellites, radio and the aurora.", levels: [["G1", "Kp 5, minor"], ["G2", "Kp 6, moderate"], ["G3", "Kp 7, strong"], ["G4", "Kp 8, severe"], ["G5", "Kp 9, extreme"]] },
+  S: { what: "Solar radiation storms, from the flux of energetic protons (at least 10 MeV, in particles per cm² per s per steradian). They affect satellites, astronauts and polar flights.", levels: [["S1", "10, minor"], ["S2", "100, moderate"], ["S3", "1,000, strong"], ["S4", "10,000, severe"], ["S5", "100,000, extreme"]] },
+  R: { what: "Radio blackouts, from the peak X-ray flux of solar flares. They degrade high-frequency radio on the sunlit side of the Earth.", levels: [["R1", "M1 flare, minor"], ["R2", "M5, moderate"], ["R3", "X1, strong"], ["R4", "X10, severe"], ["R5", "X20, extreme"]] },
+} as const;
+
 /** Solar scenario readout: Kp, the NOAA scales, solar wind, flares, the Kp forecast (a projection), and why cables and grids matter. */
-function SolarReadout({ kp, solar }: { kp: Counter | undefined; solar: { data: SolarNow | null; failed: boolean } }) {
+function SolarReadout({ kp, solar, scaleDetail }: { kp: Counter | undefined; solar: { data: SolarNow | null; failed: boolean }; scaleDetail: "G" | "S" | "R" | null }) {
   const d = solar.data;
   const na = <span className="text-dim">unavailable</span>;
   const forecast = (d?.kpForecast ?? []).filter((r) => r.kind === "predicted").slice(0, 24);
   return (
     <>
+      {scaleDetail && (
+        <Section open title={`NOAA ${scaleDetail} scale`} meta={d?.scales ? `now ${scaleDetail}${d.scales[scaleDetail].n}` : undefined}>
+          <p className="text-[12px] font-light leading-relaxed text-dim">{SCALE_INFO[scaleDetail].what}</p>
+          <table className="mono mt-2 w-full text-[11px]">
+            <tbody>
+              {SCALE_INFO[scaleDetail].levels.map(([lvl, def]) => (
+                <tr key={lvl} className="border-t border-line/50" style={{ color: d?.scales?.[scaleDetail].n === Number(lvl.slice(1)) ? "var(--fg)" : "var(--fg-dim)" }}>
+                  <td className="py-0.5 font-bold">{lvl}</td>
+                  <td className="text-right font-light">{def}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mono mt-1 text-[10px] font-light text-dim">
+            Definitions: <a className="underline" href="https://www.swpc.noaa.gov/noaa-scales-explanation" target="_blank" rel="noopener noreferrer">NOAA space weather scales</a>. The level now is observed ({d?.scales ? d.scales[scaleDetail].text : "unavailable"}), not forecast.
+          </p>
+        </Section>
+      )}
       <Section open title="Geomagnetic activity">{kp ? <KpGauge counter={kp} /> : <p className="text-xs text-dim">Kp unavailable.</p>}</Section>
       <Section open title="Solar wind and flares (observed)" meta={solar.failed ? "unavailable" : undefined}>
         {solar.failed && <p className="text-[11px] text-dim">NOAA space-weather products are unavailable right now.</p>}

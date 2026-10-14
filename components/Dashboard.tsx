@@ -113,6 +113,8 @@ export default function Dashboard() {
   const [userPlace, setUserPlace] = useState<{ lat: number; lon: number; label: string } | null>(null);
   const controlsRef = useRef<MapControls | null>(null);
   const [mapZoom, setMapZoom] = useState<number | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false); // the "More" disclosure in the right panel, opened by a scale chip
+  const [scaleDetail, setScaleDetail] = useState<"G" | "S" | "R" | null>(null);
   const lastInGroup = useRef<Partial<Record<GroupId, string>>>({}); // the scenario last open in each group
 
   const mode = MODE_BY_ID[modeId];
@@ -604,6 +606,8 @@ export default function Dashboard() {
     setLayersOn(new Set(defaultLayers(MODE_BY_ID[id])));
     setSelectedId(null);
     setTab("readout");
+    setMoreOpen(false);
+    setScaleDetail(null);
   }, []);
 
   /** A group opens the scenario last used in it (its first one by default). */
@@ -708,9 +712,9 @@ export default function Dashboard() {
           <p className="mt-1.5 text-[11px] font-light leading-relaxed text-dim">{signal.basis}</p>
         </div>
         <CounterPanel counters={orderedCounters.slice(0, 1)} today={today} />
-        {mode.id === "solar" && <ScaleChips solar={solarNow} />}
+        {mode.id === "solar" && <ScaleChips solar={solarNow} picked={scaleDetail} onPick={(k) => { setScaleDetail(k); setMoreOpen(true); setTab("readout"); }} />}
 
-        <details className="group border-t border-line">
+        <details className="group border-t border-line" open={moreOpen} onToggle={(e) => setMoreOpen(e.currentTarget.open)}>
           <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2 hover:bg-accent/5 [&::-webkit-details-marker]:hidden">
             <span className="label">More</span>
             <span className="mono text-[10px] font-bold text-accent" aria-hidden>
@@ -741,7 +745,7 @@ export default function Dashboard() {
 
           <div role="tabpanel" key={`${mode.id}-${tab}`}>
             {tab === "readout" && (
-              <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} fires={fireFile} solar={solarNow} targets={targets} userPlace={userPlace} onUseLocation={useMyLocation} />
+              <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} fires={fireFile} solar={solarNow} scaleDetail={scaleDetail} targets={targets} userPlace={userPlace} onUseLocation={useMyLocation} />
             )}
             {tab === "metrics" && (
               <>

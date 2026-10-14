@@ -115,9 +115,12 @@ for (const [label, viewport, mobile] of [["desktop", { width: 1440, height: 860 
     for (const name of ["Aurora oval", "Grid exposure", "Cables at risk", "All other cables"]) check(body.includes(name), `solar layer: ${name}`);
     check(body.includes("Long undersea internet cables need powered repeaters. A strong geomagnetic storm can induce currents that damage them, cutting internet links between continents."), "cable legend line");
     check(/Dashed bands: fixed 50° and 60°/.test(body), "50/60 degree bands kept as dashed reference");
-    const more = page.locator("details", { has: page.locator("summary", { hasText: /^More/ }) });
-    await more.locator("summary").first().click();
+    // a chip opens its detail in the right panel's More drawer
+    await page.getByRole("button", { name: /^G\d/ }).click();
     await page.waitForTimeout(500);
+    const more = page.locator("details", { has: page.locator("summary", { hasText: /^More/ }) });
+    check(await more.evaluate((d) => d.open), "clicking a scale chip opens the drawer");
+    check(/NOAA G scale/i.test(await text(page)) && /Kp 7, strong/.test(await text(page)), "chip detail: what the G scale means");
     const b2 = await text(page);
     check(/Solar wind and flares/i.test(b2) && /Kp forecast \(NOAA projection\)/i.test(b2), "solar readout: wind, flares, forecast labelled as projection");
     await shot(page, `layers-${label}-solar`);

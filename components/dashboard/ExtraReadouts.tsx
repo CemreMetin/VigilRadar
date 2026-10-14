@@ -305,7 +305,7 @@ export function WeatherReadout({ world, file, fires }: { world: WorldState; file
 }
 
 /** The three NOAA space weather scales as chips: G geomagnetic storms, S radiation storms, R radio blackouts. */
-export function ScaleChips({ solar }: { solar: { data: SolarNow | null; failed: boolean } }) {
+export function ScaleChips({ solar, picked, onPick }: { solar: { data: SolarNow | null; failed: boolean }; picked: "G" | "S" | "R" | null; onPick: (k: "G" | "S" | "R") => void }) {
   const sc = solar.data?.scales;
   if (!sc) {
     return (
@@ -320,10 +320,18 @@ export function ScaleChips({ solar }: { solar: { data: SolarNow | null; failed: 
         const level = sc[k].n;
         const color = level >= 3 ? "var(--threat)" : level >= 1 ? "var(--geo)" : "var(--fg-dim)";
         return (
-          <span key={k} className="mono flex-1 border px-2 py-1 text-center" style={{ borderColor: color, color }} title={`${k}${level}: ${sc[k].text}`}>
+          <button
+            key={k}
+            type="button"
+            aria-pressed={picked === k}
+            onClick={() => onPick(k)}
+            className="btn mono flex-1 px-2 py-1 text-center"
+            style={{ "--c": color, color } as React.CSSProperties}
+            title={`${k}${level}: ${sc[k].text}. Click for what the scale means.`}
+          >
             <span className="block text-sm font-bold">{k}{level}</span>
             <span className="block text-[9px] font-light">{sc[k].text}</span>
-          </span>
+          </button>
         );
       })}
     </div>
