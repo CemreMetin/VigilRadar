@@ -18,7 +18,7 @@ export default function ViewControls({
 }) {
   const b = "btn mono h-8 min-w-8 px-2 text-xs font-bold";
   return (
-    <div className="panel-glass flex flex-col gap-px p-1" role="group" aria-label="Map view and camera">
+    <div className="flex flex-col gap-px border border-line bg-panel-solid p-1" role="group" aria-label="Map view and camera">
       <div className="flex gap-px">
         <button type="button" aria-pressed={!globe} disabled={locked} title={locked ? "This scenario needs the globe" : undefined} onClick={() => onGlobe(false)} className={`${b} flex-1`}>2D</button>
         <button type="button" aria-pressed={globe} onClick={() => onGlobe(true)} className={`${b} flex-1`}>3D</button>

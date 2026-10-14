@@ -49,15 +49,15 @@ export default function DashboardLayout({
       {alarm && <div className="alarm-frame no-print pointer-events-none fixed inset-0 z-50" aria-hidden />}
 
       <header className={`panel-scn relative z-30 order-1 border-x-0 border-t-0 lg:absolute lg:inset-x-0 lg:top-0 ${alarm ? "alarm-bar" : ""}`}>{topBar}</header>
-      {banner && <div className="relative z-40 order-1 px-2 py-1 lg:absolute lg:left-[270px] lg:right-[388px] lg:top-[72px] lg:p-0">{banner}</div>}
+      {banner && <div className="relative z-40 order-1 px-2 py-1 lg:absolute lg:left-[270px] lg:right-[388px] lg:top-[calc(var(--topbar-h)+8px)] lg:p-0">{banner}</div>}
 
       <div className="panel-scn order-3 border-x-0 lg:absolute lg:bottom-1.5 lg:left-3 lg:right-[250px] lg:z-20 lg:order-none lg:border-x">{footer}</div>
 
-      <aside className="panel-scn panel-glass order-4 overflow-y-auto scroll-thin lg:absolute lg:bottom-11 lg:left-3 lg:top-[68px] lg:z-20 lg:w-[250px]" aria-label="Map layers for this scenario">
+      <aside className="panel-scn order-4 overflow-y-auto scroll-thin lg:absolute lg:bottom-11 lg:left-3 lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-[250px]" aria-label="Map layers for this scenario">
         {left}
       </aside>
 
-      <aside className="panel-scn order-5 flex min-h-0 flex-col lg:absolute lg:bottom-11 lg:right-3 lg:top-[68px] lg:z-20 lg:w-[364px]" aria-label="Readouts and actions">
+      <aside className="panel-scn order-5 flex min-h-0 flex-col lg:absolute lg:bottom-11 lg:right-3 lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-[364px]" aria-label="Readouts and actions">
         {right}
       </aside>
     </div>

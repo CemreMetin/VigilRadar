@@ -8,7 +8,7 @@ export default function MapHud({ color, id }: { color: string; id: string }) {
   return (
     <div key={id} className="theme-in no-print pointer-events-none absolute inset-0 z-[5]" aria-hidden>
       {/* frame around the open map area: left panel 262px, right panel 376px, top bar 76px, bottom bar 52px */}
-      <div className="absolute hidden lg:block" style={{ left: 266, right: 380, top: 76, bottom: 54 }}>
+      <div className="absolute hidden lg:block" style={{ left: 266, right: 380, top: "calc(var(--topbar-h) + 12px)", bottom: 54 }}>
         <span className={bracket} style={{ left: 0, top: 0, borderLeft: line, borderTop: line }} />
         <span className={bracket} style={{ right: 0, top: 0, borderRight: line, borderTop: line }} />
         <span className={bracket} style={{ left: 0, bottom: 0, borderLeft: line, borderBottom: line }} />

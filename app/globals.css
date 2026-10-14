@@ -17,6 +17,14 @@
   --safe: #00ff41;
   --geo: #ffb000;
   --space: #c9d1ff;
+
+  /* Scenario group colours (top bar tabs, panel borders, map frame). Matte; each is at least 4.5:1 on the panel. */
+  --grp-overview: #9aa7b0;
+  --grp-human: #d4654c;
+  --grp-earth: #b8975a;
+  --grp-space: #8fa3c8;
+
+  --topbar-h: 84px; /* two tab rows; panels on the map view start below it */
 }
 
 @theme inline {
@@ -155,19 +163,6 @@ body {
   background: var(--panel-solid);
   border: 1px solid color-mix(in srgb, var(--scn, var(--accent)) 32%, transparent);
   transition: border-color 400ms;
-}
-
-/* Glass overlay: the map stays readable through it. Falls back to solid where blur is unsupported. */
-.panel-glass {
-  background: color-mix(in srgb, var(--panel-solid) 72%, transparent);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-}
-@media (max-width: 1023px) {
-  .panel-glass { background: var(--panel-solid); }
-}
-@media (prefers-reduced-transparency: reduce) {
-  .panel-glass { background: var(--panel-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
 /* Scenario tab: flat, 1px border; hover tints the fill, selected is a solid matte fill */

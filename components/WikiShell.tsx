@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { PAGE_GROUPS } from "./SiteNav";
 
 export type WikiSection = {
   id: string;
@@ -16,7 +17,7 @@ export type WikiSection = {
 /**
  * The site's wiki frame: a dual-pane layout used by every informational page.
  *
- *   left pane   a fixed, scrollable tree of all pages in three groups; the current page is white and
+ *   left pane   a fixed, scrollable tree of all pages in the five groups of PAGE_GROUPS; the current page is white and
  *               expands to its own sections, everything else is muted
  *   right pane  the reading area, at most 3xl wide so lines stay readable
  *
@@ -24,29 +25,6 @@ export type WikiSection = {
  * links works too). On narrow screens the tree moves into a menu above the content.
  * Type: Inter for running text, JetBrains Mono for headings, tables and data (see .wiki in globals.css).
  */
-
-const TREE: { group: string; pages: { href: string; label: string }[] }[] = [
-  { group: "Preparedness", pages: [{ href: "/survive", label: "Survive" }] },
-  {
-    group: "Scenario deep-dives",
-    pages: [
-      { href: "/scenarios", label: "Scenarios" },
-      { href: "/nuclear", label: "Nuclear" },
-      { href: "/health", label: "Health" },
-      { href: "/supervolcanoes", label: "Supervolcanoes" },
-      { href: "/trajectory", label: "Trajectory" },
-      { href: "/country", label: "Countries" },
-      { href: "/links", label: "Links" },
-    ],
-  },
-  {
-    group: "Data & methodology",
-    pages: [
-      { href: "/methodology", label: "Methodology" },
-      { href: "/sources", label: "Sources" },
-    ],
-  },
-];
 
 const isActivePage = (path: string, href: string) => path === href || path.startsWith(`${href}/`);
 
@@ -101,7 +79,7 @@ export default function WikiShell({
   const q = query.trim().toLowerCase();
   const tree = useMemo(
     () =>
-      TREE.map((g) => ({
+      PAGE_GROUPS.map((g) => ({
         ...g,
         pages: g.pages.filter(
           (p) => !q || p.label.toLowerCase().includes(q) || (isActivePage(path, p.href) && sections.some((s) => s.label.toLowerCase().includes(q))),
@@ -117,9 +95,6 @@ export default function WikiShell({
 
   const nav = (
     <nav aria-label="Wiki" className="text-[13px]">
-      <Link href="/" className="mono mb-4 block text-[11px] font-bold tracking-[0.2em] text-dim hover:text-fg">
-        ← MONITORING
-      </Link>
       <label className="sr-only" htmlFor="wiki-filter">
         Filter pages
       </label>
@@ -132,8 +107,8 @@ export default function WikiShell({
         className="mono mb-5 w-full border border-line bg-transparent px-2 py-1.5 text-xs placeholder:text-dim focus:outline-none"
       />
       {tree.map((g) => (
-        <div key={g.group} className="mb-5">
-          <p className="mono mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-dim opacity-70">{g.group}</p>
+        <div key={g.title} className="mb-5">
+          <p className="mono mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-dim opacity-70">{g.title}</p>
           <ul className="border-l border-line">
             {g.pages.map((p) => {
               const here = isActivePage(path, p.href);

@@ -48,10 +48,22 @@ export const LAYER_INFO: Record<LayerId, { label: string; blurb: string; color: 
 /** "none" = no instrument measures this; the readout says so instead of showing a level. */
 export type Signal = { level: Tone | "none"; label: string; basis: string };
 
+export type GroupId = "overview" | "human" | "earth" | "space";
+
+/** Top-bar groups. Colours are CSS custom properties defined once in app/globals.css. */
+export const GROUPS: { id: GroupId; title: string; color: string }[] = [
+  { id: "overview", title: "Overview", color: "var(--grp-overview)" },
+  { id: "human", title: "Human", color: "var(--grp-human)" },
+  { id: "earth", title: "Earth", color: "var(--grp-earth)" },
+  { id: "space", title: "Space", color: "var(--grp-space)" },
+];
+export const GROUP_BY_ID = Object.fromEntries(GROUPS.map((g) => [g.id, g])) as Record<GroupId, (typeof GROUPS)[number]>;
+
 export type Mode = {
   id: string;
   title: string;
-  color: string; // CSS colour: tints the borders, the map vignette and the readout
+  group: GroupId;
+  color: string; // the group's colour: tints the tab, the panel borders, the map frame and the readout
   layers: LayerId[];
   camera: { center: [number, number]; zoom: number; minZoom?: number };
   /** the scenario only makes sense on the 3D globe: the map switches to it and the 2D/3D button has no effect */
@@ -88,11 +100,11 @@ function fromCounters(w: WorldState | null, ids: string[], basis: (w: WorldState
 /** Zoom at which the globe is small enough to leave room for the Earth-Moon plot drawn around it. */
 export const ASTEROID_ZOOM = -0.6;
 
-export const MODES: Mode[] = [
+const RAW_MODES: Omit<Mode, "color">[] = [
   {
     id: "overview",
     title: "Overview",
-    color: "var(--accent)",
+    group: "overview",
     layers: ["quakes", "volcanoes", "outbreaks"],
     camera: { center: [15, 22], zoom: 1.6 },
     page: "/scenarios",
@@ -109,7 +121,7 @@ export const MODES: Mode[] = [
   {
     id: "nuclear",
     title: "Nuclear",
-    color: "var(--threat)",
+    group: "human",
     layers: ["arsenals", "plants", "dyads"],
     camera: { center: [48, 38], zoom: 1.9 },
     page: "/scenarios/nuclear-winter",
@@ -123,9 +135,25 @@ export const MODES: Mode[] = [
     signal: (w) => fromCounters(w, ["doomsday-clock", "warheads"], (x) => describe(x, "doomsday-clock", "Doomsday Clock")),
   },
   {
+    id: "conflict",
+    title: "Conflict",
+    group: "human",
+    layers: ["conflict", "bases"],
+    camera: { center: [42, 32], zoom: 2.2 },
+    page: "/links",
+    pageLabel: "How risks feed each other",
+    blurb: "Armed conflict as reported in the news, the shipping chokepoints it can disrupt, and a reference layer of military bases. Fleet positions are not public data and are not shown.",
+    counterIds: ["conflict-news", "chokepoints"],
+    stat: (w) => {
+      const c = counter(w, "chokepoints");
+      return c ? `${c.value} chokepoints low` : "Chokepoints";
+    },
+    signal: (w) => fromCounters(w, ["chokepoints"], (x) => describe(x, "chokepoints", "Shipping chokepoints")),
+  },
+  {
     id: "bio",
     title: "Bio",
-    color: "var(--bio)",
+    group: "human",
     layers: ["outbreaks"],
     camera: { center: [20, 15], zoom: 1.5 },
     page: "/scenarios/pandemic-x",
@@ -141,7 +169,7 @@ export const MODES: Mode[] = [
   {
     id: "volcano",
     title: "Volcano",
-    color: "var(--geo)",
+    group: "earth",
     layers: ["volcanoes", "quakes"],
     camera: { center: [20, 25], zoom: 1.5 },
     page: "/scenarios/supervolcano",
@@ -164,41 +192,9 @@ export const MODES: Mode[] = [
     },
   },
   {
-    id: "conflict",
-    title: "Conflict",
-    color: "var(--conflict)",
-    layers: ["conflict", "bases"],
-    camera: { center: [42, 32], zoom: 2.2 },
-    page: "/links",
-    pageLabel: "How risks feed each other",
-    blurb: "Armed conflict as reported in the news, the shipping chokepoints it can disrupt, and a reference layer of military bases. Fleet positions are not public data and are not shown.",
-    counterIds: ["conflict-news", "chokepoints"],
-    stat: (w) => {
-      const c = counter(w, "chokepoints");
-      return c ? `${c.value} chokepoints low` : "Chokepoints";
-    },
-    signal: (w) => fromCounters(w, ["chokepoints"], (x) => describe(x, "chokepoints", "Shipping chokepoints")),
-  },
-  {
-    id: "solar",
-    title: "Solar",
-    color: "var(--space)",
-    layers: ["geomag", "cables"],
-    camera: { center: [-20, 52], zoom: 1.7 },
-    page: "/scenarios/solar-superstorm",
-    pageLabel: "Solar superstorm scenario",
-    blurb: "Space weather right now. Storms are strongest near the magnetic poles, where much of the grid and many cables sit.",
-    counterIds: ["kp"],
-    stat: (w) => {
-      const c = counter(w, "kp");
-      return c ? `Kp ${c.value}` : "Space weather";
-    },
-    signal: (w) => fromCounters(w, ["kp"], (x) => describe(x, "kp", "Planetary Kp index")),
-  },
-  {
     id: "weather",
     title: "Weather",
-    color: "#2fd4b0",
+    group: "earth",
     layers: ["cyclones", "fires"],
     camera: { center: [-60, 18], zoom: 1.5 },
     page: "/scenarios/climate-tipping",
@@ -212,9 +208,41 @@ export const MODES: Mode[] = [
     signal: (w) => fromCounters(w, ["cyclones"], (x) => describe(x, "cyclones", "Active tropical cyclones")),
   },
   {
+    id: "ice",
+    title: "Ice & Sea",
+    group: "earth",
+    layers: ["tide"],
+    camera: { center: [10, 30], zoom: 1.5 },
+    page: "/scenarios/climate-tipping",
+    pageLabel: "Tipping points",
+    blurb: "Observed sea level, sea-ice extent, and published glacier and ice-sheet losses. Tide gauges show how fast the sea is rising against the land at each coast.",
+    counterIds: ["sea-level", "sea-ice", "glaciers", "ice-sheets"],
+    stat: (w) => {
+      const c = counter(w, "sea-level");
+      return c ? `${c.value} mm since 1993` : "Sea level";
+    },
+    signal: (w) => fromCounters(w, ["sea-level", "sea-ice"], (x) => `${describe(x, "sea-level", "Sea level")} ${counter(x, "sea-ice")?.basis ?? ""}`.trim()),
+  },
+  {
+    id: "solar",
+    title: "Solar",
+    group: "space",
+    layers: ["geomag", "cables"],
+    camera: { center: [-20, 52], zoom: 1.7 },
+    page: "/scenarios/solar-superstorm",
+    pageLabel: "Solar superstorm scenario",
+    blurb: "Space weather right now. Storms are strongest near the magnetic poles, where much of the grid and many cables sit.",
+    counterIds: ["kp"],
+    stat: (w) => {
+      const c = counter(w, "kp");
+      return c ? `Kp ${c.value}` : "Space weather";
+    },
+    signal: (w) => fromCounters(w, ["kp"], (x) => describe(x, "kp", "Planetary Kp index")),
+  },
+  {
     id: "orbit",
     title: "Orbit",
-    color: "#6fa8ff",
+    group: "space",
     layers: ["satellites", "starlink", "debris"],
     camera: { center: [0, 15], zoom: 1.4 },
     globe: true,
@@ -229,25 +257,9 @@ export const MODES: Mode[] = [
     signal: (w) => ({ level: "none", label: "TRACKING", basis: describe(w, "satellites", "Catalogue counts only.") }),
   },
   {
-    id: "ice",
-    title: "Ice & Sea",
-    color: "var(--accent)",
-    layers: ["tide"],
-    camera: { center: [10, 30], zoom: 1.5 },
-    page: "/scenarios/climate-tipping",
-    pageLabel: "Tipping points",
-    blurb: "Observed sea level, sea-ice extent, and published glacier and ice-sheet losses. Tide gauges show how fast the sea is rising against the land at each coast.",
-    counterIds: ["sea-level", "sea-ice", "glaciers", "ice-sheets"],
-    stat: (w) => {
-      const c = counter(w, "sea-level");
-      return c ? `${c.value} mm since 1993` : "Sea level";
-    },
-    signal: (w) => fromCounters(w, ["sea-level", "sea-ice"], (x) => `${describe(x, "sea-level", "Sea level")} ${counter(x, "sea-ice")?.basis ?? ""}`.trim()),
-  },
-  {
     id: "asteroid",
     title: "Asteroid",
-    color: "var(--space)",
+    group: "space",
     layers: [],
     camera: { center: [0, 15], zoom: ASTEROID_ZOOM, minZoom: -2 },
     globe: true,
@@ -262,5 +274,8 @@ export const MODES: Mode[] = [
     signal: (w) => fromCounters(w, ["asteroids"], (x) => describe(x, "asteroids", "Close approaches")),
   },
 ];
+
+/** The scenario tab colour is its group's colour. */
+export const MODES: Mode[] = RAW_MODES.map((m) => ({ ...m, color: GROUP_BY_ID[m.group].color }));
 
 export const MODE_BY_ID = Object.fromEntries(MODES.map((m) => [m.id, m])) as Record<string, Mode>;

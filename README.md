@@ -38,7 +38,8 @@ There is no database, no serverless function layer and no authentication. This i
 
 Theme: an underground analysis room. Ultra-dark, flat, monospace.
 
-- Surfaces: background `#050505`, panels `#0a0f14`. Solid fills and 1px borders only; no blur, no shadows, no glow.
+- Surfaces: background `#050505`, panels `#0a0f14`. Solid fills and 1px borders only; no glass, blur, shadows or glow.
+- Scenario group colours (tabs, panel borders, map frame; matte, defined once in `app/globals.css`): Overview `#9aa7b0`, Human `#d4654c`, Earth `#b8975a`, Space `#8fa3c8`. Map layer colours and the evidence vocabulary keep their own meaning.
 - Colour roles: red `#ff003c` threat and nuclear, purple `#b026ff` biological, cyan `#00e5ff` accent and water, green `#00ff41` reserved for safe or actionable (preparedness, status), amber `#ffb000` geophysical, orange `#ff6a00` conflict, lavender `#c9d1ff` space.
 - Typography: JetBrains Mono for data, labels and controls; Inter for body text. Weight carries hierarchy: bold for values and titles, light for labels.
 - Interaction contract: anything clickable has a solid 1px border and a visible fill plus brighter border on hover (`.btn`, `.card-btn`, `.tab-btn`). Reading material is muted grey with no border. Colour never carries meaning alone; shape and text accompany it.
@@ -49,9 +50,9 @@ Theme: an underground analysis room. Ultra-dark, flat, monospace.
 
 The map view uses three strict zones around a full-window map, read top-left to bottom-right:
 
-1. Top bar: macro context. Mutually exclusive scenario tabs (Overview, Nuclear, Bio, Volcano, Conflict, Solar, Weather, Orbit, Ice & Sea, Asteroid; keys 1 to 9, then 0).
+1. Top bar: macro context, in two rows. Four groups (Overview; Human: Nuclear, Conflict, Bio; Earth: Volcano, Weather, Ice & Sea; Space: Solar, Orbit, Asteroid), and below them the scenarios of the active group. A group opens the scenario last used in it. Keys 1 to 4 pick a group; pressing the active group's key again moves to its next scenario.
 2. Left panel: micro control. Only the map layers of the active scenario, their filters and view options. It never switches scenarios.
-3. Right panel: analysis and action. Read-only readouts, metrics and links, plus the survival card. It holds no map controls.
+3. Right panel: analysis and action. The first view shows only the scenario, its signal with the basis line and the first metric; everything else (more metrics, readouts, links) is under one closed "More" disclosure. The survival card stays visible. It holds no map controls.
 
 A status line at the bottom reports system state in plain terms (`UPLINK NOMINAL`, `DEGRADED`, `LOST`), each shown only when it is true. Selecting a scenario changes the available layers, the camera, panel border colour, a map vignette and the readouts. On narrow screens the zones stack without overlapping.
 
@@ -198,7 +199,7 @@ Licence note: the submarine-cable dataset is CC BY-NC-SA 3.0, so the project is 
 - Tension pairs carry a `basis` and a one-sentence `why` (`data/dyads.json`); politically contestable pairs are marked `sensitive` and starred.
 - Data freshness: every feed reports its newest observation time, latency and fetch time (`FeedStatus.dataAsOf`, `maxAgeHours`). The table is behind the Freshness button on the map and on /sources.
 - Wiki layout (`components/WikiShell.tsx`): every informational page (Survive, Methodology, Sources, Nuclear, Health, Supervolcanoes, Trajectory, Countries, Links and the scenario pages) shows one section at a time with a sidebar; the section is in the URL as `?tab=`.
-- Map view and camera controls are at the bottom right of the map; the left layer panel is a glass overlay.
+- Map view and camera controls are at the bottom right of the map; the left layer panel is a solid panel.
 - Progressive disclosure: the right panel shows the signal chip and one headline figure; basis, caveats, sources and secondary readouts sit in collapsible sections (`Section` in `components/dashboard/parts.tsx`). The left panel is the control centre: layers with live counts, quick filters, a mini context map, the selection card and the legend.
 
 ## Orbit, asteroid globe, military bases, matte UI
@@ -207,7 +208,7 @@ Licence note: the submarine-cable dataset is CC BY-NC-SA 3.0, so the project is 
 - Asteroid tab: switches the map to the 3D globe, zoomed out, with a polar chart drawn around it (`components/dashboard/AsteroidOrbit.tsx`): angle is the approach date, radius the miss distance on a log scale, the dashed ring is the Moon orbit. JPL publishes no direction, so no flight paths are drawn.
 - Conflict tab: a military-bases layer (Wikidata, CC0, about 3,900 entries; `scripts/build-bases.py`, committed output). It is a reference layer with uneven coverage, not an order of battle. Fleet positions are not public data and are not shown.
 - Matte UI: no glow, blink, pulse, blur halos or scanlines; active states are solid fills with 1px borders; scenario tabs fit their text.
-- Wiki frame: one site-wide tree (Preparedness, Scenario deep-dives, Data & methodology) in a fixed left pane, reading column limited to 3xl; Inter for text, JetBrains Mono for headings and tables.
+- Wiki frame: one site-wide tree (Map, Scenarios, Survive, Library, About; the same groups as the pages menu, from `PAGE_GROUPS` in `components/SiteNav.tsx`) in a fixed left pane, reading column limited to 3xl; Inter for text, JetBrains Mono for headings and tables.
 
 ## Early warning (alerts)
 

@@ -6,7 +6,7 @@ import { arsenals } from "@/lib/arsenals";
 import { buildEntityIndex, dyadLines, groupOutbreaks, type Entity } from "@/lib/entities";
 import { isStale } from "@/lib/format";
 import { geomagLat, geomagLines } from "@/lib/geomag";
-import { LAYER_INFO, MODES, MODE_BY_ID, type LayerId } from "@/lib/lenses";
+import { GROUPS, LAYER_INFO, MODES, MODE_BY_ID, type GroupId, type LayerId } from "@/lib/lenses";
 import { useAlarmSound } from "@/lib/alarmTone";
 import type { Alert } from "@/lib/alerts";
 import { overdueReviews } from "@/lib/reviews";
@@ -31,7 +31,6 @@ import CounterPanel from "./CounterPanel";
 import DashboardLayout from "./dashboard/DashboardLayout";
 import FilterPanel from "./dashboard/FilterPanel";
 import HubCard from "./dashboard/HubCard";
-import { Section } from "./dashboard/parts";
 import MapHud from "./dashboard/MapHud";
 import Readout from "./dashboard/Readout";
 import StatusBar from "./dashboard/StatusBar";
@@ -100,6 +99,7 @@ export default function Dashboard() {
   const [fireFile, setFireFile] = useState<FiresFile | null | "off">(null);
   const [freshnessOpen, setFreshnessOpen] = useState(false);
   const controlsRef = useRef<MapControls | null>(null);
+  const lastInGroup = useRef<Partial<Record<GroupId, string>>>({}); // the scenario last open in each group
 
   const mode = MODE_BY_ID[modeId];
 
@@ -109,6 +109,7 @@ export default function Dashboard() {
     const u = readUrl();
     /* eslint-disable react-hooks/set-state-in-effect */
     setModeId(u.mode);
+    lastInGroup.current[MODE_BY_ID[u.mode].group] = u.mode;
     setLayersOn(new Set(MODE_BY_ID[u.mode].layers.filter((l) => !u.off.includes(l))));
     setRange(u.range);
     setMinMag(u.minMag);
@@ -456,29 +457,39 @@ export default function Dashboard() {
   /** Top-bar tabs are mutually exclusive: switching resets the layers to that scenario's set. */
   const selectMode = useCallback((id: string) => {
     if (!MODE_BY_ID[id]) return;
+    lastInGroup.current[MODE_BY_ID[id].group] = id;
     setModeId(id);
     setLayersOn(new Set(MODE_BY_ID[id].layers));
     setSelectedId(null);
     setTab("readout");
   }, []);
 
+  /** A group opens the scenario last used in it (its first one by default). */
+  const selectGroup = useCallback(
+    (g: GroupId) => selectMode(lastInGroup.current[g] ?? MODES.find((m) => m.group === g)!.id),
+    [selectMode],
+  );
+
   const viewAlert = (a: Alert) => {
     selectMode(a.scenario);
     if (a.entityId) setSelectedId(a.entityId);
   };
 
-  // keys 1-9 switch scenarios (ignored while typing)
+  // keys 1-4 pick a group; the active group's key again moves to its next scenario (ignored while typing)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
-      const i = e.key === "0" ? 9 : Number(e.key) - 1; // 1-9, then 0 for the tenth
-      if (Number.isInteger(i) && i >= 0 && i < MODES.length) selectMode(MODES[i].id);
+      const group = GROUPS[Number(e.key) - 1];
+      if (!group) return;
+      if (group.id !== MODE_BY_ID[modeId].group) return selectGroup(group.id);
+      const subs = MODES.filter((m) => m.group === group.id);
+      selectMode(subs[(subs.findIndex((m) => m.id === modeId) + 1) % subs.length].id);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selectMode]);
+  }, [modeId, selectMode, selectGroup]);
 
   const mapSummary = [
     layersOn.has("quakes") ? `${quakesFiltered.length} quakes · ${range} · M${minMag}+` : null,
@@ -521,64 +532,67 @@ export default function Dashboard() {
 
   const right = (
     <>
-      {/* scenario header: what this scenario is, and one status word with its basis */}
-      <div className="shrink-0 border-b border-line px-3 py-2.5" key={mode.id}>
-        <div className="flex items-center justify-between gap-3">
-          <p className="mono readout-in text-[11px] font-bold tracking-wider" style={{ color: mode.color }}>
-            {`SCN//${mode.title.toUpperCase()}`}
-          </p>
-          <span
-            className="mono readout-in border px-1.5 py-0.5 text-[10px] font-bold tracking-wider"
-            style={{ color: SIGNAL_COLOR[signal.level], borderColor: SIGNAL_COLOR[signal.level] }}
-            title="The highest status among this scenario's live metrics. Thresholds are set in the data worker and described on the Methodology page; it is a reading, not a forecast."
-          >
-            SIGNAL {signal.label}
-          </span>
+      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto" key={mode.id}>
+        {/* first view: scenario, signal with its basis, and the first metric */}
+        <div className="border-b border-line px-3 py-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="mono text-[11px] font-bold tracking-wider" style={{ color: mode.color }}>
+              {`SCN//${mode.title.toUpperCase()}`}
+            </p>
+            <span
+              className="mono border px-1.5 py-0.5 text-[10px] font-bold tracking-wider"
+              style={{ color: SIGNAL_COLOR[signal.level], borderColor: SIGNAL_COLOR[signal.level] }}
+              title="The highest status among this scenario's live metrics. Thresholds are set in the data worker and described on the Methodology page; it is a reading, not a forecast."
+            >
+              SIGNAL {signal.label}
+            </span>
+          </div>
+          <p className="mt-1.5 text-[11px] font-light leading-relaxed text-dim">{signal.basis}</p>
         </div>
-        {/* the one figure that matters, then everything else behind a disclosure */}
-        <p className="mono readout-in mt-1.5 text-lg font-bold leading-tight" style={{ color: SIGNAL_COLOR[signal.level] }}>
-          {mode.stat(world)}
-        </p>
-      </div>
-      <div className="shrink-0">
-        <Section title="About this reading">
-          <p className="text-[11px] font-light leading-relaxed text-dim">{signal.basis}</p>
-          <p className="mt-1.5 text-[11px] font-light leading-relaxed text-dim">{mode.blurb}</p>
-          <Link href={mode.page} style={{ "--c": mode.color } as React.CSSProperties} className="btn mono mt-2 inline-block px-2.5 py-1 text-[11px] font-bold">
+        <CounterPanel counters={orderedCounters.slice(0, 1)} today={today} />
+
+        <details className="group border-t border-line">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2 hover:bg-accent/5 [&::-webkit-details-marker]:hidden">
+            <span className="label">More</span>
+            <span className="mono text-[10px] font-bold text-accent" aria-hidden>
+              <span className="group-open:hidden">+</span>
+              <span className="hidden group-open:inline">−</span>
+            </span>
+          </summary>
+          <p className="px-3 pb-2 text-[11px] font-light leading-relaxed text-dim">{mode.blurb}</p>
+          <Link href={mode.page} style={{ "--c": mode.color } as React.CSSProperties} className="btn mono mx-3 mb-3 inline-block px-2.5 py-1 text-[11px] font-bold">
             {mode.pageLabel} →
           </Link>
-        </Section>
-      </div>
 
-      <div className="flex shrink-0 border-b border-line" role="tablist" aria-label="Right panel view">
-        {tabs.map(([id, label], i) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={tab === id}
-            onClick={() => setTab(id)}
-            className={`btn mono flex-1 border-0 px-2 py-2 text-xs font-bold ${tab === id ? "border-b-2" : ""} ${i > 0 ? "border-l" : ""}`}
-            style={{ borderBottomColor: tab === id ? "var(--accent)" : undefined, borderLeftColor: "var(--line)" }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+          <div className="flex border-y border-line" role="tablist" aria-label="Right panel view">
+            {tabs.map(([id, label], i) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={tab === id}
+                onClick={() => setTab(id)}
+                className={`btn mono flex-1 border-0 px-2 py-2 text-xs font-bold ${tab === id ? "border-b-2" : ""} ${i > 0 ? "border-l" : ""}`}
+                style={{ borderBottomColor: tab === id ? "var(--accent)" : undefined, borderLeftColor: "var(--line)" }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-      <div className="scroll-thin min-h-0 flex-1 overflow-y-auto" role="tabpanel" key={`${mode.id}-${tab}`}>
-        {tab === "readout" && (
-          <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} fires={fireFile} />
-        )}
-        {tab === "metrics" && (
-          <>
-            <CounterPanel counters={orderedCounters} today={today} focusId={mode.counterIds[0] ?? null} />
-            <p className="px-3 py-3 text-[11px] font-light leading-relaxed text-dim">
-              Open a metric for its trend, source, date and caveats.
-            </p>
-          </>
-        )}
-        {tab === "links" && <LinksPanel selected={selected} links={links} entities={entities} onSelect={select} />}
+          <div role="tabpanel" key={`${mode.id}-${tab}`}>
+            {tab === "readout" && (
+              <Readout mode={mode} world={world} quakes={quakesFiltered} now={now} selectedId={selectedId} onSelect={select} asteroids={asteroids} tide={tideFile} orbit={orbitFile} cyclones={cycloneFile} fires={fireFile} />
+            )}
+            {tab === "metrics" && (
+              <>
+                <CounterPanel counters={orderedCounters.slice(1)} today={today} />
+                <p className="px-3 py-3 text-[11px] font-light leading-relaxed text-dim">Open a metric for its trend, source, date and caveats.</p>
+              </>
+            )}
+            {tab === "links" && <LinksPanel selected={selected} links={links} entities={entities} onSelect={select} />}
+          </div>
+        </details>
       </div>
 
       <HubCard />
@@ -603,7 +617,7 @@ export default function Dashboard() {
         />
         )
       }
-      topBar={<TopBar modes={MODES} activeId={modeId} onSelect={selectMode} world={world} />}
+      topBar={<TopBar modes={MODES} activeId={modeId} onSelect={selectMode} onSelectGroup={selectGroup} world={world} />}
       left={
         <FilterPanel
           mode={mode}
@@ -657,7 +671,7 @@ export default function Dashboard() {
           <MapHud color={mode.color} id={mode.id} />
           {mode.id === "asteroid" && <AsteroidOrbit file={asteroids} now={now} />}
           {freshnessOpen && world && (
-            <section className="panel-scn panel-glass absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-12 lg:left-[270px] lg:w-[min(760px,calc(100%-660px))]" aria-label="Data freshness">
+            <section className="panel-scn absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-12 lg:left-[270px] lg:w-[min(760px,calc(100%-660px))]" aria-label="Data freshness">
               <div className="mb-2 flex items-center justify-between">
                 <p className="label caret">Data freshness</p>
                 <button type="button" className="btn mono px-2 py-0.5 text-[11px] font-bold" onClick={() => setFreshnessOpen(false)}>CLOSE</button>
