@@ -155,6 +155,31 @@ export default function MethodologyPage() {
         <P>These messages are automatic and can be wrong or late. They are not an official warning system: follow your national authority.</P>
       </>
     ) },
+    { id: "sky", label: "Sun and Moon", group: "Computed values", content: (
+      <>
+        <P>
+          On the 3D globe the dark area is the night side and the two small markers are the Sun and the Moon straight overhead. They are computed in your browser from the clock once a minute, with no data feed.
+        </P>
+        <UL>
+          <li><span className="text-fg">Sun:</span> the low-precision solar position of the Astronomical Almanac (mean longitude and anomaly, equation of centre), good to about 0.01°. The night edge is the great circle 90° from the subsolar point.</li>
+          <li><span className="text-fg">Moon:</span> a truncated version of Meeus&apos; lunar series (mean longitude plus the main anomaly term, ecliptic latitude from the argument of latitude), good to about 0.3°. The phase comes from the Moon-Sun elongation: lit fraction = (1 − cos elongation) / 2, named waxing or waning by which side of full it is on.</li>
+          <li>Right ascension is converted to a longitude with Greenwich mean sidereal time. It is accurate enough for a marker and a day/night edge, not for eclipses or navigation.</li>
+          <li>On the Asteroid plot, directions of asteroids at closest approach come from JPL Horizons (geocentric right ascension), the Moon and Sun are drawn as they are now, and the angle is right ascension seen from above the North Pole. Objects Horizons cannot place are drawn hollow and positioned by date.</li>
+        </UL>
+      </>
+    ) },
+    { id: "targets", label: "Possible target areas (model)", group: "Computed values", content: (
+      <>
+        <P>
+          The Nuclear tab has an opt-in layer of reference sites. It is an <span className="text-fg">illustrative model, not a forecast</span>: it exists so the scale of nuclear weapons can be seen on a map, and it says nothing about intentions, plans or likelihood. There is no ranking and no &quot;most likely&quot; anything.
+        </P>
+        <UL>
+          <li><span className="text-fg">Sites:</span> bases named in the FAS Nuclear Notebook editions (strategic forces, weapons storage), coordinates as printed in the FAS Russian and Chinese tables or from Wikidata, one command site, and the capitals of the nine nuclear-armed states and the NATO nuclear-sharing hosts (GeoNames). The list is partial: some states have far more named sites in open sources than others, and Israel&apos;s capital is not classed as one in GeoNames, so it is not listed.</li>
+          <li><span className="text-fg">Rings:</span> one fixed example, an airburst of 300 kt at the height that maximises blast, on flat ground in clear air. Radii follow Glasstone and Dolan, <em>The Effects of Nuclear Weapons</em> (1977), as tabulated in the MIT 8.S271 lecture notes (J. Bele), with W in kt and radius in km: fireball 0.034 W^0.40, 5 psi air blast 0.71 W^0.33, third-degree burns 0.67 W^0.41. For 300 kt that is about 0.3 km, 4.7 km and 7.0 km.</li>
+          <li>Real effects depend on burst height, terrain, buildings, weather and the weapon, so the rings are order-of-magnitude guides. The example yield is not a prediction of what would be used. Distances to the nearest listed site are great-circle distances computed in your browser; your position is not sent anywhere.</li>
+        </UL>
+      </>
+    ) },
     { id: "limits", label: "What this site does not do", group: "Boundaries", content: (
       <>
         <UL>

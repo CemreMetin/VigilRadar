@@ -96,6 +96,10 @@ export default async function SourcesPage() {
     { id: "static", label: "Static datasets", group: "Reference", content: (
       <>
       <ul className="mt-2 divide-y divide-line border border-line text-sm">
+        <li className="p-3">Possible target areas (illustrative reference list): site names from the FAS Nuclear Notebook editions (United States 2025, United Kingdom 2024, French 2023, Indian 2024), coordinates printed in the FAS Russian 2023 and Chinese 2025 editions, other coordinates from Wikidata (CC0), capitals from GeoNames (CC BY 4.0). Partial and uneven by country; built by <span className="mono">scripts/build-nuclear-targets.py</span>. Effect radii: Glasstone and Dolan scaling, see Methodology.</li>
+        <li className="p-3">Military bases: Wikidata (CC0), military base, airbase and naval base items with coordinates; former states hidden by default. Coverage is uneven and entries can be historical.</li>
+        <li className="p-3">Country outlines for the shaded layers: Natural Earth 1:110m (public domain), simplified. BSL-4 laboratories: a partial list from English Wikipedia articles that state BSL-4 containment (CC BY-SA 4.0); the Global BioLabs Report 2023 (King&apos;s College London) gives only totals.</li>
+        <li className="p-3">Places for the map search box: GeoNames cities of 100,000+ people (CC BY 4.0) and country centres. Sun and Moon positions are computed in the browser from the clock; no data source.</li>
         <li className="p-3">Nuclear arsenals: SIPRI Yearbook 2026 (January 2026 estimates), hand-entered in data/arsenals.json.</li>
         <li className="p-3">Nuclear power plants: WRI Global Power Plant Database v1.3, CC BY 4.0. Vintage about 2019, so recent openings and closures are not reflected.</li>
         <li className="p-3">Countries (names, codes, centres): GeoNames countryInfo (CC BY 4.0) and gavinr/world-countries-centroids. Cities of 15,000+: GeoNames (CC BY 4.0).</li>
