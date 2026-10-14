@@ -110,7 +110,7 @@ const FEEDS: Feed[] = [
   },
   {
     counterIds: ["asteroids"],
-    meta: { id: "jpl-cneos", name: "NASA/JPL close approaches and Sentry", domain: "space", url: "https://cneos.jpl.nasa.gov/", license: "Public domain (NASA)", cadence: "daily" },
+    meta: { id: "jpl-cneos", name: "NASA/JPL close approaches, Sentry and Horizons directions", domain: "space", url: "https://cneos.jpl.nasa.gov/", license: "Public domain (NASA)", cadence: "daily" },
     run: async () => {
       const a = await asteroidFeed();
       return { counters: a.counters, files: { asteroids: a.file } };
