@@ -48,6 +48,7 @@ import FreshnessTable from "./FreshnessTable";
 import AlarmBar from "./dashboard/AlarmBar";
 import AsteroidOrbit from "./dashboard/AsteroidOrbit";
 import ViewControls from "./dashboard/ViewControls";
+import { useMyCountry } from "@/lib/myCountry";
 import { Term } from "./ui";
 import type { MiniPoint } from "./dashboard/MiniContext";
 import MapView, { type MapControls, type MapData } from "./MapView";
@@ -479,6 +480,21 @@ export default function Dashboard() {
     [world, plants, cells, links, profiles, outbreakGroups, dyads],
   );
 
+  const [myCountry] = useMyCountry();
+  const myCountryEntity = (myCountry && entities.get(`country:${myCountry}`)) || null;
+  const cameraStarted = useRef(false);
+  useEffect(() => {
+    // first load with no scenario or selection in the URL: start the camera on the stored country (centroid, same flyTo as place search)
+    const url = new URLSearchParams(window.location.search);
+    if (!myCountryEntity || cameraStarted.current || url.has("sc") || url.has("sel")) return;
+    const wait = setInterval(() => {
+      if (!controlsRef.current) return;
+      cameraStarted.current = true;
+      controlsRef.current.flyTo(myCountryEntity.lon, myCountryEntity.lat, 3);
+      clearInterval(wait);
+    }, 300);
+    return () => clearInterval(wait);
+  }, [myCountryEntity]);
   const selected: Entity | null = selectedId ? (entities.get(selectedId) ?? null) : null;
 
   // Connections: lines from the selected thing to what it is linked to
@@ -754,7 +770,7 @@ export default function Dashboard() {
                 <p className="px-3 py-3 text-[11px] font-light leading-relaxed text-dim">Open a metric for its trend, source, date and caveats.</p>
               </>
             )}
-            {tab === "links" && <LinksPanel selected={selected} links={links} entities={entities} onSelect={select} />}
+            {tab === "links" && <LinksPanel selected={selected} myCountry={myCountryEntity} links={links} entities={entities} onSelect={select} />}
           </div>
         </details>
       </div>
