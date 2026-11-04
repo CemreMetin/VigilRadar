@@ -28,7 +28,7 @@
   --gap: 12px; /* distance of the panels from the window edge and from each other */
   --left-w: 252px;
   --right-w: 364px;
-  --foot-h: 44px; /* status bar zone along the bottom edge */
+  --foot-h: 68px; /* status bar zone along the bottom edge */
   --left-edge: calc(var(--gap) * 2 + var(--left-w)); /* where the map area starts, right of the left panel */
   --right-edge: calc(var(--gap) * 2 + var(--right-w)); /* where it ends, left of the right panel */
   --row-h: 32px; /* one height for list rows */
@@ -147,6 +147,42 @@ body {
   --accent: var(--scn);
   --line: rgba(215, 226, 234, 0.14);
   --line-strong: rgba(215, 226, 234, 0.34);
+}
+
+/* Ticker: two identical tracks side by side slide left slowly; hover or focus stops it; reduced motion shows one wrapped list */
+.ticker {
+  display: flex;
+}
+.ticker-track {
+  animation: ticker-slide 90s linear infinite;
+}
+.ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker-slide {
+  to {
+    transform: translateX(-100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    display: block;
+  }
+  .ticker-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+    gap: 4px 24px;
+  }
+  .ticker-copy {
+    display: none;
+  }
+}
+@media print {
+  .ticker {
+    display: none;
+  }
 }
 
 /* Matte: nothing pulses or blinks. The live dot is a plain solid dot. */

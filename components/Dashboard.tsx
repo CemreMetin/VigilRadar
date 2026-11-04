@@ -42,6 +42,7 @@ import HubCard from "./dashboard/HubCard";
 import MapHud from "./dashboard/MapHud";
 import Readout from "./dashboard/Readout";
 import StatusBar from "./dashboard/StatusBar";
+import Ticker, { type TickerItem } from "./dashboard/Ticker";
 import TopBar from "./dashboard/TopBar";
 import { ScaleChips } from "./dashboard/ExtraReadouts";
 import LinksPanel, { linksFor } from "./LinksPanel";
@@ -496,6 +497,18 @@ export default function Dashboard() {
     }, 300);
     return () => clearInterval(wait);
   }, [myCountryEntity]);
+  const tickerItems = useMemo<TickerItem[]>(() => {
+    if (!world || !now) return [];
+    const quake = (e: MonitorEvent) => e.kind === "quake" && (e.magnitude ?? 0) >= 6 && now - Date.parse(e.startedAt) < 864e5;
+    const who = (e: MonitorEvent) => e.kind === "outbreak" && now - Date.parse(e.startedAt) < 7 * 864e5;
+    return [
+      ...[...critical, ...notices].map((a) => ({ id: a.id, at: a.at, kind: a.level.toUpperCase(), text: a.title, source: a.sourceName, entityId: a.entityId })),
+      ...world.events.filter(quake).map((e) => ({ id: e.id, at: e.startedAt, kind: `M${e.magnitude?.toFixed(1)}`, text: e.title, source: e.source.name, entityId: e.id })),
+      ...world.events.filter(who).map((e) => ({ id: e.id, at: e.startedAt, kind: "WHO", text: e.title, source: e.source.name, entityId: e.id })),
+    ]
+      .sort((a, b) => b.at.localeCompare(a.at))
+      .slice(0, 16);
+  }, [world, now, critical, notices]);
   const selected: Entity | null = selectedId ? (entities.get(selectedId) ?? null) : null;
 
   // Connections: lines from the selected thing to what it is linked to
@@ -835,6 +848,7 @@ export default function Dashboard() {
       }
       right={right}
       footer={
+        <>
         <StatusBar
           world={world}
           loadError={loadError}
@@ -848,6 +862,8 @@ export default function Dashboard() {
           freshnessOpen={freshnessOpen}
           onFreshness={() => setFreshnessOpen((v) => !v)}
         />
+        <Ticker items={tickerItems} onSelect={select} />
+        </>
       }
       map={
         <MapView
