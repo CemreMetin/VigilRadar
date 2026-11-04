@@ -21,7 +21,7 @@
   "dependencies": {
     "fflate": "^0.8.3",
     "maplibre-gl": "^6.11.2",
-    "next": "16.3.8",
+    "next": "16.4.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "satellite.js": "^7.1.0"
@@ -32,7 +32,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.5",
     "playwright-core": "^1.63.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
