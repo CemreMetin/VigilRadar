@@ -23,6 +23,7 @@ export const PAGE_GROUPS: { title: string; pages: PageLink[] }[] = [
     pages: [
       { href: "/methodology", label: "Methodology", blurb: "How things are computed" },
       { href: "/sources", label: "Sources", blurb: "Where every number comes from" },
+      { href: "/glossary", label: "Glossary", blurb: "What the abbreviations mean" },
     ],
   },
 ];

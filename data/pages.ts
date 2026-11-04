@@ -1,5 +1,6 @@
 import { arsenals } from "@/lib/arsenals";
 import { EDGES } from "./causal";
+import { GLOSSARY } from "./glossary";
 import { ref } from "./references";
 import { BAG_ITEMS, GUIDES, OFFLINE_READING, REGULATOR_LINKS } from "./survival";
 
@@ -145,6 +146,15 @@ export const PAGE_META = {
       "Hand-entered figures carry a review date and are flagged when it passes.",
     ],
     sources: [],
+  },
+  glossary: {
+    updated: DATE,
+    keyPoints: [
+      "Every abbreviation and unit used on the site is defined here in plain words.",
+      "Each definition follows a primary source: NOAA, NASA/JPL, USGS, WHO, GDELT or the Bulletin of the Atomic Scientists.",
+      "Hover a dotted-underlined term anywhere on the site for a one-line hint, or follow it here.",
+    ],
+    sources: unique(GLOSSARY.filter((g) => g.source.url.startsWith("http")).map((g) => g.source)),
   },
   scenarios: {
     updated: DATE,
