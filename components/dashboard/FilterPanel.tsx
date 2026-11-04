@@ -61,6 +61,8 @@ export default function FilterPanel({
   selected,
   onFly,
   onClearSelection,
+  pickList,
+  onPick,
   legend,
 }: {
   mode: Mode;
@@ -90,6 +92,9 @@ export default function FilterPanel({
   selected: Entity | null;
   onFly: (lon: number, lat: number, zoom?: number) => void;
   onClearSelection: () => void;
+  /** the same things the map shows as markers, for choosing without a pointer */
+  pickList: { id: string; title: string }[];
+  onPick: (id: string) => void;
   legend: ReactNode;
 }) {
   const hasQuakes = mode.layers.includes("quakes");
@@ -225,6 +230,13 @@ export default function FilterPanel({
       )}
 
       <Section open={!!selected} title="Selection" meta={selected ? selected.kind : undefined}>
+        <label className="label block" htmlFor="pick-entity">Choose from a list</label>
+        <select id="pick-entity" value={selected?.id ?? ""} onChange={(e) => e.target.value && onPick(e.target.value)} className="mono mb-2 mt-1 w-full border border-line bg-panel-solid px-1.5 py-1 text-body">
+          <option value="">Pick an item on the map…</option>
+          {pickList.map((p) => (
+            <option key={p.id} value={p.id}>{p.title}</option>
+          ))}
+        </select>
         {selected ? (
           <>
             <p className="text-body font-bold leading-snug">{selected.title}</p>

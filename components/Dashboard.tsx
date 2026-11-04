@@ -497,6 +497,8 @@ export default function Dashboard() {
     }, 300);
     return () => clearInterval(wait);
   }, [myCountryEntity]);
+  // volcanoes and recent events: what a keyboard user can choose instead of clicking a marker
+  const pickList = useMemo(() => [...entities.values()].filter((e) => e.kind === "event" || e.kind === "volcano").slice(0, 80).map((e) => ({ id: e.id, title: e.title })), [entities]);
   const tickerItems = useMemo<TickerItem[]>(() => {
     if (!world || !now) return [];
     const quake = (e: MonitorEvent) => e.kind === "quake" && (e.magnitude ?? 0) >= 6 && now - Date.parse(e.startedAt) < 864e5;
@@ -823,6 +825,8 @@ export default function Dashboard() {
           selected={selected}
           onFly={(lon, lat, zoom) => controlsRef.current?.flyTo(lon, lat, zoom)}
           onClearSelection={() => select(null)}
+          pickList={pickList}
+          onPick={select}
           range={range}
           onRange={setRange}
           minMag={minMag}
@@ -881,6 +885,7 @@ export default function Dashboard() {
       mapOverlay={
         <>
           <MapHud color={mode.color} id={mode.id} />
+          <p className="sr-only" role="status">{`${mode.title} map. ${mapSummary}. Use the list in the Selection section to choose an item without a pointer.`}</p>
           {mode.id === "asteroid" && <AsteroidOrbit file={asteroids} now={now} zoom={mapZoom} />}
           {freshnessOpen && world && (
             <section className="panel-scn absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-[calc(var(--foot-h)+var(--gap))] lg:left-(--left-edge) lg:w-[min(760px,calc(100%-var(--left-edge)-var(--right-edge)))]" aria-label="Data freshness">
