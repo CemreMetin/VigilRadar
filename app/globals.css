@@ -8,7 +8,7 @@
   --line: rgba(0, 229, 255, 0.16);
   --line-strong: rgba(0, 229, 255, 0.4);
   --fg: #d7e2ea;
-  --fg-dim: #7d8c97;
+  --fg-dim: #9aa8b3;
 
   --threat: #ff003c;
   --conflict: #ff6a00;
@@ -25,6 +25,7 @@
   --grp-space: #3ec7ff; /* sky blue */
 
   /* Map view grid: 4px steps, fixed column widths, defined once. Every panel offset is built from these. */
+  --glass: 80%; /* panel opacity over the map: raised from 55% so text stays at 4.5:1 over desert and ice (scripts/check-contrast.mjs) */
   --gap: 12px; /* distance of the panels from the window edge and from each other */
   --left-w: 252px;
   --right-w: 364px;
@@ -315,7 +316,7 @@ body {
 /* Panels on the map view take the active scenario's colour (--scn is set by DashboardLayout) */
 .panel-scn,
 .float-panel {
-  background: color-mix(in srgb, var(--panel-solid) 55%, transparent);
+  background: color-mix(in srgb, var(--panel-solid) var(--glass), transparent);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   border: 1px solid color-mix(in srgb, var(--scn, var(--accent)) 50%, transparent);
@@ -332,7 +333,7 @@ body {
   .float-panel {
     position: absolute;
     z-index: 30;
-    background: color-mix(in srgb, var(--panel-solid) 55%, transparent);
+    background: color-mix(in srgb, var(--panel-solid) var(--glass), transparent);
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
     border: 1px solid color-mix(in srgb, var(--scn, var(--accent)) 50%, transparent);
@@ -360,7 +361,7 @@ body {
   border-color: var(--c);
 }
 .tab-btn[aria-selected="true"] {
-  background-color: color-mix(in srgb, var(--c) 35%, transparent);
+  background-color: color-mix(in srgb, var(--c) 12%, transparent);
   border-color: var(--c);
 }
 .tab-btn .tab-bar {

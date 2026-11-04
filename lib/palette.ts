@@ -5,7 +5,7 @@
 export const COLOR = {
   bg: "#050505",
   fg: "#d7e2ea",
-  dim: "#7d8c97",
+  dim: "#9aa8b3",
   mid: "#9aa8b3",
   threat: "#ff003c",
   conflict: "#ff6a00",
