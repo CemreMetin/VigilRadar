@@ -19,7 +19,7 @@ export default function PrintMapButton({
   const [light, setLight] = useState(true);
   const [busy, setBusy] = useState(false);
   return (
-    <div className="no-print flex items-center gap-2">
+    <div className="no-print flex flex-wrap items-center gap-x-2 gap-y-1">
       <button
         type="button"
         className={className}
@@ -37,7 +37,7 @@ export default function PrintMapButton({
       >
         {busy ? "PREPARING…" : "PRINT MAP"}
       </button>
-      <label className="mono flex cursor-pointer items-center gap-1 text-[10px] text-dim">
+      <label className="mono flex cursor-pointer items-center gap-1 whitespace-nowrap text-[10px] text-dim">
         <input type="checkbox" checked={light} onChange={(e) => setLight(e.target.checked)} style={{ accentColor: "var(--accent)" }} />
         Light paper
       </label>

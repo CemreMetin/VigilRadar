@@ -41,8 +41,7 @@ export default function CountryView() {
       window.history.replaceState(null, "", `?c=${c}&tab=overview`);
       window.dispatchEvent(new Event("hashchange")); // WikiShell re-reads the URL and opens the profile
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mine]); // the stored value arrives after hydration, so this runs again then
 
   const list = useMemo(() => {
     const all = Object.values(data?.countries ?? {});

@@ -44,7 +44,7 @@ export default function DashboardLayout({
         {map}
         {mapOverlay}
         {/* view and camera controls: bottom right of the open map, just left of the right panel */}
-        <div className="absolute bottom-2 right-2 z-20 lg:bottom-12 lg:right-[388px]">{controls}</div>
+        <div className="absolute bottom-2 right-2 z-20 lg:bottom-[4.5rem] lg:right-[388px]">{controls}</div>
       </section>
 
       {alarm && <div className="alarm-frame no-print pointer-events-none fixed inset-0 z-50" aria-hidden />}
