@@ -12,6 +12,10 @@ import {
   type BagCategory,
   type ScenarioTag,
 } from "@/data/survival";
+import Link from "next/link";
+import { useMyCountry } from "@/lib/myCountry";
+import { useLazyJson } from "@/lib/useLazyJson";
+import type { ProfilesFile } from "@/lib/types";
 import OfflineButton from "./OfflineButton";
 import { ChecklistPrintForm, usePrintSheet } from "./ChecklistPrint";
 import { PAGE_META } from "@/data/pages";
@@ -127,6 +131,17 @@ export default function SurvivalHub() {
   const [filter, setFilter] = useState<ScenarioTag | "all">("all");
   const [tier, setTier] = useState<1 | 2>(1);
   const { start, sheet } = usePrintSheet();
+  const [mine] = useMyCountry();
+  const { data: profiles } = useLazyJson<ProfilesFile>("/data/country_profiles.json", !!mine);
+  const mineProfile = mine ? profiles?.countries[mine] : undefined;
+  // only what the site already holds about the country; no scores and no probabilities
+  const mineChips: { tag: ScenarioTag; why: string }[] = mineProfile
+    ? [
+        ...(mineProfile.arsenal || mineProfile.plants ? [{ tag: "nuclear" as const, why: "nuclear-armed state or has nuclear power plants" }] : []),
+        ...(mineProfile.volcanoes.length ? [{ tag: "ash" as const, why: "has a supervolcano on the watchlist" }] : []),
+        ...(mineProfile.outbreaks.some((o) => Date.parse(profiles!.generatedAt) - Date.parse(o.date) < 90 * 864e5) ? [{ tag: "pandemic" as const, why: "WHO outbreak report in the last 90 days" }] : []),
+      ]
+    : [];
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
@@ -400,7 +415,33 @@ export default function SurvivalHub() {
       accent="var(--safe)"
       intro="A calm preparedness guide from official sources: plan, checklist, shelter, communication, offline maps. It works offline and needs no account."
       {...PAGE_META.survive}
-      aside={<OfflineButton />}
+      aside={
+        <>
+          {mineProfile && (
+            <p className="mb-3 text-sm">
+              Your country: <strong>{mineProfile.name}</strong>{" "}
+              <Link href="/country" className="text-accent hover:underline">change</Link>.{" "}
+              {mineChips.length > 0 ? "Highlight the checklist for:" : "Nothing in the site's data points to a scenario for it."}{" "}
+              {mineChips.map((c) => (
+                <button
+                  key={c.tag}
+                  type="button"
+                  title={c.why}
+                  onClick={() => {
+                    setFilter(c.tag);
+                    window.history.replaceState(null, "", "?tab=bag");
+                    window.dispatchEvent(new Event("hashchange")); // WikiShell re-reads the URL and opens the checklist
+                  }}
+                  className="mono mr-1.5 border border-line px-2 py-0.5 text-[11px] text-dim hover:text-fg"
+                >
+                  {SCENARIO_FILTERS.find((f) => f.id === c.tag)?.label}
+                </button>
+              ))}
+            </p>
+          )}
+          <OfflineButton />
+        </>
+      }
       openOnParam={{ for: "bag" }}
       sections={sections.map((sec, i) =>
         i === sections.length - 1
