@@ -95,7 +95,7 @@ export default function FilterPanel({
   const hasQuakes = mode.layers.includes("quakes");
   const allOn = mode.layers.every((l) => layersOn.has(l));
   return (
-    <div key={mode.id} className="flex min-h-full flex-col">
+    <div key={mode.id} data-map-title={mode.title} className="flex min-h-full flex-col">
       <div className="flex items-center justify-between gap-2 px-3 pt-3">
         <p className="mono text-[11px] font-bold tracking-wider" style={{ color: mode.color }}>
           {`${mode.title.toUpperCase()} // LAYERS`}
@@ -117,7 +117,7 @@ export default function FilterPanel({
             This scenario has no map layer: the objects are not on the ground. Its readout is on the right.
           </p>
         )}
-        <ul className="readout-in mt-2 space-y-1">
+        <ul data-layer-list className="readout-in mt-2 space-y-1">
           {mode.layers.map((id) => {
             const info = LAYER_INFO[id];
             const on = layersOn.has(id);
@@ -255,7 +255,7 @@ export default function FilterPanel({
       </Section>
 
       <Section open={layersOn.has("targets") || layersOn.has("bases")} title="Legend">
-        <div className="space-y-1 text-[11px] font-light text-dim">{legend}</div>
+        <div data-legend className="space-y-1 text-[11px] font-light text-dim">{legend}</div>
       </Section>
     </div>
   );

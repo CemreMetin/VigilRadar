@@ -161,7 +161,7 @@ body {
   [class*="border-line"], [class*="divide-line"] > * { border-color: #bbb !important; }
   [class*="opacity-"] { opacity: 1 !important; }
   /* chrome that means nothing on paper */
-  .no-print, nav, aside, button, [role="toolbar"], select, input:not([type="checkbox"]), .maplibregl-map, .maplibregl-canvas-container, .alarm-bar, .alarm-frame { display: none !important; }
+  .no-print, nav, aside, button, [role="toolbar"], select, input:not([type="checkbox"]), .maplibregl-map, .maplibregl-canvas-container, .alarm-bar, .alarm-frame, .float-panel { display: none !important; }
   main { padding: 0 !important; }
   /* wiki pages */
   .wiki { max-width: 68ch; font-size: 10.5pt; }
@@ -183,6 +183,25 @@ body {
   [class*="border-accent"], [class*="border-geo"], [class*="border-bio"], [class*="border-dim"], [class*="border-safe"], [class*="border-threat"], [class*="border-conflict"], [class*="border-space"], [class*="border-fg"] { border-color: #000 !important; }
   [class*="border-dashed"] { border-style: dashed !important; }
   [class*="border-dotted"] { border-style: dotted !important; }
+}
+/* ---------- Printed map: its own landscape page ---------- */
+@page map { size: landscape; margin: 12mm 12mm 14mm; }
+.map-print { display: none; }
+@media print {
+  html[data-print="map"] body > *:not(.map-print) { display: none !important; }
+  html[data-print="map"] .map-print { display: block; page: map; font: 9pt var(--font-inter), system-ui, sans-serif; }
+  .map-print h1 { font-size: 14pt; margin: 0 0 4mm; }
+  .map-frame { border: 1px solid #000 !important; line-height: 0; break-inside: avoid; }
+  .map-frame img { display: block; margin: 0 auto; max-width: 100%; max-height: 128mm; width: auto; height: auto; }
+  /* light paper: the dark basemap becomes a pale one; exact colours so the browser does not undo it */
+  .map-frame img.light-paper { filter: invert(1) hue-rotate(180deg); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .map-meta { display: flex; justify-content: space-between; align-items: center; margin: 1mm 0 3mm; font-size: 8pt; }
+  .map-fit { width: fit-content; max-width: 100%; margin: 0 auto; }
+  .map-scale-bar { display: block; height: 0; margin-top: 2mm; border-top: 2px solid #000; border-left: 1px solid #000; border-right: 1px solid #000; padding-top: 1mm; box-sizing: border-box; }
+  .map-north { font-weight: 700; font-size: 11pt; }
+  .map-legend { columns: 2; column-gap: 8mm; margin: 1mm 0 3mm; padding-left: 4mm; list-style: disc; font-size: 8pt; }
+  .map-legend li { break-inside: avoid; margin-bottom: 1mm; }
+  .map-credit { font-size: 7.5pt; color: #444 !important; margin-top: 2mm; }
 }
 /* the print-only blocks stay out of the screen view */
 @media screen { .print-header, .print-footer, .print-all { display: none; } }

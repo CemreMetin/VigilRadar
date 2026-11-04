@@ -49,5 +49,46 @@ await printText("methodology-section", "/methodology", /Print this section/);
 await printText("scenarios-all", "/scenarios", /Print whole page/);
 await printText("nuclear-all", "/nuclear", /Print whole page/);
 
+/** map printing: click "Print map", render the sheet to PDF and screenshot it, check the image is not blank */
+async function printMapPage(name, path) {
+  await page.goto(BASE + path, { waitUntil: "load" });
+  await page.waitForTimeout(6000); // basemap tiles
+  await page.emulateMedia({ media: "screen" });
+  await page.getByRole("button", { name: /PRINT MAP/i }).first().click();
+  await page.waitForSelector(".map-print img", { state: "attached", timeout: 15000 });
+  await page.waitForFunction(() => window.__printed > 0, null, { timeout: 5000 }).catch(() => {});
+  await page.emulateMedia({ media: "print" });
+  const info = await page.evaluate(async () => {
+    const img = document.querySelector(".map-print img");
+    const c = document.createElement("canvas");
+    c.width = 64; c.height = 64;
+    const g = c.getContext("2d");
+    g.drawImage(img, 0, 0, 64, 64);
+    const d = g.getImageData(0, 0, 64, 64).data;
+    const colours = new Set();
+    for (let i = 0; i < d.length; i += 4) colours.add(`${d[i] >> 4},${d[i + 1] >> 4},${d[i + 2] >> 4}`);
+    return {
+      colours: colours.size,
+      w: img.naturalWidth,
+      h: img.naturalHeight,
+      legend: [...document.querySelectorAll(".map-legend li")].length,
+      sheet: document.querySelector(".map-print").innerText.slice(0, 160).replace(/\s+/g, " "),
+      visibleOther: [...document.body.children].filter((e) => !e.classList.contains("map-print") && getComputedStyle(e).display !== "none").length,
+      filter: getComputedStyle(img).filter,
+    };
+  });
+  await page.setViewportSize({ width: 1123, height: 794 }); // A4 landscape at 96 dpi, for the screenshot only
+  await page.screenshot({ path: `out-print/${name}.png` });
+  const buf = await page.pdf({ preferCSSPageSize: true });
+  writeFileSync(`out-print/${name}.pdf`, buf);
+  await page.emulateMedia({ media: "screen" });
+  await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+  const n = pdfPages(buf);
+  check(info.colours > 8 && info.visibleOther === 0 && n === 1, `${name}: ${n} page(s), image ${info.w}x${info.h} with ${info.colours} colour bins, legend lines ${info.legend}, other page content ${info.visibleOther}, filter ${info.filter}`);
+  console.log("      " + info.sheet);
+}
+await printMapPage("map-nuclear", "/?sc=nuclear");
+await printMapPage("minimap-solar", "/scenarios/solar-superstorm?tab=explorer");
+
 await browser.close();
 process.exit(failed ? 1 : 0);

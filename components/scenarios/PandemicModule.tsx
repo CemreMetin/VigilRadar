@@ -185,7 +185,7 @@ export default function PandemicModule() {
       </div>
 
       <div className="mt-3">
-        <MiniMap label="Map of airports reached by the simulated outbreak" onReady={(m) => setMap(m)} height={380} />
+        <MiniMap label="Map of airports reached by the simulated outbreak" legend={["Dots: airports reached so far; larger dots have more routes, paler dots are reached later; the ringed dot is where it starts", "ILLUSTRATIVE MODEL: an illustrative calculation from a published method, not a forecast", "Lines: airline routes (OpenFlights, mostly 2017)"]} onReady={(m) => setMap(m)} height={380} />
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">

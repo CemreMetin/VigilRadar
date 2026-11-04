@@ -77,7 +77,7 @@ export default function SolarModule() {
         </span>
       </div>
       <div className="mt-3">
-        <MiniMap label="Map of geomagnetic latitude bands and submarine cables" onReady={(m) => setMap(m)} height={380} />
+        <MiniMap label="Map of geomagnetic latitude bands and submarine cables" legend={["Dashed lines: 50° and 60° geomagnetic latitude (reference lines, illustrative)", "Submarine cables: those that cross the 50° band are drawn stronger than those that stay south of it", "Cable routes: TeleGeography; geomagnetic latitude: computed"]} onReady={(m) => setMap(m)} height={380} />
       </div>
       <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-dim">
         <input type="checkbox" checked={showCables} onChange={(e) => setShowCables(e.target.checked)} style={{ accentColor: "var(--accent)" }} />

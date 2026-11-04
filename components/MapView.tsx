@@ -52,7 +52,7 @@ export type MapData = {
 };
 
 /** Imperative controls for the on-map view buttons (bottom right). */
-export type MapControls = { zoomIn: () => void; zoomOut: () => void; reset: () => void; flyTo: (lon: number, lat: number, zoom?: number) => void };
+export type MapControls = { getMap: () => MlMap | null; zoomIn: () => void; zoomOut: () => void; reset: () => void; flyTo: (lon: number, lat: number, zoom?: number) => void };
 
 /** Where the camera should go when the scenario changes. `key` identifies the scenario. */
 export type Camera = { center: [number, number]; zoom: number; key: string; minZoom?: number };
@@ -208,6 +208,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         attributionControl: false, // credited in the status bar instead, so the corner stays free for the view controls
         dragRotate: false,
         pitchWithRotate: false,
+        canvasContextAttributes: { preserveDrawingBuffer: true }, // so "Print map" can read the pixels
       });
       map.touchZoomRotate.disableRotation();
       mapRef.current = map;
@@ -218,6 +219,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           return { center: c?.center ?? ([15, 20] as [number, number]), zoom: (c ? (small ? Math.max(0.3, c.zoom - 1.3) : c.zoom) : small ? 0.3 : 1.6) + (latest.current.globe ? 0.7 : 0) };
         };
         controlsRef.current = {
+          getMap: () => map ?? null,
           zoomIn: () => map?.zoomIn({ duration: 300 }),
           zoomOut: () => map?.zoomOut({ duration: 300 }),
           reset: () => map?.flyTo({ ...home(), duration: 900 }),
