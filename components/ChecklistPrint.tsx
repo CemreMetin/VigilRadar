@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { BAG_ITEMS, CATEGORY_LABEL, COMMS_ROWS, SCENARIO_FILTERS, type BagCategory, type ScenarioTag } from "@/data/survival";
+import { BAG_ITEMS, CATEGORY_LABEL, COMMS_ROWS, SCENARIO_FILTERS, TR, type BagCategory, type ScenarioTag } from "@/data/survival";
+import { useLang } from "@/lib/lang";
 import { dataDate } from "@/lib/printMap";
 
 export const TIER_LABEL = { 1: "Grab-and-go (about 72 hours)", 2: "Staying put (longer)" } as const;
@@ -59,14 +60,15 @@ export function usePrintSheet() {
 const Line = ({ w = "60mm" }: { w?: string }) => <span className="fill" style={{ minWidth: w }} />;
 
 export function ChecklistSheet({ job }: { job: Extract<SheetJob, { kind: "checklist" }> }) {
+  const tr = useLang()[0] === "tr";
   const tiers = job.tier === "both" ? ([1, 2] as const) : ([Number(job.tier)] as (1 | 2)[]);
   const scenario = SCENARIO_FILTERS.find((f) => f.id === job.filter)?.label;
   const relevant = (tags: ScenarioTag[]) => job.filter === "all" || tags.length === 0 || tags.includes(job.filter as ScenarioTag);
   return (
     <div className="sheet-checklist">
-      <h1 className="mono">Emergency kit checklist</h1>
+      <h1 className="mono">{tr ? TR.page.checklistTitle : "Emergency kit checklist"}</h1>
       <p className="sheet-sub">
-        {tiers.map((t) => TIER_LABEL[t]).join(" and ")}
+        {tiers.map((t) => (tr ? TR.tiers[t] : TIER_LABEL[t])).join(" / ")}
         {scenario && job.filter !== "all" ? ` · grey items matter less for: ${scenario}` : ""}
       </p>
       <p className="sheet-fields">
@@ -82,11 +84,11 @@ export function ChecklistSheet({ job }: { job: Extract<SheetJob, { kind: "checkl
         for (const it of BAG_ITEMS.filter((i) => i.tier === t)) byCat.set(it.category, [...(byCat.get(it.category) ?? []), it]);
         return (
           <section key={t} className={`sheet-tier ${t === 1 ? "compact" : ""}`} style={n > 0 ? { breakBefore: "page" } : undefined}>
-            {tiers.length > 1 && <h2 className="mono">{TIER_LABEL[t]}</h2>}
+            {tiers.length > 1 && <h2 className="mono">{tr ? TR.tiers[t] : TIER_LABEL[t]}</h2>}
             <div className="sheet-cats">
               {[...byCat.entries()].map(([cat, list]) => (
                 <div key={cat} className="print-cat">
-                  <h3 className="mono">{CATEGORY_LABEL[cat]}</h3>
+                  <h3 className="mono">{tr ? TR.categories[cat] : CATEGORY_LABEL[cat]}</h3>
                   <ul>
                     {list.map((it) => {
                       const less = !relevant(it.tags);
@@ -94,7 +96,7 @@ export function ChecklistSheet({ job }: { job: Extract<SheetJob, { kind: "checkl
                         <li key={it.id} className={less ? "less" : ""}>
                           <span className="box">{job.ticks && job.checked.has(it.id) ? "✓" : ""}</span>
                           <span className="nm">
-                            {it.name}
+                            {tr ? TR.items[it.id]?.[0] ?? it.name : it.name}
                             {less && scenario && <small> (less relevant for {scenario})</small>}
                             {job.reasons && <small className="why">{it.why}</small>}
                           </span>

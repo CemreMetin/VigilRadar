@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useLang } from "@/lib/lang";
 import { useLazyJson } from "@/lib/useLazyJson";
+import LangSwitch from "./LangSwitch";
 import { PAGE_GROUPS } from "./SiteNav";
 
 type SearchEntry = { url: string; page: string; section: string; text: string };
@@ -72,6 +74,7 @@ export default function WikiShell({
   accent = "var(--accent)",
   aside,
   openOnParam,
+  translated = false,
 }: {
   title: string;
   intro?: ReactNode;
@@ -87,6 +90,8 @@ export default function WikiShell({
   aside?: ReactNode;
   /** a query parameter that opens a section when no tab is given, e.g. { for: "bag" } */
   openOnParam?: Record<string, string>;
+  /** this page has Turkish text; others say so when TR is chosen */
+  translated?: boolean;
 }) {
   const path = usePathname() ?? "";
   const sections = useMemo<WikiSection[]>(
@@ -117,6 +122,7 @@ export default function WikiShell({
   const [activeId, setActiveId] = useState(sections[0].id);
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [lang] = useLang();
   const [printedOn, setPrintedOn] = useState("");
   const [dataAsOf, setDataAsOf] = useState("n/a");
 
@@ -356,7 +362,9 @@ export default function WikiShell({
             <button type="button" className="btn mono px-3 py-1 text-body font-bold" onClick={() => print("all")}>
               Print whole page
             </button>
+            <LangSwitch />
           </div>
+          {lang === "tr" && !translated && <p className="no-print mt-2 text-body text-dim">Bu sayfa yalnızca İngilizce. Türkçe: Survive ve Scenarios sayfaları. (This page is English only.)</p>}
 
           <div className="screen-section">
             <h2 className="mono mt-8 border-t border-line pt-4 text-read font-bold tracking-[0.14em]" style={{ color: accent }}>

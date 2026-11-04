@@ -1,6 +1,11 @@
-import { SHELTER_GUIDANCE as g } from "@/data/survival";
+"use client";
+
+import { SHELTER_GUIDANCE as en, TR } from "@/data/survival";
+import { useLang } from "@/lib/lang";
 
 export default function ShelterGuidance() {
+  const [lang] = useLang();
+  const g = lang === "tr" ? { lead: TR.shelter.lead, leadBold: `“${TR.shelter.quote}” ${TR.shelter.translation}`, bullets: TR.shelter.bullets, sources: en.sources, source: TR.shelter.sourceLabel } : { ...en, source: "Source:" };
   return (
     <div className="mt-3 border border-line p-4 text-read leading-relaxed">
       <p>
@@ -12,7 +17,7 @@ export default function ShelterGuidance() {
         ))}
       </ul>
       <p className="mono mt-3 text-body text-dim">
-        Source:{" "}
+        {g.source}{" "}
         {g.sources.map((s, i) => (
           <span key={s.url}>
             {i > 0 && " · "}

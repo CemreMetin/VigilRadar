@@ -65,6 +65,7 @@ export default function ScenariosPage() {
         title="Scenarios"
         intro="How things could go badly wrong, and how well we actually know it. Each scenario is rated on the quality of the evidence behind it (not on how likely it is), says what has already happened, what models and experts estimate, and what you can do. Seven have interactive explorers."
         {...PAGE_META.scenarios}
+        translated
         sections={sections}
       />
     </>

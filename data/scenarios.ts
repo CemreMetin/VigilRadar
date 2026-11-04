@@ -719,3 +719,43 @@ export const SCENARIOS: Scenario[] = [
 ];
 
 export const SCENARIO_BY_ID = Object.fromEntries(SCENARIOS.map((s) => [s.id, s])) as Record<string, Scenario>;
+
+/** Turkish for the Scenarios index and comparison table, next to the English above. The scenario pages themselves are English. */
+export const SCENARIO_TR = {
+  titles: {
+    supervolcano: "Süper volkanik patlama",
+    "nuclear-winter": "Nükleer savaş ve nükleer kış",
+    "pandemic-x": "Pandemi X (doğal)",
+    "solar-superstorm": "Güneş süper fırtınası (Carrington tipi)",
+    asteroid: "Asteroit veya kuyruklu yıldız çarpması",
+    cascadia: "Cascadia yitim zonu depremi ve tsunamisi",
+    marmara: "İstanbul yakınında büyük deprem (Marmara)",
+    arkstorm: "Mega sel: ARkStorm",
+    "wet-bulb": "Ölümcül sıcak ve nem (yaş termometre)",
+    amr: "Antibiyotik direnci",
+    "drought-breadbasket": "Mega kuraklık ve tahıl ambarlarının çöküşü",
+    kessler: "Kessler sendromu (yörünge enkazı zinciri)",
+    "climate-tipping": "İklim devrilme noktaları zinciri",
+    "engineered-pandemic": "Tasarlanmış pandemi",
+    "grid-cyber": "Şebeke veya siber çöküş",
+    "ocean-anoxia": "Okyanusta oksijen kaybı ve asitlenme",
+    biodiversity: "Biyolojik çeşitlilik ve tozlayıcı kaybı",
+    "ai-risk": "Gelişmiş yapay zekâ riski",
+    "dormant-pathogens": "Çözünen donmuş toprağın salacağı patojenler",
+    "cumbre-vieja": "Cumbre Vieja mega tsunamisi",
+    grb: "Gama ışını patlaması veya yakın süpernova",
+    "pole-reversal": "Manyetik kutup ters dönmesi felaketi",
+    "vacuum-decay": "Boşluk çözünmesi ve parçacık fiziği kazaları",
+  } as Record<string, string>,
+  table: {
+    include: "C düzeyi düşünce deneylerini de göster",
+    scenario: "Senaryo",
+    tier: "Düzey",
+    group: "Grup",
+    effect: "Zincirdeki en büyük etki (İngilizce)",
+    step: "İlk adım (İngilizce)",
+    checklist: "Kontrol listesi →",
+    note: "Düzeyler kanıtın kalitesini derecelendirir, bir senaryonun ne kadar olası olduğunu değil.",
+    shown: "gösterilen",
+  },
+};

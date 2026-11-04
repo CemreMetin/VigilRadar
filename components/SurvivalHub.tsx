@@ -9,10 +9,12 @@ import {
   OFFLINE_READING,
   REGULATOR_LINKS,
   SCENARIO_FILTERS,
+  TR,
   type BagCategory,
   type ScenarioTag,
 } from "@/data/survival";
 import Link from "next/link";
+import { useLang } from "@/lib/lang";
 import { useMyCountry } from "@/lib/myCountry";
 import { useLazyJson } from "@/lib/useLazyJson";
 import type { ProfilesFile } from "@/lib/types";
@@ -132,6 +134,8 @@ export default function SurvivalHub() {
   const [filter, setFilter] = useState<ScenarioTag | "all">("all");
   const [tier, setTier] = useState<1 | 2>(1);
   const { start, sheet } = usePrintSheet();
+  const [lang] = useLang();
+  const tr = lang === "tr";
   const [mine] = useMyCountry();
   const { data: profiles } = useLazyJson<ProfilesFile>("/data/country_profiles.json", !!mine);
   const mineProfile = mine ? profiles?.countries[mine] : undefined;
@@ -183,6 +187,21 @@ export default function SurvivalHub() {
   const sections: WikiSection[] = [
     { id: "plan", label: "Plan", group: "Start here", hint: "30 minutes, no money", content: (
       <>
+      {tr ? (
+        <>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-read leading-relaxed">
+            {TR.plan.steps.map(([head, text]) => (
+              <li key={head}>
+                <strong>{head}</strong> {text}
+              </li>
+            ))}
+          </ol>
+          <p className="mono mt-2 text-body text-dim">
+            {TR.plan.stepsSource} <A href="https://www.ready.gov/plan">Ready.gov: Make a plan</A>.
+          </p>
+        </>
+      ) : (
+        <>
       <ol className="mt-3 list-decimal space-y-2 pl-5 text-read leading-relaxed">
         <li>
           <strong>Meet.</strong> Talk through how you would get alerts, where you would shelter, how you would leave, and
@@ -201,6 +220,8 @@ export default function SurvivalHub() {
       <p className="mono mt-2 text-body text-dim">
         Steps from <A href="https://www.ready.gov/plan">Ready.gov: Make a plan</A>.
       </p>
+        </>
+      )}
       <button type="button" onClick={() => start({ kind: "plan" })} className="btn mono no-print mt-4 px-3 py-1.5 text-body font-bold">
         PRINT FILL-IN PLAN
       </button>
@@ -220,7 +241,7 @@ export default function SurvivalHub() {
               filter === f.id ? "border-safe bg-safe/10 text-safe" : "border-line text-dim hover:text-fg"
             }`}
           >
-            {f.label}
+            {tr ? TR.filters[f.id] : f.label}
           </button>
         ))}
       </div>
@@ -245,7 +266,7 @@ export default function SurvivalHub() {
               tier === t ? "border-safe bg-safe/10 text-safe" : "border-line text-dim hover:text-fg"
             }`}
           >
-            {label}
+            {tr ? TR.tiers[t] : label}
           </button>
         ))}
       </div>
@@ -262,7 +283,7 @@ export default function SurvivalHub() {
         {byCategory.map(([cat, list]) => (
           <fieldset key={cat}>
             <legend className="label mb-1">
-              {CATEGORY_LABEL[cat]} · {list.filter((i) => checked.has(i.id)).length}/{list.length}
+              {tr ? TR.categories[cat] : CATEGORY_LABEL[cat]} · {list.filter((i) => checked.has(i.id)).length}/{list.length}
             </legend>
             <ul className="divide-y divide-line border border-line">
               {list.map((it) => {
@@ -279,9 +300,9 @@ export default function SurvivalHub() {
                         onChange={() => toggle(it.id)}
                       />
                       <span className="min-w-0">
-                        <span className={`block text-read ${on ? "text-dim line-through" : ""}`}>{it.name}</span>
+                        <span className={`block text-read ${on ? "text-dim line-through" : ""}`}>{tr ? TR.items[it.id]?.[0] ?? it.name : it.name}</span>
                         <span className="block text-body leading-relaxed text-dim">
-                          {it.why}
+                          {tr ? TR.items[it.id]?.[1] ?? it.why : it.why}
                           {it.source && (
                             <>
                               {" "}
@@ -397,10 +418,12 @@ export default function SurvivalHub() {
     <>
     {sheet}
     <WikiShell
-      title="What can you do?"
+      title={tr ? TR.page.title : "What can you do?"}
       accent="var(--safe)"
-      intro="A calm preparedness guide from official sources: plan, checklist, shelter, communication, offline maps. It works offline and needs no account."
+      intro={tr ? TR.page.intro : "A calm preparedness guide from official sources: plan, checklist, shelter, communication, offline maps. It works offline and needs no account."}
       {...PAGE_META.survive}
+      keyPoints={tr ? TR.page.keyPoints : PAGE_META.survive.keyPoints}
+      translated
       aside={
         <>
           {mineProfile && (
@@ -425,6 +448,11 @@ export default function SurvivalHub() {
               ))}
             </p>
           )}
+          {tr && (
+            <p className="mb-3 text-body">
+              {TR.afad.note} <A href={TR.afad.url}>{TR.afad.title} ↗</A>
+            </p>
+          )}
           <OfflineButton />
           <p className="mt-3 text-body">
             <Link href="/survive/pack" className="text-accent hover:underline">Preparedness pack: plan, checklist, wallet card, shelter guidance and a map on paper →</Link>
@@ -434,13 +462,13 @@ export default function SurvivalHub() {
       openOnParam={{ for: "bag" }}
       sections={sections.map((sec, i) =>
         i === sections.length - 1
-          ? { ...sec, content: (<>{sec.content}
+          ? { ...sec, label: tr ? TR.page.sections[sec.id] : sec.label, content: (<>{sec.content}
       <p className="mt-6 text-body leading-relaxed text-dim">
         This page gives general information, not medical or safety advice for your situation. Follow instructions from
         local authorities.
       </p>
 </>) }
-          : sec,
+          : { ...sec, label: tr ? TR.page.sections[sec.id] : sec.label },
       )}
     />
     </>
