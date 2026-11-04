@@ -46,17 +46,17 @@ export default function AsteroidModule() {
   }, [diameter, preset, speed]);
 
   const counter = world.data?.counters.find((c) => c.id === "asteroids");
-  const field = "mono border border-line bg-bg px-2 py-1 text-xs text-fg";
+  const field = "mono border border-line bg-bg px-2 py-1 text-body text-fg";
 
   return (
     <section className="mt-6" aria-label="Impact energy calculator">
       <div className="flex flex-wrap items-center gap-3">
         <KindTag kind="model" />
-        <span className="text-xs text-dim">Kinetic energy of an impactor, from size, material and speed. Energy only.</span>
+        <span className="text-body text-dim">Kinetic energy of an impactor, from size, material and speed. Energy only.</span>
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           Diameter: <span className="text-fg">{diameter} m</span>
           <input
             type="range" min={0} max={3} step={0.01}
@@ -66,37 +66,37 @@ export default function AsteroidModule() {
             aria-label="Diameter in metres (log scale)"
           />
         </label>
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           Material
           <select className={`${field} mt-1 block w-full`} value={kind} onChange={(e) => { setKind(e.target.value); setSpeed(DENSITY.find((d) => d.id === e.target.value)!.speed); }}>
             {DENSITY.map((d) => <option key={d.id} value={d.id}>{d.label} ({d.v} kg/m³)</option>)}
           </select>
         </label>
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           Speed: <span className="text-fg">{speed} km/s</span>
           <input type="range" min={11} max={72} step={1} value={speed} onChange={(e) => setSpeed(Number(e.target.value))} className="mt-2 block w-full" style={{ accentColor: "var(--space)" }} />
         </label>
       </div>
-      <p className="mono mt-1 text-[11px] text-dim">Diameter slider runs from 1 m to 1,000 m (log scale); for larger objects see the Chicxulub marker.</p>
+      <p className="mono mt-1 text-body text-dim">Diameter slider runs from 1 m to 1,000 m (log scale); for larger objects see the Chicxulub marker.</p>
 
       <div className="mt-4 border border-line p-4">
         <p className="label">Impact energy</p>
-        <p className="mono mt-1 text-3xl" style={{ color: "var(--space)" }}>{fmt(mt)}</p>
+        <p className="mono mt-1 text-value" style={{ color: "var(--space)" }}>{fmt(mt)}</p>
         <div className="relative mt-6 h-10" role="img" aria-label="Energy compared with historical events on a logarithmic scale">
           <div className="absolute inset-x-0 top-5 h-px bg-line-strong" />
           {REFS.map((r, i) => (
             <div key={r.label} className="absolute top-0 -translate-x-1/2 text-center" style={{ left: pos(r.mt) }}>
-              <span className={`mono block whitespace-nowrap text-[9px] text-dim ${i % 2 ? "mt-6" : ""}`}>{r.label}</span>
+              <span className={`mono block whitespace-nowrap text-label text-dim ${i % 2 ? "mt-6" : ""}`}>{r.label}</span>
               {i % 2 === 0 && <span className="mx-auto mt-3 block h-2 w-px bg-dim" />}
             </div>
           ))}
           <div className="absolute top-3 h-4 w-0.5 -translate-x-1/2 bg-[var(--space)]" style={{ left: pos(Math.min(Math.max(mt, 10 ** LOG_MIN), 10 ** LOG_MAX)) }} aria-hidden />
         </div>
-        <ul className="mt-5 grid gap-x-6 gap-y-0.5 text-[11px] text-dim sm:grid-cols-2">
+        <ul className="mt-5 grid gap-x-6 gap-y-0.5 text-body text-dim sm:grid-cols-2">
           {REFS.map((r) => <li key={r.label}><span className="text-fg">{r.label}:</span> {r.note}</li>)}
         </ul>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-dim">
+      <p className="mt-2 text-body leading-relaxed text-dim">
         This is energy only. What happens on the ground depends on entry angle, whether the object breaks up in the air
         (small stony ones usually do), and the target. For craters, blast and thermal radius use the{" "}
         <a href="https://doi.org/10.1111/j.1945-5100.2005.tb00157.x" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Earth Impact Effects Program (Collins et al., 2005)</a>.
@@ -104,16 +104,16 @@ export default function AsteroidModule() {
 
       {counter && (
         <div className="mt-6">
-          <div className="flex flex-wrap items-center gap-3"><KindTag kind="observed" /><span className="text-xs text-dim">Known objects passing close in the next 60 days (LD = distance to the Moon)</span></div>
+          <div className="flex flex-wrap items-center gap-3"><KindTag kind="observed" /><span className="text-body text-dim">Known objects passing close in the next 60 days (LD = distance to the Moon)</span></div>
           <ul className="mt-2 divide-y divide-line border border-line">
             {counter.rows?.map((r) => (
-              <li key={r.label} className="flex items-baseline justify-between gap-3 px-3 py-1.5 text-xs">
+              <li key={r.label} className="flex items-baseline justify-between gap-3 px-3 py-1.5 text-body">
                 <span className="text-dim">{r.label}</span>
                 <span className="mono shrink-0">{r.value}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs leading-relaxed text-dim">{counter.note}</p>
+          <p className="mt-2 text-body leading-relaxed text-dim">{counter.note}</p>
         </div>
       )}
     </section>

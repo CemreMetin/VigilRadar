@@ -50,19 +50,19 @@ export default async function SourcesPage() {
                 style={{ background: DOMAIN_BY_ID[f.domain].color }}
                 aria-hidden
               />
-              <a href={f.url} className="text-sm font-medium hover:text-accent" target="_blank" rel="noopener noreferrer">
+              <a href={f.url} className="text-read hover:text-accent" target="_blank" rel="noopener noreferrer">
                 {f.name}
               </a>
-              <span className={`mono text-[11px] ${f.ok ? "text-safe" : "text-threat"}`}>
+              <span className={`mono text-body ${f.ok ? "text-safe" : "text-threat"}`}>
                 {f.ok ? "ok" : `failed: ${f.error}`}
               </span>
             </div>
-            <p className="mono mt-1 text-[11px] text-dim">
+            <p className="mono mt-1 text-body text-dim">
               cadence {f.cadence} · {f.count} items · license: {f.license}
               {f.fetchedAt ? ` · last success ${f.fetchedAt.slice(0, 16).replace("T", " ")} UTC` : ""}
             </p>
           </div>
-        )) ?? <p className="p-3 text-sm text-dim">No world_state.json found. Run npm run data.</p>}
+        )) ?? <p className="p-3 text-read text-dim">No world_state.json found. Run npm run data.</p>}
       </div>
 
       </>
@@ -78,10 +78,10 @@ export default async function SourcesPage() {
                 style={{ background: DOMAIN_BY_ID[c.domain].color }}
                 aria-hidden
               />
-              <span className="text-sm font-medium">{c.label}</span>
+              <span className="text-read">{c.label}</span>
               {c.manual && <span className="label">manual</span>}
             </div>
-            <p className="mono mt-1 text-[11px] text-dim">
+            <p className="mono mt-1 text-body text-dim">
               <a href={c.source.url} className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">
                 {c.source.name} ↗
               </a>{" "}
@@ -89,14 +89,14 @@ export default async function SourcesPage() {
               {c.reviewBy ? ` · next review ${c.reviewBy}` : ""}
             </p>
           </div>
-        )) ?? <p className="p-3 text-sm text-dim">No counters found.</p>}
+        )) ?? <p className="p-3 text-read text-dim">No counters found.</p>}
       </div>
 
       </>
     ) },
     { id: "static", label: "Static datasets", group: "Reference", content: (
       <>
-      <ul className="mt-2 divide-y divide-line border border-line text-sm">
+      <ul className="mt-2 divide-y divide-line border border-line text-read">
         <li className="p-3">Possible target areas (illustrative reference list): site names from the FAS Nuclear Notebook editions (United States 2025, United Kingdom 2024, French 2023, Indian 2024), coordinates printed in the FAS Russian 2023 and Chinese 2025 editions, other coordinates from Wikidata (CC0), capitals from GeoNames (CC BY 4.0). Partial and uneven by country; built by <span className="mono">scripts/build-nuclear-targets.py</span>. Effect radii: Glasstone and Dolan scaling, see Methodology.</li>
         <li className="p-3">Military bases: Wikidata (CC0), military base, airbase and naval base items with coordinates; former states hidden by default. Coverage is uneven and entries can be historical.</li>
         <li className="p-3">Country outlines for the shaded layers: Natural Earth 1:110m (public domain), simplified. BSL-4 laboratories: a partial list from English Wikipedia articles that state BSL-4 containment (CC BY-SA 4.0); the Global BioLabs Report 2023 (King&apos;s College London) gives only totals.</li>
@@ -115,7 +115,7 @@ export default async function SourcesPage() {
       <>
       <ul className="mt-2 divide-y divide-line border border-line">
         {PLANNED.map((p) => (
-          <li key={p.name} className="flex items-baseline justify-between gap-3 p-3 text-sm">
+          <li key={p.name} className="flex items-baseline justify-between gap-3 p-3 text-read">
             <span>
               {p.name} <span className="text-dim">· {p.domain}</span>
             </span>
@@ -124,7 +124,7 @@ export default async function SourcesPage() {
         ))}
       </ul>
 
-      <p className="mt-8 text-xs text-dim">
+      <p className="mt-8 text-body text-dim">
         Basemap: © CARTO, © OpenStreetMap contributors. Licenses are verified per source before a
         feed goes live.
       </p>

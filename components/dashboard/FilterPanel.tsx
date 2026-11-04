@@ -29,7 +29,7 @@ function Segmented<T extends string | number>({
           type="button"
           aria-pressed={value === o.value}
           onClick={() => onChange(o.value)}
-          className={`btn mono flex-1 px-2 py-1 text-[11px] font-bold ${i > 0 ? "-ml-px" : ""}`}
+          className={`btn mono flex-1 px-2 py-1 text-body font-bold ${i > 0 ? "-ml-px" : ""}`}
         >
           {o.label}
         </button>
@@ -97,11 +97,11 @@ export default function FilterPanel({
   return (
     <div key={mode.id} data-map-title={mode.title} className="flex min-h-full flex-col">
       <div className="flex items-center justify-between gap-2 px-3 pt-3">
-        <p className="mono text-[11px] font-bold tracking-wider" style={{ color: mode.color }}>
+        <p className="mono text-body font-bold tracking-wider" style={{ color: mode.color }}>
           {`${mode.title.toUpperCase()} // LAYERS`}
         </p>
         {mode.layers.length > 1 && (
-          <button type="button" onClick={() => onAllLayers(!allOn)} className="btn mono px-1.5 py-0.5 text-[10px] font-bold">
+          <button type="button" onClick={() => onAllLayers(!allOn)} className="btn mono px-1.5 py-0.5 text-label font-bold">
             {allOn ? "ALL OFF" : "ALL ON"}
           </button>
         )}
@@ -113,7 +113,7 @@ export default function FilterPanel({
 
       <div className="px-3 pb-3">
         {mode.layers.length === 0 && (
-          <p className="readout-in mt-3 text-[11px] font-light leading-relaxed text-dim">
+          <p className="readout-in mt-3 text-body leading-relaxed text-dim">
             This scenario has no map layer: the objects are not on the ground. Its readout is on the right.
           </p>
         )}
@@ -133,8 +133,8 @@ export default function FilterPanel({
                   title={info.blurb}
                 >
                   <span className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: on ? info.color : "transparent", border: `1px solid ${info.color}` }} aria-hidden />
-                  <span className="min-w-0 flex-1 truncate text-[13px] font-bold">{info.label}</span>
-                  <span className="mono shrink-0 text-[11px] font-bold tabular-nums" style={{ color: on ? info.color : "var(--fg-dim)" }}>
+                  <span className="min-w-0 flex-1 truncate text-body font-bold">{info.label}</span>
+                  <span className="mono shrink-0 text-body font-bold tabular-nums" style={{ color: on ? info.color : "var(--fg-dim)" }}>
                     {n !== undefined ? n.toLocaleString("en-US") : on ? "ON" : "OFF"}
                   </span>
                 </button>
@@ -158,7 +158,7 @@ export default function FilterPanel({
                     else next.add(k);
                     basesUi.onKinds(next);
                   }}
-                  className={`btn mono flex-1 px-2 py-1 text-[11px] font-bold ${i > 0 ? "-ml-px" : ""}`}
+                  className={`btn mono flex-1 px-2 py-1 text-body font-bold ${i > 0 ? "-ml-px" : ""}`}
                 >
                   {label}
                 </button>
@@ -169,14 +169,14 @@ export default function FilterPanel({
               id="base-country"
               value={basesUi.country}
               onChange={(e) => basesUi.onCountry(e.target.value)}
-              className="mono w-full border border-line bg-panel-solid px-1.5 py-1 text-[11px]"
+              className="mono w-full border border-line bg-panel-solid px-1.5 py-1 text-body"
             >
               <option value="">All countries</option>
               {basesUi.countries.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
-            <button type="button" aria-pressed={basesUi.historical} onClick={() => basesUi.onHistorical(!basesUi.historical)} className="btn mono flex w-full items-center justify-between px-2 py-1 text-left text-[11px] font-bold">
+            <button type="button" aria-pressed={basesUi.historical} onClick={() => basesUi.onHistorical(!basesUi.historical)} className="btn mono flex w-full items-center justify-between px-2 py-1 text-left text-body font-bold">
               <span>Show historical</span>
               <span>{basesUi.historical ? "ON" : "OFF"}</span>
             </button>
@@ -212,8 +212,8 @@ export default function FilterPanel({
           className="btn mt-1.5 flex w-full items-center justify-between px-2.5 py-1 text-left"
           title="Click anything on the map to draw lines to what it is linked to"
         >
-          <span className="text-[12px] font-bold">Links for selection</span>
-          <span className="mono text-[10px] font-bold">{showConnections ? "ON" : "OFF"}</span>
+          <span className="text-body font-bold">Links for selection</span>
+          <span className="mono text-label font-bold">{showConnections ? "ON" : "OFF"}</span>
         </button>
       </div>
 
@@ -227,35 +227,35 @@ export default function FilterPanel({
       <Section open={!!selected} title="Selection" meta={selected ? selected.kind : undefined}>
         {selected ? (
           <>
-            <p className="text-[13px] font-bold leading-snug">{selected.title}</p>
+            <p className="text-body font-bold leading-snug">{selected.title}</p>
             <ul className="mt-1 space-y-1">
               {selected.lines.slice(0, 4).map((l) => (
-                <li key={l} className="text-[11px] font-light leading-snug text-dim">{l}</li>
+                <li key={l} className="text-body leading-snug text-dim">{l}</li>
               ))}
             </ul>
             <div className="mt-2 flex gap-2">
               {selected.link &&
                 (selected.link.external ? (
-                  <a href={selected.link.href} target="_blank" rel="noopener noreferrer" className="btn mono px-2 py-1 text-[11px] font-bold">
+                  <a href={selected.link.href} target="_blank" rel="noopener noreferrer" className="btn mono px-2 py-1 text-body font-bold">
                     {selected.link.text}
                   </a>
                 ) : (
-                  <Link href={selected.link.href} className="btn mono px-2 py-1 text-[11px] font-bold">
+                  <Link href={selected.link.href} className="btn mono px-2 py-1 text-body font-bold">
                     {selected.link.text}
                   </Link>
                 ))}
-              <button type="button" onClick={onClearSelection} className="btn mono px-2 py-1 text-[11px] font-bold">
+              <button type="button" onClick={onClearSelection} className="btn mono px-2 py-1 text-body font-bold">
                 CLEAR
               </button>
             </div>
           </>
         ) : (
-          <p className="text-[11px] font-light leading-relaxed text-dim">Click a marker on the map to see what it is and what it is linked to.</p>
+          <p className="text-body leading-relaxed text-dim">Click a marker on the map to see what it is and what it is linked to.</p>
         )}
       </Section>
 
       <Section open={layersOn.has("targets") || layersOn.has("bases")} title="Legend">
-        <div data-legend className="space-y-1 text-[11px] font-light text-dim">{legend}</div>
+        <div data-legend className="space-y-1 text-body text-dim">{legend}</div>
       </Section>
     </div>
   );

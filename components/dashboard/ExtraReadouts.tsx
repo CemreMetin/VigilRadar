@@ -14,13 +14,13 @@ function Published({ counter }: { counter: Counter | undefined }) {
   return (
     <div className="border border-line p-2.5">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[12px] font-bold">{counter.label}</span>
-        <span className="mono text-[11px] font-bold" style={{ color: "var(--accent)" }}>
+        <span className="text-body font-bold">{counter.label}</span>
+        <span className="mono text-body font-bold" style={{ color: "var(--accent)" }}>
           {counter.value} {counter.unit}
         </span>
       </div>
-      <p className="mt-1 text-[11px] font-light leading-relaxed text-dim">{counter.trendLabel}</p>
-      <p className="mono mt-1 text-[10px] font-light text-dim">
+      <p className="mt-1 text-body leading-relaxed text-dim">{counter.trendLabel}</p>
+      <p className="mono mt-1 text-label text-dim">
         PUBLISHED FIGURE · {counter.asOf} ·{" "}
         <a href={counter.source.url} target="_blank" rel="noopener noreferrer" className="underline">
           {counter.source.name}
@@ -44,8 +44,8 @@ export function IceReadout({ world, tide }: { world: WorldState; tide: TideGauge
       </div>
       <Section open title="Global mean sea level (annual means)">
         <Spark values={sl?.history ?? []} color="var(--accent)" label="Global mean sea level, annual means" />
-        <p className="mono mt-1 text-[10px] font-light text-dim">{sl?.trendLabel}</p>
-        <p className="mt-1 text-[10px] font-light leading-relaxed text-dim">{sl?.note}</p>
+        <p className="mono mt-1 text-label text-dim">{sl?.trendLabel}</p>
+        <p className="mt-1 text-label leading-relaxed text-dim">{sl?.note}</p>
       </Section>
       <Section title="Sea ice vs 1981–2010 mean">
         <ul>
@@ -54,25 +54,25 @@ export function IceReadout({ world, tide }: { world: WorldState; tide: TideGauge
           ))}
         </ul>
         <Spark values={ice?.history ?? []} color="var(--accent)" label="Arctic extent, last 90 days" />
-        <p className="mono mt-1 text-[10px] font-light text-dim">{ice?.trendLabel}</p>
+        <p className="mono mt-1 text-label text-dim">{ice?.trendLabel}</p>
       </Section>
       <Section title="Land ice (published assessments)">
         <div className="space-y-2">
           <Published counter={c(world, "glaciers")} />
           <Published counter={c(world, "ice-sheets")} />
         </div>
-        <p className="mt-2 text-[10px] font-light leading-relaxed text-dim">
+        <p className="mt-2 text-label leading-relaxed text-dim">
           These come from multi-year scientific assessments, not a live feed, and are updated by hand when a new one is published.
         </p>
       </Section>
       <Section title="Tide gauges on the map">
         {median !== null ? (
-          <p className="text-[12px] font-light leading-relaxed text-dim">
+          <p className="text-body leading-relaxed text-dim">
             {trends.length} stations; {rising} show rising relative sea level over the last 30 years (median {median > 0 ? "+" : ""}
             {median.toFixed(1)} mm/yr). Colour: blue falling, grey flat, amber rising, red fast. Relative sea level includes the land moving up or down, so a gauge can fall where the land is rising. Click a dot for its value.
           </p>
         ) : (
-          <p className="text-[12px] text-dim">Switch the Tide gauges layer on to load the stations.</p>
+          <p className="text-body text-dim">Switch the Tide gauges layer on to load the stations.</p>
         )}
       </Section>
     </>
@@ -83,7 +83,7 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
   const ctr = c(world, "asteroids");
   if (!file) {
     return (
-      <p className="mono caret p-4 text-xs font-light text-dim" role="status">
+      <p className="mono caret p-4 text-body text-dim" role="status">
         LOADING CLOSE APPROACHES
       </p>
     );
@@ -99,20 +99,20 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
       <div className="flex items-stretch border-b border-line">
         <div className="min-w-0 flex-[1.4] border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Nearest</p>
-          <p className="mono text-xl font-bold leading-tight" style={{ color: "var(--space)" }}>
+          <p className="mono text-value font-bold leading-tight" style={{ color: "var(--space)" }}>
             {nearest ? `${nearest.ld.toFixed(2)} LD` : "–"}
           </p>
-          <p className="mono truncate text-[10px] font-light text-dim">{nearest ? `${nearest.des} · ${nearest.date.slice(5, 11)}` : ""}</p>
+          <p className="mono truncate text-label text-dim">{nearest ? `${nearest.des} · ${nearest.date.slice(5, 11)}` : ""}</p>
         </div>
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">&lt; 1 LD</p>
-          <p className="mono text-xl font-bold leading-tight" style={{ color: inside ? "var(--geo)" : "var(--fg)" }}>{inside}</p>
-          <p className="mono text-[10px] font-light text-dim">of {byDist.length}</p>
+          <p className="mono text-value font-bold leading-tight" style={{ color: inside ? "var(--geo)" : "var(--fg)" }}>{inside}</p>
+          <p className="mono text-label text-dim">of {byDist.length}</p>
         </div>
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0" title="NASA Sentry: objects with a non-zero impact chance in 100 years; Torino scale above 0">
           <p className="label">Sentry</p>
-          <p className="mono text-xl font-bold leading-tight">{file.sentry ? file.sentry.tracked : "–"}</p>
-          <p className="mono text-[10px] font-light text-dim">{file.sentry ? `${file.sentry.torinoAbove0} above Torino 0` : "unavailable"}</p>
+          <p className="mono text-value font-bold leading-tight">{file.sentry ? file.sentry.tracked : "–"}</p>
+          <p className="mono text-label text-dim">{file.sentry ? `${file.sentry.torinoAbove0} above Torino 0` : "unavailable"}</p>
         </div>
       </div>
 
@@ -129,21 +129,21 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
             />
           ))}
         </div>
-        <p className="mono mt-0.5 flex justify-between text-[9px] font-light text-dim"><span>Earth</span><span>Moon 1 LD</span><span>{file.maxLd.toFixed(0)} LD</span></p>
+        <p className="mono mt-0.5 flex justify-between text-label text-dim"><span>Earth</span><span>Moon 1 LD</span><span>{file.maxLd.toFixed(0)} LD</span></p>
       </div>
 
       <Section open title="Next approaches" meta={`${file.windowDays} d window`}>
-        <table className="mono w-full text-[11px]">
-          <thead className="text-[9px] font-light text-dim">
-            <tr className="text-left"><th className="pb-1 font-light">UTC</th><th className="font-light">OBJECT</th><th className="text-right font-light">SIZE</th><th className="text-right font-light">KM/S</th><th className="text-right font-light">LD</th></tr>
+        <table className="mono w-full text-body">
+          <thead className="text-label text-dim">
+            <tr className="text-left"><th className="pb-1 text-dim">UTC</th><th className="text-dim">OBJECT</th><th className="text-right text-dim">SIZE</th><th className="text-right text-dim">KM/S</th><th className="text-right text-dim">LD</th></tr>
           </thead>
           <tbody>
             {soon.map((a) => (
               <tr key={a.des + a.date} className="border-t border-line/50">
-                <td className="py-0.5 font-light text-dim">{a.date.slice(5, 11)}</td>
+                <td className="py-0.5 text-dim">{a.date.slice(5, 11)}</td>
                 <td className="font-bold">{a.des}</td>
-                <td className="text-right font-light text-dim">{size(a)}</td>
-                <td className="text-right font-light text-dim">{a.kms.toFixed(1)}</td>
+                <td className="text-right text-dim">{size(a)}</td>
+                <td className="text-right text-dim">{a.kms.toFixed(1)}</td>
                 <td className="text-right font-bold" style={{ color: a.ld < 1 ? "var(--geo)" : "var(--space)" }}>{a.ld.toFixed(2)}</td>
               </tr>
             ))}
@@ -151,7 +151,7 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
         </table>
       </Section>
       <Section title="About these numbers">
-        <p className="text-[11px] font-light leading-relaxed text-dim">
+        <p className="text-body leading-relaxed text-dim">
           <Term id="ld">LD</Term> = lunar distance (384,400 km). A listed approach is a flyby, not an impact. Sizes are rough ranges from brightness (H) with two assumed reflectivities, not measurements.
           Sentry lists objects with a non-zero chance of impact within 100 years; <Term id="torino">Torino</Term> 0 means no hazard.{" "}
           {ctr ? `Source: ${ctr.source.name}, updated ${ctr.cadence}.` : ""}
@@ -165,7 +165,7 @@ export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFi
   const ctr = c(world, "satellites");
   if (!file) {
     return (
-      <p className="mono caret p-4 text-xs font-light text-dim" role="status">
+      <p className="mono caret p-4 text-body text-dim" role="status">
         LOADING CATALOGUE SNAPSHOT
       </p>
     );
@@ -182,16 +182,16 @@ export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFi
       <div className="flex items-stretch border-b border-line">
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Active</p>
-          <p className="mono text-xl font-bold leading-tight" style={{ color: "#6fa8ff" }}>{(counts.satellites + counts.starlink).toLocaleString("en-US")}</p>
+          <p className="mono text-value font-bold leading-tight" style={{ color: "#6fa8ff" }}>{(counts.satellites + counts.starlink).toLocaleString("en-US")}</p>
         </div>
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Debris</p>
-          <p className="mono text-xl font-bold leading-tight">{counts.debris.toLocaleString("en-US")}</p>
+          <p className="mono text-value font-bold leading-tight">{counts.debris.toLocaleString("en-US")}</p>
         </div>
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Snapshot</p>
-          <p className="mono text-xl font-bold leading-tight">{file.generatedAt.slice(11, 16)}</p>
-          <p className="mono text-[10px] font-light text-dim">UTC</p>
+          <p className="mono text-value font-bold leading-tight">{file.generatedAt.slice(11, 16)}</p>
+          <p className="mono text-label text-dim">UTC</p>
         </div>
       </div>
       <Section open title="By kind">
@@ -202,11 +202,11 @@ export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFi
         </ul>
       </Section>
       <Section title="Space stations (at the snapshot)">
-        <ul className="mono text-[11px]">
+        <ul className="mono text-body">
           {file.stations.map(([name, lon, lat, alt]) => (
             <li key={name} className="flex justify-between border-t border-line/50 py-0.5 first:border-0">
               <span className="font-bold">{name.replace(/ \(.*\)/, "")}</span>
-              <span className="font-light text-dim">{lat.toFixed(1)}°, {lon.toFixed(1)}° · {alt} km</span>
+              <span className="text-dim">{lat.toFixed(1)}°, {lon.toFixed(1)}° · {alt} km</span>
             </li>
           ))}
         </ul>
@@ -215,7 +215,7 @@ export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFi
         <PassFinder />
       </Section>
       <Section title="About this snapshot">
-        <p className="text-[11px] font-light leading-relaxed text-dim">
+        <p className="text-body leading-relaxed text-dim">
           Positions are computed (SGP4) from published orbital elements for {file.generatedAt.slice(0, 16).replace("T", " ")} UTC. Satellites move about 7 km/s, so the dots show where objects were at that time, not where they are now. Debris covers four major breakups only, and small objects are not tracked.{" "}
           {ctr ? `Source: ${ctr.source.name}.` : ""}
         </p>
@@ -240,7 +240,7 @@ export function WeatherReadout({ world, file, fires }: { world: WorldState; file
   const ctr = c(world, "cyclones");
   if (!file) {
     return (
-      <p className="mono caret p-4 text-xs font-light text-dim" role="status">
+      <p className="mono caret p-4 text-body text-dim" role="status">
         LOADING ADVISORIES
       </p>
     );
@@ -252,32 +252,32 @@ export function WeatherReadout({ world, file, fires }: { world: WorldState; file
       <div className="flex items-stretch border-b border-line">
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Active</p>
-          <p className="mono text-xl font-bold leading-tight" style={{ color: "#2fd4b0" }}>{storms.length}</p>
+          <p className="mono text-value font-bold leading-tight" style={{ color: "#2fd4b0" }}>{storms.length}</p>
         </div>
         <div className="flex-[1.6] border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Strongest</p>
-          <p className="mono text-xl font-bold leading-tight">{top ? `${top.windKt} kt` : "–"}</p>
-          <p className="mono truncate text-[10px] font-light text-dim">{top ? `${top.name}${step(top.windKt) ? ` · category ${step(top.windKt)}` : ""}` : "no active storms"}</p>
+          <p className="mono text-value font-bold leading-tight">{top ? `${top.windKt} kt` : "–"}</p>
+          <p className="mono truncate text-label text-dim">{top ? `${top.name}${step(top.windKt) ? ` · category ${step(top.windKt)}` : ""}` : "no active storms"}</p>
         </div>
       </div>
       <Section open title="Storms" meta="NHC advisories">
         {storms.length === 0 ? (
-          <p className="text-[12px] font-light leading-relaxed text-dim">
+          <p className="text-body leading-relaxed text-dim">
             NHC has no active tropical cyclones in the Atlantic, East Pacific or Central Pacific right now. That is normal outside the main seasons.
           </p>
         ) : (
-          <table className="mono w-full text-[11px]">
-            <thead className="text-[9px] font-light text-dim">
-              <tr className="text-left"><th className="pb-1 font-light">NAME</th><th className="font-light">CLASS</th><th className="text-right font-light">WIND</th><th className="text-right font-light">MB</th><th className="text-right font-light">MOVING</th></tr>
+          <table className="mono w-full text-body">
+            <thead className="text-label text-dim">
+              <tr className="text-left"><th className="pb-1 text-dim">NAME</th><th className="text-dim">CLASS</th><th className="text-right text-dim">WIND</th><th className="text-right text-dim">MB</th><th className="text-right text-dim">MOVING</th></tr>
             </thead>
             <tbody>
               {storms.map((s) => (
                 <tr key={s.id} className="border-t border-line/50">
                   <td className="py-0.5 font-bold"><a href={s.url} target="_blank" rel="noopener noreferrer" className="underline">{s.name}</a></td>
-                  <td className="font-light text-dim" title={CLASS_LABEL[s.cls] ?? s.cls}>{s.cls}</td>
+                  <td className="text-dim" title={CLASS_LABEL[s.cls] ?? s.cls}>{s.cls}</td>
                   <td className="text-right font-bold" style={{ color: step(s.windKt) >= 3 ? "var(--threat)" : step(s.windKt) >= 1 ? "var(--geo)" : "var(--fg)" }}>{s.windKt} kt</td>
-                  <td className="text-right font-light text-dim">{s.pressureMb ?? "–"}</td>
-                  <td className="text-right font-light text-dim">{s.dir !== null && s.speedKt !== null ? `${s.dir}° ${s.speedKt} kt` : "–"}</td>
+                  <td className="text-right text-dim">{s.pressureMb ?? "–"}</td>
+                  <td className="text-right text-dim">{s.dir !== null && s.speedKt !== null ? `${s.dir}° ${s.speedKt} kt` : "–"}</td>
                 </tr>
               ))}
             </tbody>
@@ -286,17 +286,17 @@ export function WeatherReadout({ world, file, fires }: { world: WorldState; file
       </Section>
       <Section title="Active fires (NASA FIRMS)" meta={fires && fires !== "off" ? `${fires.total.toLocaleString("en-US")} hot pixels` : undefined}>
         {fires && fires !== "off" ? (
-          <p className="text-[11px] font-light leading-relaxed text-dim">
+          <p className="text-body leading-relaxed text-dim">
             {fires.total.toLocaleString("en-US")} satellite hot-pixel detections in the last 24 hours, summed on a 0.5 degree grid ({fires.cells.length.toLocaleString("en-US")} cells; low-confidence pixels removed). A detection is a hot spot, not a confirmed wildfire: it includes agricultural burns and gas flares.
           </p>
         ) : (
-          <p className="text-[11px] font-light leading-relaxed text-dim">
+          <p className="text-body leading-relaxed text-dim">
             {fires === "off" ? "Fire detections are not enabled on this deployment: the data job needs a free NASA FIRMS key (FIRMS_MAP_KEY)." : "Loading…"}
           </p>
         )}
       </Section>
       <Section title="About these numbers">
-        <p className="text-[11px] font-light leading-relaxed text-dim">
+        <p className="text-body leading-relaxed text-dim">
           Sustained one-minute wind in knots (1 kt = 1.15 mph = 1.85 km/h) and the position from the latest NHC advisory, issued about every six hours; the storm has moved since. Colour steps follow the Saffir-Simpson scale. NHC forecast tracks are not drawn here. Only the Atlantic, East Pacific and Central Pacific are covered; West Pacific typhoons and Indian Ocean cyclones are not.{" "}
           {ctr ? `Source: ${ctr.source.name}.` : ""}
         </p>
@@ -310,7 +310,7 @@ export function ScaleChips({ solar, picked, onPick }: { solar: { data: SolarNow 
   const sc = solar.data?.scales;
   if (!sc) {
     return (
-      <p className="mono px-3 py-2 text-[11px] font-light text-dim" role="status">
+      <p className="mono px-3 py-2 text-body text-dim" role="status">
         {solar.failed || solar.data ? "NOAA scales unavailable right now." : "LOADING NOAA SCALES"}
       </p>
     );
@@ -330,8 +330,8 @@ export function ScaleChips({ solar, picked, onPick }: { solar: { data: SolarNow 
             style={{ "--c": color, color } as React.CSSProperties}
             title={`${k}${level}: ${sc[k].text}. Click for what the scale means.`}
           >
-            <span className="block text-sm font-bold">{k}{level}</span>
-            <span className="block text-[9px] font-light">{sc[k].text}</span>
+            <span className="block text-body font-bold">{k}{level}</span>
+            <span className="block text-label text-dim">{sc[k].text}</span>
           </button>
         );
       })}

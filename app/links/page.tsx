@@ -17,7 +17,7 @@ const sections: WikiSection[] = [
     label: "Causal vs computed",
     group: "Links",
     content: (
-      <div className="mt-3 max-w-2xl space-y-3 text-sm leading-relaxed">
+      <div className="mt-3 max-w-2xl space-y-3 text-read leading-relaxed">
         <p>
           This map makes claims about <span className="text-fg">cause</span>. Each arrow is written by hand, rated by strength of evidence (strong, moderate,
           speculative) and cited. Speculative arrows are hidden by default.

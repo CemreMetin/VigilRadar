@@ -10,14 +10,14 @@ export function Page({ children, wide = false }: { children: ReactNode; wide?: b
 
 export function H1({ children, color = "var(--accent)" }: { children: ReactNode; color?: string }) {
   return (
-    <h1 className="mono text-xl font-bold tracking-wide" style={{ color }}>
+    <h1 className="mono text-title font-bold tracking-wide" style={{ color }}>
       {children}
     </h1>
   );
 }
 
 export function Lead({ children }: { children: ReactNode }) {
-  return <p className="mt-3 max-w-2xl text-sm leading-relaxed text-dim">{children}</p>;
+  return <p className="mt-3 max-w-2xl text-read leading-relaxed text-dim">{children}</p>;
 }
 
 export function H2({ id, children }: { id?: string; children: ReactNode }) {
@@ -70,7 +70,7 @@ const KIND: Record<Kind, { text: string; cls: string }> = {
 };
 export function KindTag({ kind }: { kind: Kind }) {
   const k = KIND[kind];
-  return <span className={`mono inline-block border px-1.5 py-0.5 text-[10px] tracking-wider ${k.cls}`}>{k.text}</span>;
+  return <span className={`mono inline-block border px-1.5 py-0.5 text-label tracking-wider ${k.cls}`}>{k.text}</span>;
 }
 
 export type Tier = "A" | "B" | "C";
@@ -82,7 +82,7 @@ const TIER: Record<Tier, { name: string; cls: string }> = {
 export function TierBadge({ tier }: { tier: Tier }) {
   const t = TIER[tier];
   return (
-    <span className={`mono inline-block border px-1.5 py-0.5 text-[10px] tracking-wider ${t.cls}`} title="Evidence quality, not likelihood">
+    <span className={`mono inline-block border px-1.5 py-0.5 text-label tracking-wider ${t.cls}`} title="Evidence quality, not likelihood">
       {t.name}
     </span>
   );
@@ -90,7 +90,7 @@ export function TierBadge({ tier }: { tier: Tier }) {
 
 export function Loading({ error }: { error?: string | null }) {
   return (
-    <p className={`mt-6 text-sm ${error ? "text-threat" : "text-dim"}`}>
+    <p className={`mt-6 text-read ${error ? "text-threat" : "text-dim"}`}>
       {error ? `Could not load data (${error}). Run npm run data.` : "Loading…"}
     </p>
   );

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 import type { ScenarioModule } from "@/data/scenarios";
 
-const Loading = () => <p className="mt-6 text-sm text-dim">Loading…</p>;
+const Loading = () => <p className="mt-6 text-read text-dim">Loading…</p>;
 
 // Map-based modules are client-only (they need WebGL), so skip server rendering for them.
 const MODULES: Record<ScenarioModule, ComponentType> = {

@@ -155,18 +155,18 @@ export default function PandemicModule() {
 
   if (loading || error || !data) return <Loading error={error} />;
 
-  const field = "mono border border-line bg-bg px-2 py-1 text-xs text-fg";
+  const field = "mono border border-line bg-bg px-2 py-1 text-body text-fg";
   return (
     <section aria-label="Pandemic spread explorer" className="mt-6">
       <div className="flex flex-wrap items-center gap-3">
         <KindTag kind="model" />
-        <span className="text-xs text-dim">
+        <span className="text-body text-dim">
           Order and relative timing of arrival by air travel, using &quot;effective distance&quot; on the airline network.
         </span>
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           Outbreak starts in
           <select className={`${field} mt-1 block w-full`} value={origin} onChange={(e) => { setOrigin(e.target.value); setDay(0); setPlaying(false); }}>
             {Object.keys(data.origins).map((o) => (
@@ -174,11 +174,11 @@ export default function PandemicModule() {
             ))}
           </select>
         </label>
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           R₀ (new cases per case): <span className="text-fg">{r0.toFixed(1)}</span>
           <input type="range" min={1.2} max={6} step={0.1} value={r0} onChange={(e) => setR0(Number(e.target.value))} className="mt-2 block w-full" style={{ accentColor: "var(--bio)" }} />
         </label>
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           Generation time (days): <span className="text-fg">{gen}</span>
           <input type="range" min={2} max={12} step={1} value={gen} onChange={(e) => setGen(Number(e.target.value))} className="mt-2 block w-full" style={{ accentColor: "var(--bio)" }} />
         </label>
@@ -196,11 +196,11 @@ export default function PandemicModule() {
             else if (day < firstDay) setDay(firstDay);
             setPlaying((p) => !p);
           }}
-          className="mono border border-bio px-3 py-1 text-xs text-bio hover:bg-bio/10"
+          className="mono border border-bio px-3 py-1 text-body text-bio hover:bg-bio/10"
         >
           {playing ? "pause" : day >= maxDay ? "replay" : "play"}
         </button>
-        <label className="flex min-w-[220px] flex-1 items-center gap-3 text-xs text-dim">
+        <label className="flex min-w-[220px] flex-1 items-center gap-3 text-body text-dim">
           Day
           <input type="range" min={0} max={maxDay} value={day} onChange={(e) => { setPlaying(false); setDay(Number(e.target.value)); }} className="flex-1" style={{ accentColor: "var(--bio)" }} />
           <span className="mono w-14 text-right text-fg">day {day}</span>
@@ -208,7 +208,7 @@ export default function PandemicModule() {
       </div>
 
       {stats && (
-        <p className="mono mt-2 text-[11px] text-dim">
+        <p className="mono mt-2 text-body text-dim">
           By day {day}: {stats.reached} of {data.airports.length} airports reached, covering about{" "}
           {(stats.share * 100).toFixed(0)}% of route volume. Growth rate {growth.toFixed(2)} per day.
         </p>
@@ -217,7 +217,7 @@ export default function PandemicModule() {
       {stats && (
         <div className="mt-4">
           <p className="label">First airports reached (day)</p>
-          <ol className="mt-1 grid gap-x-6 gap-y-0.5 text-xs sm:grid-cols-2">
+          <ol className="mt-1 grid gap-x-6 gap-y-0.5 text-body sm:grid-cols-2">
             {stats.first.map(({ i, t }) => {
               const a = data.airports[i];
               return (
@@ -231,7 +231,7 @@ export default function PandemicModule() {
         </div>
       )}
 
-      <div className="mt-4 border border-line p-3 text-xs leading-relaxed text-dim">
+      <div className="mt-4 border border-line p-3 text-body leading-relaxed text-dim">
         <p className="text-fg">How to read this</p>
         <ul className="mt-1 list-disc space-y-1 pl-5">
           <li>

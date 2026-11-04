@@ -18,7 +18,7 @@ const n = (v: number) => v.toLocaleString("en-US");
 const num = (s: string) => Number(s.replace(/[,%+]/g, "").replace("−", "-"));
 
 function QuakeList({ quakes, now, selectedId, onSelect, limit = 6 }: { quakes: MonitorEvent[]; now: number | null; selectedId: string | null; onSelect: (id: string) => void; limit?: number }) {
-  if (quakes.length === 0) return <p className="text-xs text-dim">No earthquakes match the filters.</p>;
+  if (quakes.length === 0) return <p className="text-body text-dim">No earthquakes match the filters.</p>;
   return (
     <ul className="divide-y divide-line border border-line">
       {quakes.slice(0, limit).map((e) => (
@@ -29,10 +29,10 @@ function QuakeList({ quakes, now, selectedId, onSelect, limit = 6 }: { quakes: M
             aria-current={e.id === selectedId}
             className={`flex w-full items-center gap-3 px-2.5 py-1.5 text-left hover:bg-accent/10 ${e.id === selectedId ? "bg-accent/15" : ""}`}
           >
-            <span className="mono w-9 shrink-0 text-center text-xs font-bold text-geo">{e.magnitude?.toFixed(1)}</span>
+            <span className="mono w-9 shrink-0 text-center text-body font-bold text-geo">{e.magnitude?.toFixed(1)}</span>
             <span className="min-w-0">
-              <span className="block truncate text-[12px] font-bold">{e.title.replace(/^M [\d.]+ - /, "")}</span>
-              <span className="mono text-[10px] font-light text-dim">{now ? relTime(e.startedAt, now) : ""} · {Math.round(e.depthKm ?? 0)} km deep</span>
+              <span className="block truncate text-body font-bold">{e.title.replace(/^M [\d.]+ - /, "")}</span>
+              <span className="mono text-label text-dim">{now ? relTime(e.startedAt, now) : ""} · {Math.round(e.depthKm ?? 0)} km deep</span>
             </span>
           </button>
         </li>
@@ -48,8 +48,8 @@ function KpGauge({ counter }: { counter: Counter }) {
   return (
     <>
       <div className="flex items-baseline gap-3">
-        <span className="mono readout-in text-3xl font-bold" style={{ color: kp >= 5 ? "var(--threat)" : "var(--space)" }}>{counter.value}</span>
-        <span className="mono text-[11px] font-light text-dim"><Term id="kp">Kp</Term> now · {counter.unit?.split("·")[1]?.trim()}</span>
+        <span className="mono readout-in text-value font-bold" style={{ color: kp >= 5 ? "var(--threat)" : "var(--space)" }}>{counter.value}</span>
+        <span className="mono text-body text-dim"><Term id="kp">Kp</Term> now · {counter.unit?.split("·")[1]?.trim()}</span>
       </div>
       {/* nine segments: Kp 0-9. Filled up to the current value; a tick marks the 24 h peak. */}
       <div className="mt-3 flex gap-0.5" role="img" aria-label={`Kp ${counter.value} of 9, 24 hour peak ${peak.toFixed(1)}`}>
@@ -64,7 +64,7 @@ function KpGauge({ counter }: { counter: Counter }) {
           );
         })}
       </div>
-      <div className="mono mt-2 flex justify-between text-[9px] font-light text-dim">
+      <div className="mono mt-2 flex justify-between text-label text-dim">
         <span>0</span><span>quiet</span><span className="text-threat">5 storm (G1)</span><span>9</span>
       </div>
       {hist.length > 1 && (
@@ -118,7 +118,7 @@ export default function Readout({
 }) {
   if (!world) {
     return (
-      <p className="mono caret p-4 text-xs font-light text-dim" role="status">
+      <p className="mono caret p-4 text-body text-dim" role="status">
         INITIALIZING FEEDS
       </p>
     );
@@ -164,18 +164,18 @@ export default function Readout({
               <div key={i} className="flex-1" style={{ height: `${((120 - s) / 40) * 100}%`, minHeight: 6, background: i === seconds.length - 1 ? "var(--threat)" : "var(--line-strong)" }} title={`${2020 + i}: ${s} s`} />
             ))}
           </div>
-          <p className="mono mt-1 text-[10px] font-light text-dim">Taller bar = closer to midnight. Source: Bulletin of the Atomic Scientists.</p>
+          <p className="mono mt-1 text-label text-dim">Taller bar = closer to midnight. Source: Bulletin of the Atomic Scientists.</p>
         </Section>
         <Section open title="Tension between pairs (media coverage, 0-100)">
           <ul>
             {dyads.map((d) => (
               <li key={d.label} className="border-b border-line/50 pb-1.5 last:border-0">
                 <ul><Bar label={`${d.label}${d.sensitive ? " *" : ""}`} value={String(d.tension)} pct={d.tension ?? 0} color={(d.tension ?? 0) >= 55 ? "var(--threat)" : (d.tension ?? 0) >= 40 ? "var(--conflict)" : "var(--geo)"} hint={d.why} /></ul>
-                {d.why && <p className="text-[10px] font-light leading-snug text-dim">Why drawn: {d.why}</p>}
+                {d.why && <p className="text-label leading-snug text-dim">Why drawn: {d.why}</p>}
               </li>
             ))}
           </ul>
-          <p className="mt-1 text-[10px] font-light leading-relaxed text-dim">Describes how news reports each pair; not a forecast. * Politically sensitive: the pair is listed for the reason given, which is not an accusation.</p>
+          <p className="mt-1 text-label leading-relaxed text-dim">Describes how news reports each pair; not a forecast. * Politically sensitive: the pair is listed for the reason given, which is not an accusation.</p>
         </Section>
         <Section title="Largest arsenals (military stockpile)">
           <ul>
@@ -185,31 +185,31 @@ export default function Readout({
           </ul>
         </Section>
         <Section title="Possible target areas (illustrative)">
-          <p className="text-[11px] font-light leading-relaxed text-dim">
+          <p className="text-body leading-relaxed text-dim">
             An illustrative model, not a forecast: sites that open sources associate with nuclear forces, plus capitals, so the map can show what one fixed example explosion (300 kt, an airburst) would reach. It says nothing about intentions or likelihood, and the list is partial. Switch the layer on and click a marker for the rings.
           </p>
           {targets.failed ? (
-            <p className="mt-2 text-[11px] text-dim">The reference list is unavailable right now.</p>
+            <p className="mt-2 text-body text-dim">The reference list is unavailable right now.</p>
           ) : targets.data ? (
             (() => {
               const near = userPlace ? nearestSite(userPlace.lat, userPlace.lon, targets.data.sites.map((x) => ({ name: x[0], lat: x[1], lon: x[2] }))) : null;
               return (
                 <div className="mt-2">
                   {near && userPlace ? (
-                    <p className="text-[12px] leading-relaxed">
-                      Distance from {userPlace.label} to the nearest listed site: <span className="mono font-bold">{Math.round(near.km).toLocaleString("en-US")} km</span> <span className="font-light text-dim">({near.site.name})</span>
+                    <p className="text-body leading-relaxed">
+                      Distance from {userPlace.label} to the nearest listed site: <span className="mono font-bold">{Math.round(near.km).toLocaleString("en-US")} km</span> <span className="text-dim">({near.site.name})</span>
                     </p>
                   ) : (
-                    <p className="text-[11px] font-light leading-relaxed text-dim">Pick a place in the search box on the left, or use your location, to see the distance to the nearest listed site.</p>
+                    <p className="text-body leading-relaxed text-dim">Pick a place in the search box on the left, or use your location, to see the distance to the nearest listed site.</p>
                   )}
-                  <button type="button" className="btn mono mt-1.5 px-2 py-1 text-[11px] font-bold" onClick={onUseLocation} title="Uses this device location; it stays in your browser and is never sent anywhere">
+                  <button type="button" className="btn mono mt-1.5 px-2 py-1 text-body font-bold" onClick={onUseLocation} title="Uses this device location; it stays in your browser and is never sent anywhere">
                     USE MY LOCATION
                   </button>
                 </div>
               );
             })()
           ) : (
-            <p className="mt-2 text-[11px] text-dim">Loading the list…</p>
+            <p className="mt-2 text-body text-dim">Loading the list…</p>
           )}
         </Section>
       </>
@@ -233,7 +233,7 @@ export default function Readout({
           />
         </div>
         {latest[0] && (
-          <p className="border-b border-line px-3 py-2 text-[11px] font-light leading-relaxed text-dim">
+          <p className="border-b border-line px-3 py-2 text-body leading-relaxed text-dim">
             Most recent report: <span className="font-bold text-fg">{latest[0].title}</span> ({latest[0].startedAt.slice(0, 10)})
           </p>
         )}
@@ -242,14 +242,14 @@ export default function Readout({
             {latest.map((e) => (
               <li key={e.id}>
                 <button type="button" onClick={() => onSelect(`health:${e.countries[0]}`)} className="block w-full px-2.5 py-1.5 text-left hover:bg-accent/10">
-                  <span className="block text-[12px] font-bold leading-snug">{e.title}</span>
-                  <span className="mono text-[10px] font-light text-dim">{e.startedAt.slice(0, 10)}</span>
+                  <span className="block text-body font-bold leading-snug">{e.title}</span>
+                  <span className="mono text-label text-dim">{e.startedAt.slice(0, 10)}</span>
                 </button>
               </li>
             ))}
-            {latest.length === 0 && <li className="px-2.5 py-2 text-xs text-dim">No reports in the last 120 days.</li>}
+            {latest.length === 0 && <li className="px-2.5 py-2 text-body text-dim">No reports in the last 120 days.</li>}
           </ul>
-          <p className="mt-2 text-[10px] font-light leading-relaxed text-dim">A count of published reports, not of outbreaks. Countries are shaded by reports in the last 90 days; click one on the map for the list. The purple rings are the busiest airports (how fast a new pathogen can travel); the outlined rings are a partial list of BSL-4 laboratories, reference data and not a risk ranking.</p>
+          <p className="mt-2 text-label leading-relaxed text-dim">A count of published reports, not of outbreaks. Countries are shaded by reports in the last 90 days; click one on the map for the list. The purple rings are the busiest airports (how fast a new pathogen can travel); the outlined rings are a partial list of BSL-4 laboratories, reference data and not a risk ranking.</p>
         </Section>
       </>
     );
@@ -267,10 +267,10 @@ export default function Readout({
                   <button type="button" onClick={() => onSelect(`volcano:${v.id}`)} className="flex w-full items-center gap-3 px-2.5 py-1.5 text-left hover:bg-accent/10">
                     <span className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: col }} aria-hidden />
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[12px] font-bold">{v.name}</span>
-                      <span className="mono block truncate text-[10px] font-light text-dim">{v.levelLabel}</span>
+                      <span className="block text-body font-bold">{v.name}</span>
+                      <span className="mono block truncate text-label text-dim">{v.levelLabel}</span>
                     </span>
-                    {v.quakes30d && <span className="mono shrink-0 text-[10px] text-dim" title="earthquakes in the last 30 days nearby">{n(v.quakes30d.count)} q</span>}
+                    {v.quakes30d && <span className="mono shrink-0 text-label text-dim" title="earthquakes in the last 30 days nearby">{n(v.quakes30d.count)} q</span>}
                   </button>
                 </li>
               );
@@ -301,7 +301,7 @@ export default function Readout({
               <Bar key={r.label} label={r.label} value={n(r.v)} pct={(r.v / max) * 100} color="var(--conflict)" />
             ))}
           </ul>
-          <p className="mt-1 text-[10px] font-light leading-relaxed text-dim">How much is reported, not casualties. High-coverage countries are over-represented.</p>
+          <p className="mt-1 text-label leading-relaxed text-dim">How much is reported, not casualties. High-coverage countries are over-represented.</p>
         </Section>
         <Section title="Shipping chokepoints vs the past year">
           <ul>
@@ -310,7 +310,7 @@ export default function Readout({
               return <Bar key={r.label} label={r.label} value={r.value} pct={Math.abs(v)} color={r.tone === "high" ? "var(--threat)" : r.tone === "elevated" ? "var(--geo)" : "var(--accent)"} />;
             })}
           </ul>
-          <p className="mt-1 text-[10px] font-light leading-relaxed text-dim">Bar length is the size of the change, up or down. Source: IMF PortWatch.</p>
+          <p className="mt-1 text-label leading-relaxed text-dim">Bar length is the size of the change, up or down. Source: IMF PortWatch.</p>
         </Section>
       </>
     );
@@ -339,28 +339,28 @@ function SolarReadout({ kp, solar, scaleDetail }: { kp: Counter | undefined; sol
     <>
       {scaleDetail && (
         <Section open title={`NOAA ${scaleDetail} scale`} meta={d?.scales ? `now ${scaleDetail}${d.scales[scaleDetail].n}` : undefined}>
-          <p className="text-[12px] font-light leading-relaxed text-dim">{SCALE_INFO[scaleDetail].what} <Term id="noaa-scales">About the G, S and R scales</Term></p>
-          <table className="mono mt-2 w-full text-[11px]">
+          <p className="text-body leading-relaxed text-dim">{SCALE_INFO[scaleDetail].what} <Term id="noaa-scales">About the G, S and R scales</Term></p>
+          <table className="mono mt-2 w-full text-body">
             <tbody>
               {SCALE_INFO[scaleDetail].levels.map(([lvl, def]) => (
                 <tr key={lvl} className="border-t border-line/50" style={{ color: d?.scales?.[scaleDetail].n === Number(lvl.slice(1)) ? "var(--fg)" : "var(--fg-dim)" }}>
                   <td className="py-0.5 font-bold">{lvl}</td>
-                  <td className="text-right font-light">{def}</td>
+                  <td className="text-right text-dim">{def}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p className="mono mt-1 text-[10px] font-light text-dim">
+          <p className="mono mt-1 text-label text-dim">
             Definitions: <a className="underline" href="https://www.swpc.noaa.gov/noaa-scales-explanation" target="_blank" rel="noopener noreferrer">NOAA space weather scales</a>. The level now is observed ({d?.scales ? d.scales[scaleDetail].text : "unavailable"}), not forecast.
           </p>
         </Section>
       )}
-      <Section open title="Geomagnetic activity">{kp ? <KpGauge counter={kp} /> : <p className="text-xs text-dim">Kp unavailable.</p>}</Section>
+      <Section open title="Geomagnetic activity">{kp ? <KpGauge counter={kp} /> : <p className="text-body text-dim">Kp unavailable.</p>}</Section>
       <Section open title="Solar wind and flares (observed)" meta={solar.failed ? "unavailable" : undefined}>
-        {solar.failed && <p className="text-[11px] text-dim">NOAA space-weather products are unavailable right now.</p>}
-        {!solar.failed && !d && <p className="text-[11px] text-dim">Loading…</p>}
+        {solar.failed && <p className="text-body text-dim">NOAA space-weather products are unavailable right now.</p>}
+        {!solar.failed && !d && <p className="text-body text-dim">Loading…</p>}
         {d && (
-          <ul className="mono space-y-2 text-[11px]">
+          <ul className="mono space-y-2 text-body">
             <li>
               <div className="flex justify-between"><span className="text-dim">Wind speed</span><span className="font-bold">{d.wind ? `${d.wind.speed} km/s${d.wind.density !== null ? ` · ${d.wind.density} p/cm³` : ""}` : na}</span></div>
               {d.wind && <Spark values={d.wind.speedHistory} color="var(--space)" label="Solar wind speed, last 3 hours" />}
@@ -378,7 +378,7 @@ function SolarReadout({ kp, solar, scaleDetail }: { kp: Counter | undefined; sol
       </Section>
       <Section title="Kp forecast (NOAA projection)">
         {forecast.length === 0 ? (
-          <p className="text-[11px] text-dim">{solar.failed ? "Unavailable right now." : "No forecast loaded."}</p>
+          <p className="text-body text-dim">{solar.failed ? "Unavailable right now." : "No forecast loaded."}</p>
         ) : (
           <>
             <div className="flex h-12 items-end gap-0.5" role="img" aria-label="NOAA three-day Kp forecast">
@@ -386,12 +386,12 @@ function SolarReadout({ kp, solar, scaleDetail }: { kp: Counter | undefined; sol
                 <div key={r.time} className="flex-1" title={`${r.time.slice(0, 16).replace("T", " ")} UTC: Kp ${r.kp}`} style={{ height: `${Math.max(6, (r.kp / 9) * 100)}%`, border: "1px dashed var(--geo)", background: r.kp >= 5 ? "rgba(255,0,60,0.25)" : "transparent" }} />
               ))}
             </div>
-            <p className="mono mt-1 text-[10px] font-light text-dim">Dashed amber = NOAA projection for the next 3 days, 3-hour steps; not observed and not ours.</p>
+            <p className="mono mt-1 text-label text-dim">Dashed amber = NOAA projection for the next 3 days, 3-hour steps; not observed and not ours.</p>
           </>
         )}
       </Section>
       <Section title="Why it matters">
-        <p className="text-[12px] font-light leading-relaxed text-dim">
+        <p className="text-body leading-relaxed text-dim">
           Storms induce currents in long conductors, strongest near the magnetic poles: power lines, pipelines and the powered repeaters of undersea internet cables. The map shades countries by the share of their power capacity at high geomagnetic latitude, and shows the cables that cross the 50° band.
         </p>
       </Section>

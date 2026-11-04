@@ -68,7 +68,7 @@ export default function MiniMap({
     <>
       <div ref={el} style={{ height }} className="w-full border border-line" role="application" aria-label={label} />
       <div className="mt-1.5">
-        <PrintMapButton getMap={() => mapRef.current} title={label} getLegend={() => legend} className="btn mono px-2 py-1 text-[10px] font-bold" />
+        <PrintMapButton getMap={() => mapRef.current} title={label} getLegend={() => legend} className="btn mono px-2 py-1 text-label font-bold" />
       </div>
     </>
   );

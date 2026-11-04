@@ -27,11 +27,11 @@ export default function FreshnessTable({ feeds: given }: { feeds?: FeedStatus[] 
     return () => clearInterval(t);
   }, []);
 
-  if (!feeds) return <p className="mono text-[11px] text-dim">Loading feed status…</p>;
+  if (!feeds) return <p className="mono text-body text-dim">Loading feed status…</p>;
 
   return (
     <div className="overflow-x-auto scroll-thin">
-      <table className="mono w-full min-w-[640px] text-left text-[11px]">
+      <table className="mono w-full min-w-[640px] text-left text-body">
         <thead className="text-dim">
           <tr className="border-b border-line">
             <th className="py-1.5 pr-3 font-bold">FEED</th>
@@ -48,10 +48,10 @@ export default function FreshnessTable({ feeds: given }: { feeds?: FeedStatus[] 
             return (
               <tr key={f.id} className="border-b border-line/60 align-top">
                 <td className="py-1.5 pr-3 font-bold">{f.name}</td>
-                <td className="pr-3 font-light text-dim">{f.cadence}</td>
-                <td className="pr-3 font-light">{asOfText(f)}</td>
+                <td className="pr-3 text-dim">{f.cadence}</td>
+                <td className="pr-3 text-dim">{asOfText(f)}</td>
                 <td className="pr-3 font-bold tabular-nums">{fr?.observedLagMs != null ? duration(fr.observedLagMs) : "n/a"}</td>
-                <td className="pr-3 font-light text-dim tabular-nums">
+                <td className="pr-3 text-dim tabular-nums">
                   {fr?.fetchedAgeMs != null ? `${duration(fr.fetchedAgeMs)} ago` : "never"}
                 </td>
                 <td className="font-bold" style={{ color: !f.ok ? "var(--threat)" : fr?.late ? "var(--geo)" : "var(--safe)" }} title={f.error}>
@@ -62,7 +62,7 @@ export default function FreshnessTable({ feeds: given }: { feeds?: FeedStatus[] 
           })}
         </tbody>
       </table>
-      <p className="mt-2 text-[11px] font-light leading-relaxed text-dim">
+      <p className="mt-2 text-body leading-relaxed text-dim">
         Latency is the age of the newest observation, so it includes the source&apos;s own publishing delay (monthly climate series lag by weeks, by design). Fetched is when this site last pulled the feed successfully; the data job runs twice an hour.
       </p>
     </div>

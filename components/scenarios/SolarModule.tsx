@@ -72,20 +72,20 @@ export default function SolarModule() {
     <section className="mt-6" aria-label="Solar storm exposure">
       <div className="flex flex-wrap items-center gap-3">
         <KindTag kind="model" />
-        <span className="text-xs text-dim">
+        <span className="text-body text-dim">
           Where a geomagnetic storm is strongest: closer to the magnetic poles. Dashed lines mark 50° (amber) and 60° (red) geomagnetic latitude.
         </span>
       </div>
       <div className="mt-3">
         <MiniMap label="Map of geomagnetic latitude bands and submarine cables" legend={["Dashed lines: 50° and 60° geomagnetic latitude (reference lines, illustrative)", "Submarine cables: those that cross the 50° band are drawn stronger than those that stay south of it", "Cable routes: TeleGeography; geomagnetic latitude: computed"]} onReady={(m) => setMap(m)} height={380} />
       </div>
-      <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-dim">
+      <label className="mt-2 flex cursor-pointer items-center gap-2 text-body text-dim">
         <input type="checkbox" checked={showCables} onChange={(e) => setShowCables(e.target.checked)} style={{ accentColor: "var(--accent)" }} />
         Show submarine cables (cyan: crosses the 50° band; grey: stays south of it)
       </label>
 
       {kp && (
-        <p className="mono mt-3 text-xs">
+        <p className="mono mt-3 text-body">
           <span className="text-dim">Right now:</span> Kp {kp.value} ({kp.trendLabel})
         </p>
       )}
@@ -95,25 +95,25 @@ export default function SolarModule() {
         <Loading error={exposure.error} />
       ) : (
         <>
-          <p className="mt-1 text-xs leading-relaxed text-dim">
+          <p className="mt-1 text-body leading-relaxed text-dim">
             About {Math.round(exposure.data.world.share * 100)}% of the world&apos;s installed capacity (
             {exposure.data.world.highGW.toLocaleString("en-US")} of {exposure.data.world.totalGW.toLocaleString("en-US")} GW) sits at
             50° geomagnetic latitude or higher. Countries with the most capacity there:
           </p>
           <div className="mt-2 overflow-x-auto border border-line">
-            <table className="w-full min-w-[420px] text-left text-xs">
+            <table className="w-full min-w-[420px] text-left text-body">
               <thead>
                 <tr className="label border-b border-line">
-                  <th className="p-2 font-normal">Country</th>
-                  <th className="mono p-2 text-right font-normal">GW at ≥50°</th>
-                  <th className="mono p-2 text-right font-normal">of total GW</th>
-                  <th className="mono p-2 text-right font-normal">share</th>
+                  <th className="p-2">Country</th>
+                  <th className="mono p-2 text-right">GW at ≥50°</th>
+                  <th className="mono p-2 text-right">of total GW</th>
+                  <th className="mono p-2 text-right">share</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {exposure.data.countries.slice(0, 12).map((c) => (
                   <tr key={c.iso3}>
-                    <th scope="row" className="p-2 font-medium">{c.name}</th>
+                    <th scope="row" className="p-2">{c.name}</th>
                     <td className="mono p-2 text-right">{c.highGW}</td>
                     <td className="mono p-2 text-right text-dim">{c.totalGW}</td>
                     <td className="mono p-2 text-right">{Math.round(c.share * 100)}%</td>
@@ -122,7 +122,7 @@ export default function SolarModule() {
               </tbody>
             </table>
           </div>
-          <div className="mt-3 border border-line p-3 text-xs leading-relaxed text-dim">
+          <div className="mt-3 border border-line p-3 text-body leading-relaxed text-dim">
             <p className="text-fg">Read with care</p>
             <ul className="mt-1 list-disc space-y-1 pl-5">
               <li>Geomagnetic latitude is a rough stand-in for risk. Ground conductivity, line length and orientation, and transformer design matter as much; a low-latitude grid can be hit too, and a northern grid can be well protected.</li>

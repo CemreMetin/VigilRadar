@@ -11,15 +11,15 @@ export const metadata: Metadata = {
   description: "How the tension index, links, counters and evidence tiers are computed, and what this site does not do.",
 };
 
-const P = ({ children }: { children: React.ReactNode }) => <p className="mt-3 text-sm leading-relaxed">{children}</p>;
-const UL = ({ children }: { children: React.ReactNode }) => <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">{children}</ul>;
+const P = ({ children }: { children: React.ReactNode }) => <p className="mt-3 text-read leading-relaxed">{children}</p>;
+const UL = ({ children }: { children: React.ReactNode }) => <ul className="mt-3 list-disc space-y-1.5 pl-5 text-read leading-relaxed">{children}</ul>;
 
 export default function MethodologyPage() {
   const sections: WikiSection[] = [
     { id: "kinds", label: "Three kinds of statement", group: "Concepts", content: (
       <>
         <P>Every number or claim is one of these, and is labelled so they never blur together:</P>
-        <ul className="mt-3 space-y-2 text-sm leading-relaxed">
+        <ul className="mt-3 space-y-2 text-read leading-relaxed">
           <li><KindTag kind="observed" /> a measurement or a published record (an earthquake, CO₂ at Mauna Loa, a SIPRI warhead count).</li>
           <li><KindTag kind="projection" /> what a model or scenario says follows from stated assumptions (IPCC pathways, nuclear-soot food models). Not a prediction.</li>
           <li><KindTag kind="expert" /> a named person&apos;s or group&apos;s own judgement (Toby Ord&apos;s 1 in 6). Not a measurement.</li>
@@ -34,7 +34,7 @@ export default function MethodologyPage() {
     { id: "tiers", label: "Evidence tiers for scenarios", group: "Concepts", content: (
       <>
         <P>Tiers rate how good the evidence is, not how likely the event is. A very unlikely event can still have strong evidence for how it would work.</P>
-        <ul className="mt-3 space-y-2 text-sm leading-relaxed">
+        <ul className="mt-3 space-y-2 text-read leading-relaxed">
           <li><TierBadge tier="A" /> The mechanism is known, there is historical precedent, and there is a published scenario or model.</li>
           <li><TierBadge tier="B" /> The mechanism is known or plausible, but precedent is thin and uncertainty is high.</li>
           <li><TierBadge tier="C" /> Physically conceivable, but the evidence is weak, disputed or mostly folklore. Hidden by default.</li>
@@ -56,7 +56,7 @@ export default function MethodologyPage() {
           <li><span className="text-fg">Surge</span>: the last 7 days&apos; event rate against the 30-day average, on a log scale where a fourfold jump counts as full. Weight 15%.</li>
         </UL>
         <Card className="mt-4">
-          <p className="mono text-xs leading-relaxed">
+          <p className="mono text-body leading-relaxed">
             tension = 100 × (0.40 × g + 0.30 × m + 0.15 × t + 0.15 × s)
             <br />
             g = (1 − Goldstein/10)/2 · m = min(1, material share/0.5) · t = (1 − tone/10)/2 · s = clamp(log₂(rate7/rate30)/2, 0, 1)
@@ -97,14 +97,14 @@ export default function MethodologyPage() {
     { id: "links", label: "Links: computed versus causal", group: "Computed values", content: (
       <>
         <P>There are two kinds of link on this site and they claim different things.</P>
-        <p className="mt-4 text-sm font-semibold">Computed links (automatic; show connection, not cause)</p>
+        <p className="mt-4 text-read font-bold">Computed links (automatic; show connection, not cause)</p>
         <UL>
           <li><span className="text-fg">Nearby:</span> an earthquake of magnitude 5+ within 100 km of a nuclear plant or 150 km of a watchlist supervolcano; a cell with 15+ armed-conflict reports in 7 days within 50 km of a plant.</li>
           <li><span className="text-fg">Same country:</span> an outbreak report, volcano or tension pair that names a country is linked to it.</li>
           <li><span className="text-fg">Exposure:</span> the residents of cities with 15,000+ people within 100 km (GeoNames). This is a lower bound: towns, villages and visitors are not counted, which is why Yellowstone shows none.</li>
           <li><span className="text-fg">Same time:</span> country profiles list indicators that are active in the same country now (an outbreak report, heavy conflict coverage, a tension pair at 60+, a volcano above baseline, high water stress at 75%+ withdrawal). This is co-occurrence, not cause.</li>
         </UL>
-        <p className="mt-4 text-sm font-semibold">Causal links (hand-written, cited)</p>
+        <p className="mt-4 text-read font-bold">Causal links (hand-written, cited)</p>
         <P>
           The <Link href="/links" className="text-accent hover:underline">Links page</Link> is the only place the site says one thing can cause another. Each
           arrow has an evidence rating (strong, moderate, speculative) and at least one citation, except speculative arrows, which are hidden by default.

@@ -49,7 +49,7 @@ export default function TippingModule() {
         <KindTag kind="expert" />
         <KindTag kind="projection" />
         <KindTag kind="observed" />
-        <span className="text-xs text-dim">Estimated thresholds (dotted), projected warming (dashed) and observed warming (solid), all in °C above 1850-1900.</span>
+        <span className="text-body text-dim">Estimated thresholds (dotted), projected warming (dashed) and observed warming (solid), all in °C above 1850-1900.</span>
       </div>
 
       <div className="mt-3 overflow-x-auto border border-line bg-panel-solid">
@@ -84,11 +84,11 @@ export default function TippingModule() {
           })}
         </svg>
       </div>
-      <p className="mono mt-2 text-[11px] text-dim">
+      <p className="mono mt-2 text-body text-dim">
         ● core element (global) · ○ regional impact element · dotted bar = uncertainty range, marker = best estimate.
       </p>
 
-      <p className="mt-3 text-xs leading-relaxed text-dim">
+      <p className="mt-3 text-body leading-relaxed text-dim">
         Reading it: the bars that already overlap the cyan &quot;now&quot; band (Greenland, West Antarctica, abrupt permafrost thaw,
         Labrador Sea convection, coral reefs) are the five Armstrong McKay and colleagues say may already be at risk. A threshold
         being crossed does not mean the change is instant: the table below shows how long each takes once triggered, from a
@@ -97,19 +97,19 @@ export default function TippingModule() {
       </p>
 
       <div className="mt-3 overflow-x-auto border border-line">
-        <table className="w-full min-w-[520px] text-left text-xs">
+        <table className="w-full min-w-[520px] text-left text-body">
           <thead>
             <tr className="label border-b border-line">
-              <th className="p-2 font-normal">Element</th>
-              <th className="mono p-2 text-right font-normal">Threshold °C</th>
-              <th className="mono p-2 text-right font-normal">Range</th>
-              <th className="mono p-2 text-right font-normal">Years to play out</th>
+              <th className="p-2">Element</th>
+              <th className="mono p-2 text-right">Threshold °C</th>
+              <th className="mono p-2 text-right">Range</th>
+              <th className="mono p-2 text-right">Years to play out</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
             {sorted.map((e) => (
               <tr key={e.name}>
-                <th scope="row" className="p-2 font-medium">{e.name} <span className="text-dim">{e.core ? "(core)" : "(regional)"}</span></th>
+                <th scope="row" className="p-2">{e.name} <span className="text-dim">{e.core ? "(core)" : "(regional)"}</span></th>
                 <td className="mono p-2 text-right">{e.best.toFixed(1)}</td>
                 <td className="mono p-2 text-right text-dim">{e.lo.toFixed(1)}–{e.hi.toFixed(1)}</td>
                 <td className="mono p-2 text-right text-dim">{e.years}</td>
@@ -118,7 +118,7 @@ export default function TippingModule() {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-dim">
+      <p className="mt-2 text-body text-dim">
         Source:{" "}
         <a href="https://doi.org/10.1126/science.abn7950" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Armstrong McKay et al., Science 2022 ↗</a>; projections from{" "}
         <a href="https://www.ipcc.ch/report/ar6/wg1/chapter/summary-for-policymakers/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">IPCC AR6 WGI SPM ↗</a>; observed from{" "}

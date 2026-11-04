@@ -9,7 +9,7 @@ export default function PrintMapButton({
   getMap,
   title,
   getLegend,
-  className = "btn mono h-8 px-2 text-xs font-bold",
+  className = "btn mono h-8 px-2 text-body font-bold",
 }: {
   getMap: () => MlMap | null | undefined;
   title: string | (() => string);
@@ -37,7 +37,7 @@ export default function PrintMapButton({
       >
         {busy ? "PREPARING…" : "PRINT MAP"}
       </button>
-      <label className="mono flex cursor-pointer items-center gap-1 whitespace-nowrap text-[10px] text-dim">
+      <label className="mono flex cursor-pointer items-center gap-1 whitespace-nowrap text-label text-dim">
         <input type="checkbox" checked={light} onChange={(e) => setLight(e.target.checked)} style={{ accentColor: "var(--accent)" }} />
         Light paper
       </label>

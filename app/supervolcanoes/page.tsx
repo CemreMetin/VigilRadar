@@ -15,7 +15,7 @@ export default function SupervolcanoesPage() {
   const sections: WikiSection[] = [
     { id: "watchlist", label: "Watchlist", group: "Status", content: (<>
         <VolcanoCards />
-        <p className="mt-6 text-sm">
+        <p className="mt-6 text-read">
           What a supereruption could do:{" "}
           <Link href="/scenarios/supervolcano" className="text-accent hover:underline">Supervolcano scenario →</Link>
           {" · "}
@@ -24,7 +24,7 @@ export default function SupervolcanoesPage() {
     </>) },
     { id: "reading", label: "Reading the watchlist", group: "Context", content: (<>
         <Card className="mt-3">
-          <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed">
+          <ul className="list-disc space-y-2 pl-5 text-read leading-relaxed">
             <li>
               <span className="text-fg">Unrest is not an eruption.</span> Earthquake swarms, ground uplift and gas release happen at
               many calderas for years or decades without erupting. Campi Flegrei has been at a yellow alert level since 2012.

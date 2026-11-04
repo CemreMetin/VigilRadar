@@ -37,7 +37,7 @@ export default function TopBar({
   return (
     <div className="flex flex-wrap items-stretch gap-x-3 px-3 lg:contents">
       <div className="float-panel flex shrink-0 flex-col justify-center py-1.5 pr-2 lg:left-3 lg:top-3 lg:px-3">
-        <h1 className="mono text-sm font-bold tracking-[0.22em] text-accent">MONITORING</h1>
+        <h1 className="mono text-body font-bold tracking-[0.22em] text-accent">MONITORING</h1>
         <span className="label hidden sm:block">global risk board</span>
       </div>
 
@@ -58,10 +58,10 @@ export default function TopBar({
                 style={{ "--c": g.color } as CSSProperties}
                 className="tab-btn relative flex w-fit shrink-0 items-baseline gap-2 whitespace-nowrap px-3 py-2 text-left sm:px-5"
               >
-                <span className="mono text-[14px] font-bold uppercase tracking-wider" style={{ color: on ? "#fff" : g.color }}>
+                <span className="mono text-body font-bold uppercase tracking-wider" style={{ color: on ? "#fff" : g.color }}>
                   {g.title}
                 </span>
-                <span className="mono hidden text-[9px] font-light text-dim sm:inline" aria-hidden>
+                <span className="mono hidden text-label text-dim sm:inline" aria-hidden>
                   {i + 1}
                 </span>
                 {on && <span aria-hidden className="absolute inset-x-0 -bottom-[6px] h-0.5" style={{ background: g.color }} />}
@@ -83,7 +83,7 @@ export default function TopBar({
                   onClick={() => onSelect(m.id)}
                   title={m.stat(world)}
                   style={{ borderBottomColor: on ? m.color : "transparent", color: on ? m.color : "var(--fg)" }}
-                  className={`mono shrink-0 whitespace-nowrap border-b-2 px-0.5 pb-1 text-[11px] font-bold uppercase tracking-wider hover:opacity-100 ${on ? "" : "opacity-70"}`}
+                  className={`mono shrink-0 whitespace-nowrap border-b-2 px-0.5 pb-1 text-body font-bold uppercase tracking-wider hover:opacity-100 ${on ? "" : "opacity-70"}`}
                 >
                   {m.title}
                 </button>

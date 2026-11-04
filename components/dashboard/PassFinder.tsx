@@ -65,7 +65,7 @@ export default function PassFinder() {
   return (
     <div className="space-y-2">
       <div className="flex gap-1.5">
-        <select aria-label="Object" value={name} onChange={(e) => setName(e.target.value)} className="mono border border-line bg-panel-solid px-1.5 py-1 text-[11px]">
+        <select aria-label="Object" value={name} onChange={(e) => setName(e.target.value)} className="mono border border-line bg-panel-solid px-1.5 py-1 text-body">
           <option value="ISS (ZARYA)">ISS</option>
           <option value="CSS (TIANHE)">Tiangong</option>
           <option value="HST">Hubble</option>
@@ -76,36 +76,36 @@ export default function PassFinder() {
           onChange={(e) => setPlace(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && go()}
           placeholder="lat, lon"
-          className="mono min-w-0 flex-1 border border-line bg-transparent px-2 py-1 text-[11px] placeholder:text-dim focus:outline-none"
+          className="mono min-w-0 flex-1 border border-line bg-transparent px-2 py-1 text-body placeholder:text-dim focus:outline-none"
         />
       </div>
       <div className="flex gap-1.5">
-        <button type="button" className="btn mono flex-1 px-2 py-1 text-[11px] font-bold" onClick={go} disabled={busy}>
+        <button type="button" className="btn mono flex-1 px-2 py-1 text-body font-bold" onClick={go} disabled={busy}>
           {busy ? "COMPUTING…" : "NEXT 48 H"}
         </button>
-        <button type="button" className="btn mono px-2 py-1 text-[11px] font-bold" onClick={locate} disabled={busy} title="Uses this device's location; it stays in your browser">
+        <button type="button" className="btn mono px-2 py-1 text-body font-bold" onClick={locate} disabled={busy} title="Uses this device's location; it stays in your browser">
           MY LOCATION
         </button>
       </div>
       {passes && (
-        <table className="mono w-full text-[11px]">
-          <thead className="text-[9px] font-light text-dim">
-            <tr className="text-left"><th className="pb-1 font-light">RISES</th><th className="font-light">PEAK</th><th className="text-right font-light">MAX ELEV</th></tr>
+        <table className="mono w-full text-body">
+          <thead className="text-label text-dim">
+            <tr className="text-left"><th className="pb-1 text-dim">RISES</th><th className="text-dim">PEAK</th><th className="text-right text-dim">MAX ELEV</th></tr>
           </thead>
           <tbody>
-            {passes.length === 0 && <tr><td colSpan={3} className="py-1 font-light text-dim">No pass above 10° in the next 48 h.</td></tr>}
+            {passes.length === 0 && <tr><td colSpan={3} className="py-1 text-dim">No pass above 10° in the next 48 h.</td></tr>}
             {passes.slice(0, 6).map((p) => (
               <tr key={p.rise} className="border-t border-line/50">
                 <td className="py-0.5">{fmt(p.rise)}</td>
-                <td className="font-light text-dim">{fmt(p.peak)}</td>
+                <td className="text-dim">{fmt(p.peak)}</td>
                 <td className="text-right font-bold">{Math.round(p.maxElevationDeg)}°</td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
-      {msg && <p className="text-[10px] font-light leading-relaxed text-dim">{msg}</p>}
-      <p className="text-[10px] font-light leading-relaxed text-dim">
+      {msg && <p className="text-label leading-relaxed text-dim">{msg}</p>}
+      <p className="text-label leading-relaxed text-dim">
         Times are in your local time. A pass is when the object is above the horizon (peak elevation 10° or more). Whether you can see it also needs the object in sunlight and a dark sky, which this does not check. Your position stays in this browser.
       </p>
     </div>

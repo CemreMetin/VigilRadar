@@ -27,17 +27,17 @@ export default function HealthView() {
           <p className="label mt-6">Last 120 days</p>
           <KindTag kind="observed" />
           <ul className="mt-3 divide-y divide-line border border-line">
-            {unique.length === 0 && <li className="p-3 text-sm text-dim">No reports in this window.</li>}
+            {unique.length === 0 && <li className="p-3 text-read text-dim">No reports in this window.</li>}
             {unique.map((e) => (
               <li key={e.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-3 py-2">
-                <span className="min-w-0 flex-1 text-[13px]">
+                <span className="min-w-0 flex-1 text-read">
                   {e.url ? <Ext href={e.url}>{e.title} ↗</Ext> : e.title}
                 </span>
-                <span className="mono shrink-0 text-[11px] text-dim">{e.startedAt.slice(0, 10)}</span>
+                <span className="mono shrink-0 text-body text-dim">{e.startedAt.slice(0, 10)}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-dim">
+          <p className="mt-2 text-body text-dim">
             Source: <Ext href="https://www.who.int/emergencies/disease-outbreak-news">WHO Disease Outbreak News</Ext> (CC BY-NC-SA 3.0 IGO).
           </p>
         </>
@@ -46,7 +46,7 @@ export default function HealthView() {
     </>) },
     { id: "read", label: "How to read this", group: "Context", content: (<>
       <Card className="mt-3">
-        <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed">
+        <ul className="list-disc space-y-2 pl-5 text-read leading-relaxed">
           <li>A report means WHO thinks an event matters internationally. Many outbreaks are never published here, and one outbreak can produce several reports.</li>
           <li>Reports do not give an outbreak&apos;s infectiousness (R₀) or fatality rate, and this site does not guess them. For those, read the report itself.</li>
           <li>On the map, each country with a report gets one marker at the country&apos;s centre, not at the outbreak location.</li>
@@ -56,7 +56,7 @@ export default function HealthView() {
 
     </>) },
     { id: "related", label: "Related", group: "Context", content: (<>
-      <p className="mt-3 text-sm">
+      <p className="mt-3 text-read">
         What a fast-spreading new pathogen could do: <Link href="/scenarios/pandemic-x" className="text-accent hover:underline">Pandemic X explorer →</Link>
       </p>
     </>) },

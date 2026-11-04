@@ -79,7 +79,7 @@ export default function OfflineButton() {
   };
 
   if (state === "unsupported") {
-    return <p className="text-xs text-dim">This browser cannot save the site for offline use.</p>;
+    return <p className="text-body text-dim">This browser cannot save the site for offline use.</p>;
   }
 
   return (
@@ -89,17 +89,17 @@ export default function OfflineButton() {
           type="button"
           onClick={save}
           disabled={state === "working"}
-          className="mono border border-safe px-3 py-1.5 text-xs text-safe hover:bg-safe/10 disabled:opacity-50"
+          className="mono border border-safe px-3 py-1.5 text-body text-safe hover:bg-safe/10 disabled:opacity-50"
         >
           {state === "working" ? "saving…" : state === "done" ? "update offline copy" : "save for offline use"}
         </button>
-        <span className="text-xs text-dim" role="status">
+        <span className="text-body text-dim" role="status">
           {state === "done" && "Saved on this device. "}
           {state === "error" && `Could not save: ${detail}. `}
           {detail && state === "done" ? detail : ""}
         </span>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-dim">
+      <p className="mt-2 text-body leading-relaxed text-dim">
         Stores this site, the checklist and the latest data on your device so they open with no connection (works after
         the site is served over HTTPS). The map background still needs internet. You can also install it as an app from
         your browser menu.

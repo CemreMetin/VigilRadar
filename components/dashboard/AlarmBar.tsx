@@ -36,7 +36,7 @@ export default function AlarmBar({
   return (
     <div
       role={isCritical ? "alert" : "status"}
-      className="mono flex flex-wrap items-center gap-x-3 gap-y-1 border px-3 py-1.5 text-[12px]"
+      className="mono flex flex-wrap items-center gap-x-3 gap-y-1 border px-3 py-1.5 text-body"
       style={{ borderColor: color, background: `color-mix(in srgb, ${color} ${isCritical ? 26 : 12}%, var(--panel-solid))` }}
     >
       <span className="font-bold tracking-wider" style={{ color: isCritical ? "#fff" : color }}>
@@ -44,13 +44,13 @@ export default function AlarmBar({
       </span>
       <span className="min-w-0 flex-1 truncate">
         <span className="font-bold text-fg">{shown.title}</span>
-        <span className="font-light text-dim"> · {shown.detail} · {now ? relTime(shown.at, now) : ""}</span>
-        {more > 0 && <span className="font-light text-dim"> · +{more} more</span>}
+        <span className="text-dim"> · {shown.detail} · {now ? relTime(shown.at, now) : ""}</span>
+        {more > 0 && <span className="text-dim"> · +{more} more</span>}
       </span>
-      <button type="button" className="btn px-2 py-0.5 text-[11px] font-bold" style={{ "--c": color } as React.CSSProperties} onClick={() => onView(shown)}>
+      <button type="button" className="btn px-2 py-0.5 text-body font-bold" style={{ "--c": color } as React.CSSProperties} onClick={() => onView(shown)}>
         VIEW
       </button>
-      <button type="button" className="btn px-2 py-0.5 text-[11px] font-bold" style={{ "--c": color } as React.CSSProperties} onClick={() => onAck([shown.id])}>
+      <button type="button" className="btn px-2 py-0.5 text-body font-bold" style={{ "--c": color } as React.CSSProperties} onClick={() => onAck([shown.id])}>
         ACK
       </button>
       {isCritical && (
@@ -58,7 +58,7 @@ export default function AlarmBar({
           type="button"
           aria-pressed={muted}
           onClick={() => onMute(!muted)}
-          className="btn px-2 py-0.5 text-[11px] font-bold"
+          className="btn px-2 py-0.5 text-body font-bold"
           style={{ "--c": color } as React.CSSProperties}
           title={locked ? "Click anywhere on the page to allow sound" : muted ? "Turn the alarm tone on" : "Mute the alarm tone"}
         >

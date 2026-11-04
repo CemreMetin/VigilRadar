@@ -174,7 +174,7 @@ export function ChecklistPrintForm({ onPrint, defaultTier }: { onPrint: (o: { ti
   const [tier, setTier] = useState<"1" | "2" | "both">(String(defaultTier) as "1" | "2");
   const [ticks, setTicks] = useState(false);
   const [reasons, setReasons] = useState(false);
-  const opt = "mono flex items-center gap-1.5 text-[11px] text-dim";
+  const opt = "mono flex items-center gap-1.5 text-body text-dim";
   return (
     <form
       className="no-print mt-4 border border-line p-3"
@@ -210,10 +210,10 @@ export function ChecklistPrintForm({ onPrint, defaultTier }: { onPrint: (o: { ti
           Include reasons
         </label>
       </div>
-      <button type="submit" className="btn mono mt-3 px-3 py-1.5 text-xs font-bold">
+      <button type="submit" className="btn mono mt-3 px-3 py-1.5 text-body font-bold">
         PRINT CHECKLIST
       </button>
-      <p className="mt-2 text-[11px] text-dim">Your ticks stay on this device; nothing is sent anywhere.</p>
+      <p className="mt-2 text-body text-dim">Your ticks stay on this device; nothing is sent anywhere.</p>
     </form>
   );
 }

@@ -83,19 +83,19 @@ function MapExtractTool() {
     ? `pmtiles extract https://build.protomaps.com/<BUILD_DATE>.pmtiles my-area.pmtiles --bbox=${bbox} --maxzoom=14`
     : "";
 
-  const field = "mono w-full border border-line bg-bg px-2 py-1 text-xs text-fg";
+  const field = "mono w-full border border-line bg-bg px-2 py-1 text-body text-fg";
   return (
     <div className="mt-3 border border-line p-3">
       <div className="grid gap-3 sm:grid-cols-3">
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           Latitude
           <input className={field} inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} />
         </label>
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           Longitude
           <input className={field} inputMode="decimal" value={lon} onChange={(e) => setLon(e.target.value)} />
         </label>
-        <label className="text-xs text-dim">
+        <label className="text-body text-dim">
           Radius (km, max 300)
           <input className={field} inputMode="decimal" value={radius} onChange={(e) => setRadius(e.target.value)} />
         </label>
@@ -103,16 +103,16 @@ function MapExtractTool() {
       <button
         type="button"
         onClick={useMyLocation}
-        className="mono mt-3 border border-line px-2.5 py-1 text-xs text-dim hover:border-accent hover:text-accent"
+        className="mono mt-3 border border-line px-2.5 py-1 text-body text-dim hover:border-accent hover:text-accent"
       >
         use my location
       </button>
-      {geoMsg && <span className="ml-3 text-xs text-dim">{geoMsg}</span>}
+      {geoMsg && <span className="ml-3 text-body text-dim">{geoMsg}</span>}
       {cmd ? (
         <>
           <p className="label mt-4">Command</p>
-          <pre className="mono mt-1 overflow-x-auto whitespace-pre-wrap break-all border border-line bg-bg p-2 text-[11px]">{cmd}</pre>
-          <p className="mt-2 text-xs leading-relaxed text-dim">
+          <pre className="mono mt-1 overflow-x-auto whitespace-pre-wrap break-all border border-line bg-bg p-2 text-body">{cmd}</pre>
+          <p className="mt-2 text-body leading-relaxed text-dim">
             Replace <code className="mono">&lt;BUILD_DATE&gt;</code> with a build listed on the{" "}
             <A href="https://maps.protomaps.com/builds/">Protomaps builds page</A>. Add{" "}
             <code className="mono">--dry-run</code> first to see how many tiles and how much data it would download. Needs the free{" "}
@@ -120,7 +120,7 @@ function MapExtractTool() {
           </p>
         </>
       ) : (
-        <p className="mt-3 text-xs text-threat">Enter a valid latitude, longitude and a radius up to 300 km.</p>
+        <p className="mt-3 text-body text-threat">Enter a valid latitude, longitude and a radius up to 300 km.</p>
       )}
     </div>
   );
@@ -182,7 +182,7 @@ export default function SurvivalHub() {
   const sections: WikiSection[] = [
     { id: "plan", label: "Plan", group: "Start here", hint: "30 minutes, no money", content: (
       <>
-      <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed">
+      <ol className="mt-3 list-decimal space-y-2 pl-5 text-read leading-relaxed">
         <li>
           <strong>Meet.</strong> Talk through how you would get alerts, where you would shelter, how you would leave, and
           how the household would contact each other.
@@ -197,10 +197,10 @@ export default function SurvivalHub() {
           <strong>Practise.</strong> A plan nobody has rehearsed fails under stress.
         </li>
       </ol>
-      <p className="mono mt-2 text-[11px] text-dim">
+      <p className="mono mt-2 text-body text-dim">
         Steps from <A href="https://www.ready.gov/plan">Ready.gov: Make a plan</A>.
       </p>
-      <button type="button" onClick={() => start({ kind: "plan" })} className="btn mono no-print mt-4 px-3 py-1.5 text-xs font-bold">
+      <button type="button" onClick={() => start({ kind: "plan" })} className="btn mono no-print mt-4 px-3 py-1.5 text-body font-bold">
         PRINT FILL-IN PLAN
       </button>
 
@@ -215,7 +215,7 @@ export default function SurvivalHub() {
             type="button"
             aria-pressed={filter === f.id}
             onClick={() => setFilter(f.id)}
-            className={`mono border px-2 py-1 text-[11px] ${
+            className={`mono border px-2 py-1 text-body ${
               filter === f.id ? "border-safe bg-safe/10 text-safe" : "border-line text-dim hover:text-fg"
             }`}
           >
@@ -223,7 +223,7 @@ export default function SurvivalHub() {
           </button>
         ))}
       </div>
-      <p className="no-print mt-2 text-xs text-dim">
+      <p className="no-print mt-2 text-body text-dim">
         Choosing a scenario fades items that matter less for it. Nothing is hidden.
       </p>
 
@@ -240,7 +240,7 @@ export default function SurvivalHub() {
             role="tab"
             aria-selected={tier === t}
             onClick={() => setTier(t)}
-            className={`mono flex-1 border px-2 py-1.5 text-xs ${
+            className={`mono flex-1 border px-2 py-1.5 text-body ${
               tier === t ? "border-safe bg-safe/10 text-safe" : "border-line text-dim hover:text-fg"
             }`}
           >
@@ -248,7 +248,7 @@ export default function SurvivalHub() {
           </button>
         ))}
       </div>
-      <p className="mono mt-2 text-[11px] text-dim">
+      <p className="mono mt-2 text-body text-dim">
         {tierDone} of {items.length} packed on this list
         {tierDone > 0 && (
           <button type="button" onClick={reset} className="no-print ml-3 text-dim underline hover:text-fg">
@@ -278,8 +278,8 @@ export default function SurvivalHub() {
                         onChange={() => toggle(it.id)}
                       />
                       <span className="min-w-0">
-                        <span className={`block text-[13px] font-medium ${on ? "text-dim line-through" : ""}`}>{it.name}</span>
-                        <span className="block text-xs leading-relaxed text-dim">
+                        <span className={`block text-read ${on ? "text-dim line-through" : ""}`}>{it.name}</span>
+                        <span className="block text-body leading-relaxed text-dim">
                           {it.why}
                           {it.source && (
                             <>
@@ -303,18 +303,18 @@ export default function SurvivalHub() {
     ) },
     { id: "shelter", label: "Radiation shelter", group: "Emergencies", hint: "Get inside, stay inside, stay tuned", content: (
       <>
-      <div className="mt-3 border border-line p-4 text-sm leading-relaxed">
+      <div className="mt-3 border border-line p-4 text-read leading-relaxed">
         <p>
           Official guidance (Ready.gov) is three words: <strong>get inside, stay inside, stay tuned.</strong>
         </p>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-dim">
+        <ul className="mt-2 list-disc space-y-1 pl-5 text-body text-dim">
           <li>Go to the nearest solid building, away from windows. A basement or the middle of a building is best.</li>
           <li>If you are caught outside by a blast, Ready.gov advises lying face down to protect your skin, then getting indoors within about 10 minutes, before fallout arrives.</li>
           <li>Stay for at least 24 hours unless officials say otherwise or you face an immediate danger. Close windows, doors and air intakes.</li>
           <li>Afterwards, remove outer clothing (this removes up to 90% of radioactive material, per Ready.gov), wash with soap and water, and avoid unsealed outdoor food until authorities say it is safe.</li>
           <li>Potassium iodide is not a general radiation pill. Take it only if your health authority tells you to.</li>
         </ul>
-        <p className="mono mt-3 text-[11px] text-dim">
+        <p className="mono mt-3 text-body text-dim">
           Source: <A href="https://www.ready.gov/nuclear-explosion">Ready.gov: Nuclear explosion</A> ·{" "}
           <A href="https://www.who.int/publications/i/item/9789241550185">WHO iodine thyroid blocking guideline</A>
         </p>
@@ -324,24 +324,24 @@ export default function SurvivalHub() {
     ) },
     { id: "comms", label: "Communication", group: "Emergencies", hint: "When networks fail", content: (
       <>
-      <p className="mt-3 text-sm leading-relaxed text-dim">
+      <p className="mt-3 text-read leading-relaxed text-dim">
         Start simple: a written contact list, a meeting place and a battery radio to hear official instructions. Two-way
         radio is a bonus; learn it before you need it.
       </p>
       <div className="mt-3 overflow-x-auto border border-line">
-        <table className="w-full min-w-[640px] text-left text-xs">
+        <table className="w-full min-w-[640px] text-left text-body">
           <thead>
             <tr className="label border-b border-line">
-              <th className="p-2 font-normal">Method</th>
-              <th className="p-2 font-normal">Where</th>
-              <th className="p-2 font-normal">Licence</th>
-              <th className="p-2 font-normal">Notes</th>
+              <th className="p-2">Method</th>
+              <th className="p-2">Where</th>
+              <th className="p-2">Licence</th>
+              <th className="p-2">Notes</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line align-top">
             {COMMS_ROWS.map((r) => (
               <tr key={r.service}>
-                <th scope="row" className="p-2 font-medium">{r.service}</th>
+                <th scope="row" className="p-2">{r.service}</th>
                 <td className="p-2 text-dim">{r.where}</td>
                 <td className="p-2 text-dim">{r.licence}</td>
                 <td className="p-2 leading-relaxed text-dim">{r.detail}</td>
@@ -350,7 +350,7 @@ export default function SurvivalHub() {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-dim">
+      <p className="mt-2 text-body leading-relaxed text-dim">
         Radio rules differ by country and change. Never transmit on emergency-service or public-safety channels, and do not
         use amateur frequencies without a licence. Check your regulator:{" "}
         {REGULATOR_LINKS.map((l, i) => (
@@ -361,7 +361,7 @@ export default function SurvivalHub() {
         ))}
         .
       </p>
-      <button type="button" onClick={() => start({ kind: "card" })} className="btn mono no-print mt-4 px-3 py-1.5 text-xs font-bold">
+      <button type="button" onClick={() => start({ kind: "card" })} className="btn mono no-print mt-4 px-3 py-1.5 text-body font-bold">
         PRINT WALLET CARD
       </button>
 
@@ -369,11 +369,11 @@ export default function SurvivalHub() {
     ) },
     { id: "maps", label: "Offline maps", group: "Resources", hint: "Maps without a connection", content: (
       <>
-      <p className="mt-3 text-sm leading-relaxed text-dim">
+      <p className="mt-3 text-read leading-relaxed text-dim">
         For most people the easiest option is a phone app with downloaded regions. If you are technical and want a map file
         you control, the tool below builds the extraction command for a circle around a place.
       </p>
-      <ul className="mt-2 space-y-1 text-xs">
+      <ul className="mt-2 space-y-1 text-body">
         {OFFLINE_READING.map((o) => (
           <li key={o.url}>
             <A href={o.url}>{o.label} ↗</A> <span className="text-dim">· {o.note}</span>
@@ -386,7 +386,7 @@ export default function SurvivalHub() {
     ) },
     { id: "guides", label: "Official guides", group: "Resources", hint: "Links to the agencies that issue them", content: (
       <>
-      <p className="mt-3 text-sm leading-relaxed text-dim">
+      <p className="mt-3 text-read leading-relaxed text-dim">
         These are links, not copies: guidance changes, and the issuing health and emergency agencies keep it current. For
         medicine and doses, follow them, not this page. Save the ones you need before a crisis (print to PDF or open them in
         a reader such as Kiwix).
@@ -397,9 +397,9 @@ export default function SurvivalHub() {
             <A href={g.url}>
               {g.title} ↗
             </A>
-            <span className="mono ml-2 text-[11px] text-dim">{g.org}</span>
-            {g.botBlocked && <span className="mono ml-2 text-[11px] text-dim">(opens in a browser)</span>}
-            <span className="block text-xs text-dim">{g.blurb}</span>
+            <span className="mono ml-2 text-body text-dim">{g.org}</span>
+            {g.botBlocked && <span className="mono ml-2 text-body text-dim">(opens in a browser)</span>}
+            <span className="block text-body text-dim">{g.blurb}</span>
           </li>
         ))}
       </ul>
@@ -418,7 +418,7 @@ export default function SurvivalHub() {
       aside={
         <>
           {mineProfile && (
-            <p className="mb-3 text-sm">
+            <p className="mb-3 text-read">
               Your country: <strong>{mineProfile.name}</strong>{" "}
               <Link href="/country" className="text-accent hover:underline">change</Link>.{" "}
               {mineChips.length > 0 ? "Highlight the checklist for:" : "Nothing in the site's data points to a scenario for it."}{" "}
@@ -432,7 +432,7 @@ export default function SurvivalHub() {
                     window.history.replaceState(null, "", "?tab=bag");
                     window.dispatchEvent(new Event("hashchange")); // WikiShell re-reads the URL and opens the checklist
                   }}
-                  className="mono mr-1.5 border border-line px-2 py-0.5 text-[11px] text-dim hover:text-fg"
+                  className="mono mr-1.5 border border-line px-2 py-0.5 text-body text-dim hover:text-fg"
                 >
                   {SCENARIO_FILTERS.find((f) => f.id === c.tag)?.label}
                 </button>
@@ -446,7 +446,7 @@ export default function SurvivalHub() {
       sections={sections.map((sec, i) =>
         i === sections.length - 1
           ? { ...sec, content: (<>{sec.content}
-      <p className="mt-6 text-xs leading-relaxed text-dim">
+      <p className="mt-6 text-body leading-relaxed text-dim">
         This page gives general information, not medical or safety advice for your situation. Follow instructions from
         local authorities.
       </p>

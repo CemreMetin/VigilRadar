@@ -85,8 +85,8 @@ function RangeBars({ field, max, unit }: { field: "t" | "s"; max: number; unit: 
       {SSP.map((s) => {
         const [mid, lo, hi] = s[field];
         return (
-          <li key={s.id} className="flex items-center gap-3 px-3 py-2 text-xs">
-            <span className="w-28 shrink-0"><span className="mono text-fg">{s.id}</span><span className="block text-[10px] text-dim">{s.note}</span></span>
+          <li key={s.id} className="flex items-center gap-3 px-3 py-2 text-body">
+            <span className="w-28 shrink-0"><span className="mono text-fg">{s.id}</span><span className="block text-label text-dim">{s.note}</span></span>
             <span className="relative h-3 flex-1 bg-line" role="img" aria-label={`${s.id}: ${mid}${unit}, range ${lo} to ${hi}${unit}`}>
               <span className="absolute inset-y-0" style={{ left: `${(lo / max) * 100}%`, width: `${((hi - lo) / max) * 100}%`, background: "repeating-linear-gradient(90deg, var(--geo) 0 5px, transparent 5px 8px)", opacity: 0.8 }} />
               <span className="absolute -inset-y-0.5 w-0.5 bg-fg" style={{ left: `${(mid / max) * 100}%` }} />
@@ -124,32 +124,32 @@ export default function TrajectoryView() {
     { id: "now", label: "Where we are", group: "Observed", content: (<>
       {loading || error || !data ? <Loading error={error} /> : (
         <>
-          <p className="mt-3 flex items-center gap-3 text-sm"><KindTag kind="observed" /> Global surface temperature, annual mean</p>
+          <p className="mt-3 flex items-center gap-3 text-read"><KindTag kind="observed" /> Global surface temperature, annual mean</p>
           <LineChart data={data.giss.annual} color="#ffb000" unit=" °C" label="Global temperature anomaly" zeroLine />
-          <p className="mt-1 text-[11px] leading-relaxed text-dim">
+          <p className="mt-1 text-body leading-relaxed text-dim">
             NASA GISTEMP <Term id="anomaly">anomaly relative to 1951-1980</Term> (not the pre-industrial baseline used for the 1.5 °C target, which is roughly 0.3 °C
             cooler). <Ext href={data.giss.source.url}>{data.giss.source.name} ↗</Ext>
           </p>
 
-          <p className="mt-6 flex items-center gap-3 text-sm"><KindTag kind="observed" /> Atmospheric CO₂ at Mauna Loa, annual mean</p>
+          <p className="mt-6 flex items-center gap-3 text-read"><KindTag kind="observed" /> Atmospheric CO₂ at Mauna Loa, annual mean</p>
           <LineChart data={data.co2.annual} color="#00e5ff" unit=" ppm" label="Atmospheric CO2" />
-          <p className="mt-1 text-[11px] text-dim">
+          <p className="mt-1 text-body text-dim">
             Pre-industrial level was about 280 ppm. <Ext href={data.co2.source.url}>{data.co2.source.name} ↗</Ext>
           </p>
         </>
       )}
-      <p className="mt-4 text-sm leading-relaxed">
+      <p className="mt-4 text-read leading-relaxed">
         The WMO puts long-term warming at 1.34–1.41 °C above 1850-1900 and found 2024 alone about 1.55 ± 0.13 °C.{" "}
         <Ext href="https://wmo.int/files/state-of-global-climate-2024">WMO report ↗</Ext>
       </p>
 
     </>) },
     { id: "ipcc", label: "IPCC scenarios", group: "Projections", content: (<>
-      <p className="mt-3 flex items-center gap-3 text-sm"><KindTag kind="projection" /> Warming by 2081-2100 vs 1850-1900 (best estimate and very likely range)</p>
+      <p className="mt-3 flex items-center gap-3 text-read"><KindTag kind="projection" /> Warming by 2081-2100 vs 1850-1900 (best estimate and very likely range)</p>
       <RangeBars field="t" max={6} unit=" °C" />
-      <p className="mt-6 flex items-center gap-3 text-sm"><KindTag kind="projection" /> Global sea level rise by 2100 vs 1995-2014 (median and likely range)</p>
+      <p className="mt-6 flex items-center gap-3 text-read"><KindTag kind="projection" /> Global sea level rise by 2100 vs 1995-2014 (median and likely range)</p>
       <RangeBars field="s" max={1.2} unit=" m" />
-      <p className="mt-2 text-xs leading-relaxed text-dim">
+      <p className="mt-2 text-body leading-relaxed text-dim">
         These are scenarios of what follows from different emission paths, not predictions: the path is a human choice. Sea-level
         rise would continue for centuries beyond 2100, and the high end is uncertain because of ice-sheet behaviour.{" "}
         <Ext href="https://www.ipcc.ch/report/ar6/wg1/chapter/summary-for-policymakers/">IPCC AR6 WGI SPM ↗</Ext>.
@@ -158,14 +158,14 @@ export default function TrajectoryView() {
 
     </>) },
     { id: "experts", label: "Expert estimates", group: "Judgements", content: (<>
-      <p className="mt-3 flex items-center gap-3 text-sm"><KindTag kind="expert" /> Toby Ord, <em>The Precipice</em> (2020): chance of an existential catastrophe within the next 100 years</p>
+      <p className="mt-3 flex items-center gap-3 text-read"><KindTag kind="expert" /> Toby Ord, <em>The Precipice</em> (2020): chance of an existential catastrophe within the next 100 years</p>
       <ul className="mt-2 divide-y divide-line border border-line">
         {ORD.map((r) => {
           const p = 1 / r.oneIn;
           const w = ((Math.log10(p) + 9) / 9) * 100; // 1e-9 .. 1
           return (
-            <li key={r.label} className={`flex items-center gap-3 px-3 py-1.5 text-xs ${r.total ? "bg-line/30" : ""}`}>
-              <span className={`w-56 shrink-0 ${r.total ? "font-semibold" : ""}`}>{r.label}</span>
+            <li key={r.label} className={`flex items-center gap-3 px-3 py-1.5 text-body ${r.total ? "bg-line/30" : ""}`}>
+              <span className={`w-56 shrink-0 ${r.total ? "font-bold" : ""}`}>{r.label}</span>
               <span className="relative h-2 flex-1 bg-line" role="img" aria-label={`1 in ${r.oneIn.toLocaleString("en-US")}`}>
                 <span className="absolute inset-y-0 left-0" style={{ width: `${w}%`, background: "repeating-linear-gradient(90deg, var(--bio) 0 2px, transparent 2px 5px)" }} />
               </span>
@@ -174,11 +174,11 @@ export default function TrajectoryView() {
           );
         })}
       </ul>
-      <p className="mono mt-1 text-[10px] text-dim">Bars use a logarithmic scale from 1 in a billion to 1 in 1.</p>
+      <p className="mono mt-1 text-label text-dim">Bars use a logarithmic scale from 1 in a billion to 1 in 1.</p>
 
       <Card className="mt-6">
         <p className="label">Other expert estimates, side by side</p>
-        <ul className="mt-2 space-y-3 text-sm leading-relaxed">
+        <ul className="mt-2 space-y-3 text-read leading-relaxed">
           <li>
             <KindTag kind="expert" /> <span className="text-fg">Advanced AI:</span> in a survey of 2,778 AI researchers, between 38% and 51%
             (depending on the question) gave at least a 10% chance to outcomes as bad as human extinction, while Ord puts unaligned
@@ -193,7 +193,7 @@ export default function TrajectoryView() {
           </li>
         </ul>
       </Card>
-      <p className="mt-4 text-xs leading-relaxed text-dim">
+      <p className="mt-4 text-body leading-relaxed text-dim">
         These are personal judgements by experts, built from limited evidence and not comparable to measurements. They differ by orders
         of magnitude between authors and methods, which is itself the finding. This site never adds probabilities of its own. See{" "}
         <Link href="/scenarios" className="text-accent hover:underline">the scenarios</Link> for the reasoning behind each, and{" "}

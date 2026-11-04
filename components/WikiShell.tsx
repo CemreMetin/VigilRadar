@@ -98,7 +98,7 @@ export default function WikiShell({
               id: "sources",
               label: "Sources",
               content: (
-                <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-xs leading-relaxed text-dim">
+                <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-body leading-relaxed text-dim">
                   {sources.map((x) => (
                     <li key={x.url}>
                       {x.label}{" "}
@@ -220,7 +220,7 @@ export default function WikiShell({
   const next = sections[index + 1];
 
   const nav = (
-    <nav aria-label="Wiki" className="text-[13px]">
+    <nav aria-label="Wiki" className="text-read">
       <label className="sr-only" htmlFor="wiki-filter">
         Filter pages
       </label>
@@ -241,12 +241,12 @@ export default function WikiShell({
         }}
         placeholder="Search the site  ( / )"
         aria-controls="wiki-results"
-        className="mono mb-5 w-full border border-line bg-transparent px-2 py-1.5 text-xs placeholder:text-dim focus:outline-none"
+        className="mono mb-5 w-full border border-line bg-transparent px-2 py-1.5 text-body placeholder:text-dim focus:outline-none"
       />
       {q.length >= 3 && (
         <div id="wiki-results" className="-mt-3 mb-5" aria-live="polite">
           {results.length === 0 ? (
-            <p className="mono text-[11px] text-dim">{searchIndex ? "No text matches." : "Searching…"}</p>
+            <p className="mono text-body text-dim">{searchIndex ? "No text matches." : "Searching…"}</p>
           ) : (
             <ul role="listbox" aria-label="Search results" className="border-l border-line">
               {results.map((r, i) => (
@@ -259,10 +259,10 @@ export default function WikiShell({
                     }}
                     className={`block break-words py-1 pl-3 hover:text-fg ${i === picked ? "-ml-px border-l border-fg text-fg" : "text-dim"}`}
                   >
-                    <span className="mono block text-[11px] font-bold text-fg">
+                    <span className="mono block text-body font-bold text-fg">
                       {r.page} › {r.section}
                     </span>
-                    <span className="block text-[11px] leading-snug">
+                    <span className="block text-body leading-snug">
                       <Snippet text={r.text} words={words} />
                     </span>
                   </a>
@@ -274,7 +274,7 @@ export default function WikiShell({
       )}
       {tree.map((g) => (
         <div key={g.title} className="mb-5">
-          <p className="mono mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-dim opacity-70">{g.title}</p>
+          <p className="mono mb-1.5 text-label font-bold uppercase tracking-[0.16em] text-dim opacity-70">{g.title}</p>
           <ul className="border-l border-line">
             {g.pages.map((p) => {
               const here = isActivePage(path, p.href);
@@ -283,7 +283,7 @@ export default function WikiShell({
                   <Link
                     href={p.href}
                     aria-current={here ? "page" : undefined}
-                    className={`block py-1 pl-3 hover:text-fg ${here ? "-ml-px border-l border-fg font-semibold text-fg" : "text-dim"}`}
+                    className={`block py-1 pl-3 hover:text-fg ${here ? "-ml-px border-l border-fg font-bold text-fg" : "text-dim"}`}
                   >
                     {p.label}
                   </Link>
@@ -297,7 +297,7 @@ export default function WikiShell({
                               type="button"
                               onClick={() => open(s.id)}
                               aria-current={s.id === active.id ? "true" : undefined}
-                              className={`block w-full py-0.5 pl-3 text-left text-[12px] hover:text-fg ${s.id === active.id ? "-ml-px border-l border-fg text-fg" : "text-dim"}`}
+                              className={`block w-full py-0.5 pl-3 text-left text-body hover:text-fg ${s.id === active.id ? "-ml-px border-l border-fg text-fg" : "text-dim"}`}
                             >
                               {s.label}
                             </button>
@@ -311,7 +311,7 @@ export default function WikiShell({
           </ul>
         </div>
       ))}
-      {tree.length === 0 && <p className="mono text-[11px] text-dim">No page matches.</p>}
+      {tree.length === 0 && <p className="mono text-body text-dim">No page matches.</p>}
     </nav>
   );
 
@@ -319,7 +319,7 @@ export default function WikiShell({
     <div className="mx-auto flex max-w-6xl flex-col lg:flex-row">
       {/* narrow screens: the tree sits behind a menu button above the content */}
       <div className="no-print border-b border-line px-4 py-2 lg:hidden">
-        <button type="button" className="btn mono px-3 py-1.5 text-xs font-bold" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
+        <button type="button" className="btn mono px-3 py-1.5 text-body font-bold" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
           {menuOpen ? "CLOSE MENU" : `MENU · ${title.toUpperCase()}`}
         </button>
         {menuOpen && <div className="mt-3">{nav}</div>}
@@ -332,15 +332,15 @@ export default function WikiShell({
           <p className="print-header hidden print:block">
             {title} · printed {printedOn}
           </p>
-          <h1 className="mono text-xl font-bold tracking-wide" style={{ color: accent }}>
+          <h1 className="mono text-title font-bold tracking-wide" style={{ color: accent }}>
             {title}
           </h1>
-          {intro && <div className="mt-3 text-sm leading-relaxed text-dim">{intro}</div>}
-          {updated && <p className="mono mt-2 text-[11px] text-dim">Last updated: {updated}</p>}
+          {intro && <div className="mt-3 text-read leading-relaxed text-dim">{intro}</div>}
+          {updated && <p className="mono mt-2 text-body text-dim">Last updated: {updated}</p>}
           {keyPoints && index <= 0 && (
             <section aria-label="Key points" className="mt-4 border border-line p-3">
               <p className="label">Key points</p>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed">
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-read leading-relaxed">
                 {keyPoints.slice(0, 4).map((k) => (
                   <li key={k}>{k}</li>
                 ))}
@@ -350,16 +350,16 @@ export default function WikiShell({
           {aside && <div className="no-print mt-5">{aside}</div>}
 
           <div className="no-print mt-4 flex flex-wrap gap-2" role="toolbar" aria-label="Print">
-            <button type="button" className="btn mono px-3 py-1 text-[11px] font-bold" onClick={() => print("section")}>
+            <button type="button" className="btn mono px-3 py-1 text-body font-bold" onClick={() => print("section")}>
               Print this section
             </button>
-            <button type="button" className="btn mono px-3 py-1 text-[11px] font-bold" onClick={() => print("all")}>
+            <button type="button" className="btn mono px-3 py-1 text-body font-bold" onClick={() => print("all")}>
               Print whole page
             </button>
           </div>
 
           <div className="screen-section">
-            <h2 className="mono mt-8 border-t border-line pt-4 text-sm font-bold tracking-[0.14em]" style={{ color: accent }}>
+            <h2 className="mono mt-8 border-t border-line pt-4 text-read font-bold tracking-[0.14em]" style={{ color: accent }}>
               {active.label.toUpperCase()}
             </h2>
             <div className="mt-1">{active.content}</div>
@@ -392,14 +392,14 @@ export default function WikiShell({
 
           <div className="no-print mt-10 flex justify-between gap-3 border-t border-line pt-3">
             {prev ? (
-              <button type="button" className="btn mono px-3 py-1.5 text-xs font-bold" onClick={() => open(prev.id)}>
+              <button type="button" className="btn mono px-3 py-1.5 text-body font-bold" onClick={() => open(prev.id)}>
                 ← {prev.label}
               </button>
             ) : (
               <span />
             )}
             {next && (
-              <button type="button" className="btn mono px-3 py-1.5 text-xs font-bold" onClick={() => open(next.id)}>
+              <button type="button" className="btn mono px-3 py-1.5 text-body font-bold" onClick={() => open(next.id)}>
                 {next.label} →
               </button>
             )}

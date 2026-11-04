@@ -25,10 +25,10 @@ export default function GlossaryPage() {
             .filter((e) => e.topic === topic)
             .map((e) => (
               <div key={e.id} id={e.id} className="scroll-mt-4 break-inside-avoid">
-                <dt className="mono text-sm font-bold">{e.term}</dt>
-                <dd className="mt-1 text-sm leading-relaxed">
+                <dt className="mono text-read font-bold">{e.term}</dt>
+                <dd className="mt-1 text-read leading-relaxed">
                   {e.short} {e.long}
-                  <span className="mono mt-1 block text-[11px] text-dim">
+                  <span className="mono mt-1 block text-body text-dim">
                     Source: {e.source.url.startsWith("/") ? <Int href={e.source.url}>{e.source.label}</Int> : <Ext href={e.source.url}>{e.source.label} ↗</Ext>}
                   </span>
                 </dd>

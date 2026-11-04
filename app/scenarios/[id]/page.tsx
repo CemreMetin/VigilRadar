@@ -40,13 +40,13 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
     { id: "overview", label: "Overview", group: "This scenario", content: (
       <>
         {s.tier === "C" && (
-          <p className="mt-3 border border-dashed border-geo px-3 py-2 text-xs leading-relaxed text-geo">
+          <p className="mt-3 border border-dashed border-geo px-3 py-2 text-body leading-relaxed text-geo">
             Thought experiment: physically conceivable, but the evidence is weak or disputed. It is here for curiosity and to say what
             the science actually thinks.
           </p>
         )}
-        <p className="mt-4 text-sm leading-relaxed">{s.summary}</p>
-        <p className="mt-2 text-[11px] text-dim">The tier rates the quality of the evidence, not how likely the event is.</p>
+        <p className="mt-4 text-read leading-relaxed">{s.summary}</p>
+        <p className="mt-2 text-body text-dim">The tier rates the quality of the evidence, not how likely the event is.</p>
 
         {s.indicators && <LiveIndicators ids={s.indicators} />}
 
@@ -60,10 +60,10 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
           {s.chain.map((c, i) => {
             const e = EVIDENCE[c.evidence];
             return (
-              <li key={i} className="flex items-start gap-3 text-sm">
+              <li key={i} className="flex items-start gap-3 text-read">
                 <span className="mono mt-0.5 w-5 shrink-0 text-right text-dim">{i + 1}</span>
                 <span className="min-w-0 flex-1 leading-relaxed">{c.step}</span>
-                <span className={`mono shrink-0 border px-1.5 py-0.5 text-[10px] ${e.cls}`} title={e.label}>
+                <span className={`mono shrink-0 border px-1.5 py-0.5 text-label ${e.cls}`} title={e.label}>
                   {e.mark} {e.label}
                 </span>
               </li>
@@ -72,7 +72,7 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
         </ol>
 
         <p className="label mt-6">Historical anchors</p>
-        <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
+        <ul className="mt-3 list-disc space-y-1.5 pl-5 text-read leading-relaxed">
           {s.analogs.map((a) => <li key={a}>{a}</li>)}
         </ul>
 
@@ -84,18 +84,18 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
         {s.estimates.length > 0 && (
           <>
             <div className="mt-3 overflow-x-auto border border-line">
-              <table className="w-full min-w-[520px] text-left text-xs">
+              <table className="w-full min-w-[520px] text-left text-body">
                 <thead>
                   <tr className="label border-b border-line">
-                    <th className="p-2 font-normal">Source</th>
-                    <th className="p-2 font-normal">Statement</th>
-                    <th className="p-2 font-normal">Kind</th>
+                    <th className="p-2">Source</th>
+                    <th className="p-2">Statement</th>
+                    <th className="p-2">Kind</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line align-top">
                   {s.estimates.map((e) => (
                     <tr key={e.who + e.what}>
-                      <th scope="row" className="p-2 font-medium">
+                      <th scope="row" className="p-2">
                         <Ext href={ref(e.ref).url}>{e.who} ↗</Ext>
                       </th>
                       <td className="p-2 leading-relaxed text-dim">{e.what}</td>
@@ -107,7 +107,7 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
                 </tbody>
               </table>
             </div>
-            <p className="mt-2 text-[11px] text-dim">
+            <p className="mt-2 text-body text-dim">
               Expert estimates are personal judgements, not measurements, and experts disagree. This site never adds its own probabilities.
             </p>
           </>
@@ -116,7 +116,7 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
         {s.caveat && (
           <Card className="mt-8">
             <p className="label">Caveat</p>
-            <p className="mt-1 text-sm leading-relaxed">{s.caveat}</p>
+            <p className="mt-1 text-read leading-relaxed">{s.caveat}</p>
           </Card>
         )}
 
@@ -125,10 +125,10 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
       : []),
     { id: "todo", label: "What you can do", group: "Action", content: (
       <>
-        <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
+        <ul className="mt-3 list-disc space-y-1.5 pl-5 text-read leading-relaxed">
           {s.doNow.map((d) => <li key={d}>{d}</li>)}
         </ul>
-        <p className="mt-3 text-sm">
+        <p className="mt-3 text-read">
           <Link href={surviveHref} className="text-safe hover:underline">Open the preparedness checklist{s.tag ? " for this scenario" : ""} →</Link>
         </p>
 
@@ -138,7 +138,7 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
             <ul className="mt-3 flex flex-wrap gap-2">
               {related.map((r) => (
                 <li key={r.id}>
-                  <Link href={`/scenarios/${r.id}`} className="mono border border-line px-2.5 py-1 text-xs text-dim hover:border-accent hover:text-accent">
+                  <Link href={`/scenarios/${r.id}`} className="mono border border-line px-2.5 py-1 text-body text-dim hover:border-accent hover:text-accent">
                     {r.title}
                   </Link>
                 </li>
@@ -159,7 +159,7 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
         intro={
           <>
             <span className="flex flex-wrap items-center gap-3">
-              <Link href="/scenarios" className="mono text-xs hover:text-accent">← all scenarios</Link>
+              <Link href="/scenarios" className="mono text-body hover:text-accent">← all scenarios</Link>
               <TierBadge tier={s.tier} />
               <span className="label">{s.group}</span>
             </span>

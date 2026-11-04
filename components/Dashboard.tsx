@@ -715,18 +715,18 @@ export default function Dashboard() {
         {/* first view: scenario, signal with its basis, and the first metric */}
         <div className="border-b border-line px-3 py-2.5">
           <div className="flex items-center justify-between gap-3">
-            <p className="mono text-[11px] font-bold tracking-wider" style={{ color: mode.color }}>
+            <p className="mono text-body font-bold tracking-wider" style={{ color: mode.color }}>
               {`SCN//${mode.title.toUpperCase()}`}
             </p>
             <span
-              className="mono border px-1.5 py-0.5 text-[10px] font-bold tracking-wider"
+              className="mono border px-1.5 py-0.5 text-label font-bold tracking-wider"
               style={{ color: SIGNAL_COLOR[signal.level], borderColor: SIGNAL_COLOR[signal.level] }}
               title="The highest status among this scenario's live metrics. Thresholds are set in the data worker and described on the Methodology page; it is a reading, not a forecast."
             >
               SIGNAL {signal.label}
             </span>
           </div>
-          <p className="mt-1.5 text-[11px] font-light leading-relaxed text-dim">{signal.basis}</p>
+          <p className="mt-1.5 text-body leading-relaxed text-dim">{signal.basis}</p>
         </div>
         <CounterPanel counters={orderedCounters.slice(0, 1)} today={today} />
         {mode.id === "solar" && <ScaleChips solar={solarNow} picked={scaleDetail} onPick={(k) => { setScaleDetail(k); setMoreOpen(true); setTab("readout"); }} />}
@@ -734,13 +734,13 @@ export default function Dashboard() {
         <details className="group border-t border-line" open={moreOpen} onToggle={(e) => setMoreOpen(e.currentTarget.open)}>
           <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2 hover:bg-accent/5 [&::-webkit-details-marker]:hidden">
             <span className="label">More</span>
-            <span className="mono text-[10px] font-bold text-accent" aria-hidden>
+            <span className="mono text-label font-bold text-accent" aria-hidden>
               <span className="group-open:hidden">+</span>
               <span className="hidden group-open:inline">−</span>
             </span>
           </summary>
-          <p className="px-3 pb-2 text-[11px] font-light leading-relaxed text-dim">{mode.blurb}</p>
-          <Link href={mode.page} style={{ "--c": mode.color } as React.CSSProperties} className="btn mono mx-3 mb-3 inline-block px-2.5 py-1 text-[11px] font-bold">
+          <p className="px-3 pb-2 text-body leading-relaxed text-dim">{mode.blurb}</p>
+          <Link href={mode.page} style={{ "--c": mode.color } as React.CSSProperties} className="btn mono mx-3 mb-3 inline-block px-2.5 py-1 text-body font-bold">
             {mode.pageLabel} →
           </Link>
 
@@ -752,7 +752,7 @@ export default function Dashboard() {
                 role="tab"
                 aria-selected={tab === id}
                 onClick={() => setTab(id)}
-                className={`btn mono flex-1 border-0 px-2 py-2 text-xs font-bold ${tab === id ? "border-b-2" : ""} ${i > 0 ? "border-l" : ""}`}
+                className={`btn mono flex-1 border-0 px-2 py-2 text-body font-bold ${tab === id ? "border-b-2" : ""} ${i > 0 ? "border-l" : ""}`}
                 style={{ borderBottomColor: tab === id ? "var(--accent)" : undefined, borderLeftColor: "var(--line)" }}
               >
                 {label}
@@ -767,7 +767,7 @@ export default function Dashboard() {
             {tab === "metrics" && (
               <>
                 <CounterPanel counters={orderedCounters.slice(1)} today={today} />
-                <p className="px-3 py-3 text-[11px] font-light leading-relaxed text-dim">Open a metric for its trend, source, date and caveats.</p>
+                <p className="px-3 py-3 text-body leading-relaxed text-dim">Open a metric for its trend, source, date and caveats.</p>
               </>
             )}
             {tab === "links" && <LinksPanel selected={selected} myCountry={myCountryEntity} links={links} entities={entities} onSelect={select} />}
@@ -869,11 +869,11 @@ export default function Dashboard() {
             <section className="panel-scn absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-12 lg:left-[270px] lg:w-[min(760px,calc(100%-660px))]" aria-label="Data freshness">
               <div className="mb-2 flex items-center justify-between">
                 <p className="label caret">Data freshness</p>
-                <button type="button" className="btn mono px-2 py-0.5 text-[11px] font-bold" onClick={() => setFreshnessOpen(false)}>CLOSE</button>
+                <button type="button" className="btn mono px-2 py-0.5 text-body font-bold" onClick={() => setFreshnessOpen(false)}>CLOSE</button>
               </div>
               <FreshnessTable feeds={world.feeds} />
               {overdue.length > 0 && (
-                <div className="mt-3 border border-geo p-2 text-[11px] leading-relaxed">
+                <div className="mt-3 border border-geo p-2 text-body leading-relaxed">
                   <p className="mono font-bold" style={{ color: "var(--geo)" }}>PAST REVIEW DATE (hand-entered figures)</p>
                   <ul className="mt-1 text-dim">
                     {overdue.map((o) => (

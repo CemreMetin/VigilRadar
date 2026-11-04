@@ -66,8 +66,8 @@ export default function LinksPanel({
           disabled={!other}
           className="block w-full px-3 py-2 text-left hover:bg-accent/5 disabled:cursor-default disabled:hover:bg-transparent"
         >
-          <span className="block text-[13px]">{other?.title ?? it.otherId}</span>
-          <span className="block text-[11px] text-dim">{it.label}</span>
+          <span className="block text-body">{other?.title ?? it.otherId}</span>
+          <span className="block text-body text-dim">{it.label}</span>
         </button>
       </li>
     );
@@ -76,7 +76,7 @@ export default function LinksPanel({
     <div className="border-b border-line">
       <p className="label px-3 pt-3">Your country · {myCountry?.title} · {mine.length}</p>
       <ul className="divide-y divide-line">{mine.slice(0, 10).map(row)}</ul>
-      {mine.length > 10 && <p className="px-3 pb-2 text-[11px] text-dim">+ {mine.length - 10} more: click the country on the map</p>}
+      {mine.length > 10 && <p className="px-3 pb-2 text-body text-dim">+ {mine.length - 10} more: click the country on the map</p>}
     </div>
   );
 
@@ -84,7 +84,7 @@ export default function LinksPanel({
     return (
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto" role="tabpanel">
       {yourCountry}
-      <div className="p-4 text-xs leading-relaxed text-dim">
+      <div className="p-4 text-body leading-relaxed text-dim">
         <p className="text-fg">Click anything on the map to see what it is linked to.</p>
         <p className="mt-2">
           Links are computed from data we already have: things that are <em>near</em> each other (an earthquake close to
@@ -105,9 +105,9 @@ export default function LinksPanel({
       {yourCountry}
       <div className="border-b border-line p-3">
         <p className="label">{selected.kind}</p>
-        <p className="mt-1 text-sm font-medium">{selected.title}</p>
+        <p className="mt-1 text-body">{selected.title}</p>
         {selected.lines.map((l) => (
-          <p key={l} className="mt-1.5 text-xs leading-relaxed text-dim">
+          <p key={l} className="mt-1.5 text-body leading-relaxed text-dim">
             {l}
           </p>
         ))}
@@ -116,19 +116,19 @@ export default function LinksPanel({
             <a
               href={selected.link.href}
               {...(selected.link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className="mono text-[11px] text-accent hover:underline"
+              className="mono text-body text-accent hover:underline"
             >
               {selected.link.text}
             </a>
           )}
-          <button type="button" onClick={() => onSelect(null)} className="mono text-[11px] text-dim hover:text-fg">
+          <button type="button" onClick={() => onSelect(null)} className="mono text-body text-dim hover:text-fg">
             clear selection
           </button>
         </div>
       </div>
 
       {grouped.length === 0 ? (
-        <p className="p-3 text-xs text-dim">No computed links for this item right now.</p>
+        <p className="p-3 text-body text-dim">No computed links for this item right now.</p>
       ) : (
         grouped.map(([type, list]) => (
           <div key={type} className="border-b border-line">
@@ -136,7 +136,7 @@ export default function LinksPanel({
             <ul className="divide-y divide-line">
               {list.slice(0, 25).map(row)}
             </ul>
-            {list.length > 25 && <p className="px-3 pb-2 text-[11px] text-dim">+ {list.length - 25} more</p>}
+            {list.length > 25 && <p className="px-3 pb-2 text-body text-dim">+ {list.length - 25} more</p>}
           </div>
         ))
       )}

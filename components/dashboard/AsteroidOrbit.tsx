@@ -109,7 +109,7 @@ export default function AsteroidOrbit({ file, now, zoom }: { file: AsteroidsFile
           <text key={`l-${p.a.des}`} x={p.x + 7} y={p.y + 3} fontSize={9} fill="var(--fg)" className="mono">{p.a.des}</text>
         ))}
       </svg>
-      <p className="mono absolute bottom-14 left-[280px] max-w-[26rem] text-[10px] font-light leading-snug text-dim">
+      <p className="mono absolute bottom-14 left-[280px] max-w-[26rem] text-label leading-snug text-dim">
         Directions: JPL Horizons. Distances not to scale with the globe.
         {" "}Asteroids are shown where they are at closest approach, the Moon and Sun as they are now; angle is right ascension seen from above the North Pole.
         {hollow > 0 ? ` Hollow dots (${hollow}): no direction available, placed by date (top is now, clockwise).` : ""}

@@ -32,7 +32,7 @@ export const PAGE_GROUPS: { title: string; pages: PageLink[] }[] = [
 export function PagesMenu() {
   return (
     <details className="relative">
-      <summary className="mono cursor-pointer list-none text-xs text-dim hover:text-accent [&::-webkit-details-marker]:hidden">
+      <summary className="mono cursor-pointer list-none text-body text-dim hover:text-accent [&::-webkit-details-marker]:hidden">
         pages ▾
       </summary>
       <div className="panel absolute right-0 z-50 mt-2 w-72 border border-line-strong bg-panel-solid">
@@ -43,8 +43,8 @@ export function PagesMenu() {
               {g.pages.map((p) => (
                 <li key={p.href}>
                   <Link href={p.href} className="block px-3 py-1.5 hover:bg-accent/10">
-                    <span className="mono text-xs text-accent">{p.label}</span>
-                    <span className="block text-[11px] text-dim">{p.blurb}</span>
+                    <span className="mono text-body text-accent">{p.label}</span>
+                    <span className="block text-body text-dim">{p.blurb}</span>
                   </Link>
                 </li>
               ))}
@@ -61,10 +61,10 @@ export default function SiteNav() {
   return (
     <header className="no-print border-b border-line">
       <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
-        <Link href="/" className="mono text-sm font-bold tracking-[0.2em] text-accent">
+        <Link href="/" className="mono text-read font-bold tracking-[0.2em] text-accent">
           MONITORING
         </Link>
-        <nav aria-label="Primary" className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+        <nav aria-label="Primary" className="flex flex-wrap gap-x-4 gap-y-1 text-body">
           {[...PAGE_GROUPS.slice(0, 3).flatMap((g) => g.pages), { href: PAGE_GROUPS[3].pages[0].href, label: PAGE_GROUPS[3].title }].map((p) => (
             <Link key={p.href} href={p.href} className="mono text-dim hover:text-accent">
               {p.label.toLowerCase()}

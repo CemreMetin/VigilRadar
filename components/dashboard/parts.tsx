@@ -9,7 +9,7 @@ export function Section({ title, children, open = false, meta }: { title: string
     <details open={open} className="group border-b border-line">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 hover:bg-accent/5 [&::-webkit-details-marker]:hidden">
         <span className="label">{title}</span>
-        <span className="mono flex shrink-0 items-center gap-2 text-[10px] font-light text-dim">
+        <span className="mono flex shrink-0 items-center gap-2 text-label text-dim">
           {meta}
           <span className="font-bold text-accent group-open:hidden" aria-hidden>+</span>
           <span className="hidden font-bold text-accent group-open:inline" aria-hidden>−</span>
@@ -26,10 +26,10 @@ export function Big({ label, value, color, sub }: { label: string; value: string
   return (
     <div className="p-3 odd:border-r odd:border-line [&:nth-child(n+3)]:border-t [&:nth-child(n+3)]:border-line">
       <p className="label">{label}</p>
-      <p className="mono readout-in mt-1 text-2xl font-bold leading-none" style={{ color }}>
+      <p className="mono readout-in mt-1 text-value font-bold leading-none" style={{ color }}>
         {value}
       </p>
-      {sub && <p className="mono mt-1 text-[10px] font-light text-dim">{sub}</p>}
+      {sub && <p className="mono mt-1 text-label text-dim">{sub}</p>}
     </div>
   );
 }
@@ -38,9 +38,9 @@ export function Big({ label, value, color, sub }: { label: string; value: string
 export function Bar({ label, value, pct, color, hint }: { label: string; value: string; pct: number; color: string; hint?: string }) {
   return (
     <li className="py-1" title={hint}>
-      <div className="flex items-baseline justify-between gap-3 text-[12px]">
+      <div className="flex items-baseline justify-between gap-3 text-body">
         <span className="min-w-0 truncate">{label}</span>
-        <span className="mono shrink-0 text-[11px] font-bold" style={{ color }}>
+        <span className="mono shrink-0 text-body font-bold" style={{ color }}>
           {value}
         </span>
       </div>

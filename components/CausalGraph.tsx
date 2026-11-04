@@ -44,7 +44,7 @@ export default function CausalGraph() {
 
   return (
     <div className="mt-6">
-      <label className="flex cursor-pointer items-center gap-2 text-xs">
+      <label className="flex cursor-pointer items-center gap-2 text-body">
         <input type="checkbox" checked={showSpec} onChange={(e) => setShowSpec(e.target.checked)} style={{ accentColor: "var(--geo)" }} />
         <span>Show speculative links ({EDGES.filter((e) => e.evidence === "speculative").length})</span>
       </label>
@@ -90,7 +90,7 @@ export default function CausalGraph() {
         </svg>
       </div>
 
-      <p className="mono mt-2 flex flex-wrap gap-x-4 text-[11px] text-dim">
+      <p className="mono mt-2 flex flex-wrap gap-x-4 text-body text-dim">
         <span>━ strong</span>
         <span>─ moderate</span>
         <span>┄ speculative</span>
@@ -102,10 +102,10 @@ export default function CausalGraph() {
           <p className="label">
             {NODES.find((n) => n.id === selected.from)!.label} → {NODES.find((n) => n.id === selected.to)!.label}
           </p>
-          <p className="mono mt-1 text-xs text-accent">{STYLE[selected.evidence].label}</p>
-          <p className="mt-2 text-sm leading-relaxed">{selected.note}</p>
+          <p className="mono mt-1 text-body text-accent">{STYLE[selected.evidence].label}</p>
+          <p className="mt-2 text-read leading-relaxed">{selected.note}</p>
           {selected.refs.length > 0 ? (
-            <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-dim">
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-body text-dim">
               {selected.refs.map((r) => (
                 <li key={r}>
                   {ref(r).text} <Ext href={ref(r).url}>link ↗</Ext>
@@ -113,7 +113,7 @@ export default function CausalGraph() {
               ))}
             </ul>
           ) : (
-            <p className="mt-3 text-xs text-dim">No citation: this link is a plausible inference and is shown only when you ask for speculative links.</p>
+            <p className="mt-3 text-body text-dim">No citation: this link is a plausible inference and is shown only when you ask for speculative links.</p>
           )}
         </Card>
       )}
@@ -125,10 +125,10 @@ export default function CausalGraph() {
               type="button"
               onClick={() => setSel(e.id)}
               aria-pressed={sel === e.id}
-              className={`w-full border px-2 py-1 text-left text-xs ${sel === e.id ? "border-accent text-accent" : "border-line text-dim hover:text-fg"}`}
+              className={`w-full border px-2 py-1 text-left text-body ${sel === e.id ? "border-accent text-accent" : "border-line text-dim hover:text-fg"}`}
             >
               {NODES.find((n) => n.id === e.from)!.label} → {NODES.find((n) => n.id === e.to)!.label}{" "}
-              <span className="mono text-[10px]">· {STYLE[e.evidence].label}</span>
+              <span className="mono text-label">· {STYLE[e.evidence].label}</span>
             </button>
           </li>
         ))}

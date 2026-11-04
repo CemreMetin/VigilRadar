@@ -55,7 +55,7 @@ export default function CounterPanel({
   }, [focusId]);
 
   if (counters.length === 0) {
-    return <p className="p-4 text-xs text-dim">No metrics loaded. Run npm run data.</p>;
+    return <p className="p-4 text-body text-dim">No metrics loaded. Run npm run data.</p>;
   }
 
   return (
@@ -78,52 +78,52 @@ export default function CounterPanel({
                 <span className="flex items-center gap-2">
                   <span className="label">{c.label}</span>
                   {c.manual && <span className="label opacity-60">manual</span>}
-                  {tone !== "normal" && <span className="mono text-[10px] font-bold" style={{ color: TONE_COLOR[tone] }}>{TONE_LABEL[tone].toUpperCase()}</span>}
+                  {tone !== "normal" && <span className="mono text-label font-bold" style={{ color: TONE_COLOR[tone] }}>{TONE_LABEL[tone].toUpperCase()}</span>}
                   {reviewDue && <span className="label text-geo">review due</span>}
                 </span>
                 <span className="mt-0.5 flex items-baseline gap-2">
-                  <span className="mono text-xl leading-none" style={{ color: TONE_COLOR[tone] }}>
+                  <span className="mono text-value leading-none" style={{ color: TONE_COLOR[tone] }}>
                     {c.value}
                   </span>
-                  {c.unit && <span className="mono text-[11px] text-dim">{c.unit}</span>}
+                  {c.unit && <span className="mono text-body text-dim">{c.unit}</span>}
                 </span>
               </span>
               {c.history && <Sparkline values={c.history} color={dom.color} />}
-              <span className="mono mt-0.5 shrink-0 text-xs font-bold text-accent" aria-hidden>
+              <span className="mono mt-0.5 shrink-0 text-body font-bold text-accent" aria-hidden>
                 {isOpen ? "−" : "+"}
               </span>
               <span className="sr-only">Status: {TONE_LABEL[tone]}</span>
             </button>
 
             {isOpen && (
-              <div className="border-t border-line bg-bg/60 px-3 py-3 text-xs leading-relaxed">
+              <div className="border-t border-line bg-bg/60 px-3 py-3 text-body leading-relaxed">
                 {c.trendLabel && (
-                  <p className="mb-2 text-[11px] leading-snug text-fg">
+                  <p className="mb-2 text-body leading-snug text-fg">
                     {c.trend && <span className="mono mr-1" aria-hidden>{TREND_ARROW[c.trend]}</span>}
                     {c.trendLabel}
                   </p>
                 )}
-                {c.basis && <p className="mb-2 text-[11px] font-light leading-snug text-dim">How the status is set: {c.basis}</p>}
-                {c.note && <p className="font-light text-dim">{c.note}</p>}
+                {c.basis && <p className="mb-2 text-body leading-snug text-dim">How the status is set: {c.basis}</p>}
+                {c.note && <p className="text-dim">{c.note}</p>}
                 {c.rows && (
                   <ul className="mono mt-2 divide-y divide-line border border-line">
                     {c.rows.map((r, i) => (
                       <li key={`${i}-${r.label}`} className="flex items-baseline justify-between gap-3 px-2 py-1">
-                        <span className="min-w-0 truncate text-[11px] text-dim" title={r.label}>
+                        <span className="min-w-0 truncate text-body text-dim" title={r.label}>
                           {r.label}
                         </span>
-                        <span className="shrink-0 text-[11px]" style={{ color: TONE_COLOR[r.tone ?? "normal"] }}>
+                        <span className="shrink-0 text-body" style={{ color: TONE_COLOR[r.tone ?? "normal"] }}>
                           {r.value}
                         </span>
                       </li>
                     ))}
                   </ul>
                 )}
-                <p className="mono mt-2 text-[11px] text-dim">
+                <p className="mono mt-2 text-body text-dim">
                   as of {fmtAsOf(c.asOf)} · {c.cadence}
                   {reviewDue ? ` · was due for review ${c.reviewBy}` : ""}
                 </p>
-                <p className="mono mt-1 text-[11px]">
+                <p className="mono mt-1 text-body">
                   <a
                     href={c.source.url}
                     target="_blank"
@@ -135,7 +135,7 @@ export default function CounterPanel({
                   <span className="text-dim"> · {c.source.license}</span>
                 </p>
                 {c.href && (
-                  <Link href={c.href} className="mono mt-2 inline-block text-[11px] text-accent hover:underline">
+                  <Link href={c.href} className="mono mt-2 inline-block text-body text-accent hover:underline">
                     details →
                   </Link>
                 )}

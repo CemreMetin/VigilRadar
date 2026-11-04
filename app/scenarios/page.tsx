@@ -30,9 +30,9 @@ function Cards({ list }: { list: Scenario[] }) {
               <span className="label">{s.group}</span>
               <TierBadge tier={s.tier} />
             </div>
-            <h3 className="mt-2 text-sm font-semibold">{s.title}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-dim">{firstSentence(s.summary)}</p>
-            {s.module && <p className="mono mt-2 text-[10px] text-accent">interactive</p>}
+            <h3 className="mt-2 text-read font-bold">{s.title}</h3>
+            <p className="mt-1 text-body leading-relaxed text-dim">{firstSentence(s.summary)}</p>
+            {s.module && <p className="mono mt-2 text-label text-accent">interactive</p>}
           </Link>
         </li>
       ))}
@@ -47,7 +47,7 @@ const sections: WikiSection[] = (["A", "B", "C"] as Tier[]).map((t) => {
     label: `${TIER_INFO[t].title} · ${list.length}`,
     content: (
       <>
-        <p className="mt-2 text-xs text-dim">{TIER_INFO[t].blurb}</p>
+        <p className="mt-2 text-body text-dim">{TIER_INFO[t].blurb}</p>
         <Cards list={list} />
       </>
     ),

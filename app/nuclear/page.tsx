@@ -49,48 +49,48 @@ export default async function NuclearPage() {
             <div className="mt-3 grid gap-px border border-line bg-line sm:grid-cols-3">
         <div className="bg-panel-solid p-4">
           <p className="label"><Term id="doomsday-clock">Doomsday Clock</Term></p>
-          <p className="mono mt-1 text-3xl" style={{ color: "var(--threat)" }}>
+          <p className="mono mt-1 text-value" style={{ color: "var(--threat)" }}>
             {clock?.value}
           </p>
-          <p className="mt-1 text-xs text-dim">to midnight · set {clock?.asOf}</p>
-          <p className="mt-2 text-[11px] leading-snug text-dim">{clock?.note}</p>
+          <p className="mt-1 text-body text-dim">to midnight · set {clock?.asOf}</p>
+          <p className="mt-2 text-body leading-snug text-dim">{clock?.note}</p>
         </div>
         <div className="bg-panel-solid p-4">
           <p className="label">Military stockpile</p>
-          <p className="mono mt-1 text-3xl" style={{ color: "var(--geo)" }}>
+          <p className="mono mt-1 text-value" style={{ color: "var(--geo)" }}>
             {n(arsenals.totals.stockpile)}
           </p>
-          <p className="mt-1 text-xs text-dim">
+          <p className="mt-1 text-body text-dim">
             {n(arsenals.totals.deployed)} deployed · {n(arsenals.totals.stored)} in storage
           </p>
-          <p className="mt-2 text-[11px] leading-snug text-dim">Warheads that could be used: the number that matters most.</p>
+          <p className="mt-2 text-body leading-snug text-dim">Warheads that could be used: the number that matters most.</p>
         </div>
         <div className="bg-panel-solid p-4">
           <p className="label">Total inventory</p>
-          <p className="mono mt-1 text-3xl text-fg">{n(arsenals.totals.inventory)}</p>
-          <p className="mt-1 text-xs text-dim">incl. {n(arsenals.totals.retired)} retired, awaiting dismantling</p>
-          <p className="mt-2 text-[11px] leading-snug text-dim">Falls as old warheads are dismantled even while usable stockpiles grow.</p>
+          <p className="mono mt-1 text-value text-fg">{n(arsenals.totals.inventory)}</p>
+          <p className="mt-1 text-body text-dim">incl. {n(arsenals.totals.retired)} retired, awaiting dismantling</p>
+          <p className="mt-2 text-body leading-snug text-dim">Falls as old warheads are dismantled even while usable stockpiles grow.</p>
         </div>
       </div>
 
     </>) },
     { id: "arsenals", label: `Arsenals · ${arsenals.asOf}`, group: "Weapons", content: (<>
       <div className="mt-2 overflow-x-auto border border-line">
-        <table className="w-full min-w-[620px] text-sm">
+        <table className="w-full min-w-[620px] text-read">
           <thead>
             <tr className="label border-b border-line text-left">
-              <th className="p-2 font-normal">Country</th>
-              <th className="p-2 font-normal">Composition (share of total inventory)</th>
-              <th className="mono p-2 text-right font-normal">Deployed</th>
-              <th className="mono p-2 text-right font-normal">Stored</th>
-              <th className="mono p-2 text-right font-normal">Retired</th>
-              <th className="mono p-2 text-right font-normal">Total</th>
+              <th className="p-2">Country</th>
+              <th className="p-2">Composition (share of total inventory)</th>
+              <th className="mono p-2 text-right">Deployed</th>
+              <th className="mono p-2 text-right">Stored</th>
+              <th className="mono p-2 text-right">Retired</th>
+              <th className="mono p-2 text-right">Total</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
             {rows.map((r) => (
               <tr key={r.iso3}>
-                <th scope="row" className="p-2 text-left font-medium">
+                <th scope="row" className="p-2 text-left">
                   {r.name}
                 </th>
                 <td className="p-2">
@@ -124,18 +124,18 @@ export default async function NuclearPage() {
           </tfoot>
         </table>
       </div>
-      <p className="mono mt-2 flex flex-wrap gap-x-4 text-[11px] text-dim">
+      <p className="mono mt-2 flex flex-wrap gap-x-4 text-body text-dim">
         <span><span className="mr-1 inline-block h-2 w-2" style={{ background: "var(--threat)" }} />deployed</span>
         <span><span className="mr-1 inline-block h-2 w-2" style={{ background: "rgba(255,0,60,0.4)" }} />stored</span>
         <span><span className="mr-1 inline-block h-2 w-2" style={{ background: "rgba(125,140,151,0.55)" }} />retired</span>
       </p>
 
-      <ul className="mt-4 list-disc space-y-1 pl-5 text-xs leading-relaxed text-dim">
+      <ul className="mt-4 list-disc space-y-1 pl-5 text-body leading-relaxed text-dim">
         {arsenals.notes.map((t) => (
           <li key={t}>{t}</li>
         ))}
       </ul>
-      <dl className="mt-4 grid gap-x-6 gap-y-1 text-xs sm:grid-cols-2">
+      <dl className="mt-4 grid gap-x-6 gap-y-1 text-body sm:grid-cols-2">
         {Object.entries(arsenals.definitions).map(([k, v]) => (
           <div key={k}>
             <dt className="label inline">{k.replace(/([A-Z])/g, " $1")}: </dt>
@@ -143,7 +143,7 @@ export default async function NuclearPage() {
           </div>
         ))}
       </dl>
-      <p className="mono mt-3 text-[11px] text-dim">
+      <p className="mono mt-3 text-body text-dim">
         Source:{" "}
         <a href={arsenals.source.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
           {arsenals.source.name} ↗
@@ -153,24 +153,24 @@ export default async function NuclearPage() {
 
     </>) },
     { id: "pairs", label: "Tension pairs", group: "Weapons", content: (<>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-dim">
+      <p className="mt-3 max-w-2xl text-read leading-relaxed text-dim">
         The map draws a line between these country pairs and colours it by how tense news coverage of the pair is. Each pair is listed for the reason given here.
         Being listed is not an accusation and not a prediction. Live values are on the map (Nuclear tab) and in <Link href="/methodology?tab=pairs" className="text-accent hover:underline">the methodology</Link>.
       </p>
       <ul className="mt-3 divide-y divide-line border border-line">
         {dyadsFile.pairs.map((d) => (
           <li key={d.a + d.b} className="px-3 py-2">
-            <p className="text-[13px] font-bold">
+            <p className="text-read font-bold">
               {d.label}
-              {"sensitive" in d && d.sensitive ? <span className="mono ml-2 text-[10px] font-bold text-geo">SENSITIVE</span> : null}
+              {"sensitive" in d && d.sensitive ? <span className="mono ml-2 text-label font-bold text-geo">SENSITIVE</span> : null}
             </p>
-            <p className="mt-0.5 text-xs leading-relaxed text-dim">{d.why}</p>
+            <p className="mt-0.5 text-body leading-relaxed text-dim">{d.why}</p>
           </li>
         ))}
       </ul>
     </>) },
     { id: "plants", label: "Power plants", group: "Civil", content: (<>
-      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-dim">
+      <p className="mt-2 max-w-2xl text-body leading-relaxed text-dim">
         Civil power reactors are not weapons. They are shown because a war, quake or flood near a
         plant is a risk of its own; the map links quakes and conflict reports near a plant. Switch on{" "}
         <em>Nuclear</em> on the map to see all {plantsFile?.plants.length ?? "–"}.
@@ -178,18 +178,18 @@ export default async function NuclearPage() {
       {plantsFile && (
         <>
           <div className="mt-2 border border-line">
-            <table className="w-full text-sm">
+            <table className="w-full text-read">
               <thead>
                 <tr className="label border-b border-line text-left">
-                  <th className="p-2 font-normal">Country (top 12 by capacity)</th>
-                  <th className="mono p-2 text-right font-normal">Plants</th>
-                  <th className="mono p-2 text-right font-normal">Capacity (MW)</th>
+                  <th className="p-2">Country (top 12 by capacity)</th>
+                  <th className="mono p-2 text-right">Plants</th>
+                  <th className="mono p-2 text-right">Capacity (MW)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {plantRows.map(([country, v]) => (
                   <tr key={country}>
-                    <th scope="row" className="p-2 text-left font-medium">{country}</th>
+                    <th scope="row" className="p-2 text-left">{country}</th>
                     <td className="mono p-2 text-right">{v.count}</td>
                     <td className="mono p-2 text-right">{n(v.mw)}</td>
                   </tr>
@@ -197,7 +197,7 @@ export default async function NuclearPage() {
               </tbody>
             </table>
           </div>
-          <p className="mono mt-2 text-[11px] text-dim">
+          <p className="mono mt-2 text-body text-dim">
             Source:{" "}
             <a href={plantsFile.source.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
               {plantsFile.source.name} ↗

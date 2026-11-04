@@ -41,22 +41,22 @@ export default function StatusBar({
       : { text: "UPLINK NOMINAL", color: "var(--safe)", dot: "bg-safe live-dot" };
 
   return (
-    <div className="mono flex flex-wrap items-center gap-x-5 gap-y-1 px-3 py-1.5 text-[11px]" role="status">
+    <div className="mono flex flex-wrap items-center gap-x-5 gap-y-1 px-3 py-1.5 text-body" role="status">
       <span className="flex items-center gap-2 font-bold" style={{ color: state.color }} title={failed.length ? `Not updating: ${failed.join(", ")}` : undefined}>
         <span className={`inline-block h-2 w-2 rounded-full ${state.dot}`} aria-hidden />
         <span className={world ? "" : "caret"}>{state.text}</span>
-        {world && <span className="font-light text-dim">{liveFeeds}/{totalFeeds} feeds</span>}
+        {world && <span className="text-dim">{liveFeeds}/{totalFeeds} feeds</span>}
       </span>
-      <span className="font-light text-dim">
+      <span className="text-dim">
         UTC <span className="font-bold text-fg">{now ? utcClock(now) : "--:--:--"}</span>
       </span>
-      {world && now && <span className="font-light text-dim">DATA AGE {ageLabel(world.generatedAt, now)}</span>}
+      {world && now && <span className="text-dim">DATA AGE {ageLabel(world.generatedAt, now)}</span>}
       <button
         type="button"
         aria-pressed={freshnessOpen}
         aria-expanded={freshnessOpen}
         onClick={onFreshness}
-        className="btn px-2 py-0.5 text-[11px] font-bold"
+        className="btn px-2 py-0.5 text-body font-bold"
         title="Per-feed latency and exact update times"
       >
         FRESHNESS
@@ -72,8 +72,8 @@ export default function StatusBar({
           ⚠ {overdue.length} MANUAL {overdue.length === 1 ? "FIGURE" : "FIGURES"} PAST REVIEW DATE
         </button>
       )}
-      {summary && <span className="min-w-0 truncate font-light text-dim">{summary}</span>}
-      <span className="font-light text-dim">
+      {summary && <span className="min-w-0 truncate text-dim">{summary}</span>}
+      <span className="text-dim">
         Map ©{" "}
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a>
         {" · "}

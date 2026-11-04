@@ -26,14 +26,14 @@ export default function VolcanoCards() {
         return (
           <li key={v.id} className="border border-line bg-panel-solid p-4">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="text-sm font-semibold">{v.name}</h3>
-              <span className={`mono shrink-0 border px-1.5 py-0.5 text-[10px] ${lv.cls}`}>
+              <h3 className="text-read font-bold">{v.name}</h3>
+              <span className={`mono shrink-0 border px-1.5 py-0.5 text-label ${lv.cls}`}>
                 {lv.mark} {lv.label}
               </span>
             </div>
-            <p className="mt-1 text-xs text-dim">{v.levelLabel}</p>
-            {v.detail && <p className="mt-2 text-xs leading-relaxed text-dim">{v.detail}</p>}
-            <dl className="mono mt-3 space-y-1 text-[11px]">
+            <p className="mt-1 text-body text-dim">{v.levelLabel}</p>
+            {v.detail && <p className="mt-2 text-body leading-relaxed text-dim">{v.detail}</p>}
+            <dl className="mono mt-3 space-y-1 text-body">
               <div className="flex justify-between gap-3">
                 <dt className="text-dim">Last super-eruption</dt>
                 <dd className="text-right">
@@ -56,7 +56,7 @@ export default function VolcanoCards() {
                 </div>
               )}
             </dl>
-            <p className="mono mt-3 text-[11px]">
+            <p className="mono mt-3 text-body">
               <a href={v.source.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
                 {v.source.name} ↗
               </a>

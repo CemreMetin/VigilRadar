@@ -17,7 +17,7 @@ export default function ViewControls({
   onGlobe: (v: boolean) => void;
   controls: RefObject<MapControls | null>;
 }) {
-  const b = "btn mono h-8 min-w-8 px-2 text-xs font-bold";
+  const b = "btn mono h-8 min-w-8 px-2 text-body font-bold";
   return (
     <div className="panel-scn flex flex-col gap-px p-1" role="group" aria-label="Map view and camera">
       <div className="flex gap-px">

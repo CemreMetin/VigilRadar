@@ -94,7 +94,7 @@ export default function PlaceSearch({ onFly }: { onFly: (lon: number, lat: numbe
           } else if (e.key === "Enter") pick(active);
           else if (e.key === "Escape") setOpen(false);
         }}
-        className="mono w-full border border-line bg-transparent px-2 py-1.5 text-[11px] placeholder:text-dim focus:outline-none"
+        className="mono w-full border border-line bg-transparent px-2 py-1.5 text-body placeholder:text-dim focus:outline-none"
       />
       {open && q.trim() && (
         <ul id="place-results" role="listbox" className="absolute inset-x-0 top-full z-40 border border-line bg-panel-solid">
@@ -104,15 +104,15 @@ export default function PlaceSearch({ onFly }: { onFly: (lon: number, lat: numbe
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(i)}
-                className={`flex w-full items-baseline justify-between gap-2 px-2 py-1 text-left text-[12px] hover:bg-accent/10 ${i === active ? "bg-accent/15" : ""}`}
+                className={`flex w-full items-baseline justify-between gap-2 px-2 py-1 text-left text-body hover:bg-accent/10 ${i === active ? "bg-accent/15" : ""}`}
               >
                 <span className="truncate font-bold">{r.label}</span>
-                <span className="mono shrink-0 text-[10px] font-light text-dim">{r.sub}</span>
+                <span className="mono shrink-0 text-label text-dim">{r.sub}</span>
               </button>
             </li>
           ))}
           {results.length === 0 && (
-            <li className="mono px-2 py-1.5 text-[11px] font-light text-dim">{failed ? "Place list unavailable" : places ? "No match. Try lat, lon" : "Loading places…"}</li>
+            <li className="mono px-2 py-1.5 text-body text-dim">{failed ? "Place list unavailable" : places ? "No match. Try lat, lon" : "Loading places…"}</li>
           )}
         </ul>
       )}

@@ -11,7 +11,7 @@ function Bars({ rows, unit, color, max }: { rows: Row[]; unit: string; color: st
   return (
     <ul className="mt-2 divide-y divide-line border border-line">
       {rows.map((r) => (
-        <li key={r.iso3} className="flex items-center gap-3 px-3 py-1.5 text-xs">
+        <li key={r.iso3} className="flex items-center gap-3 px-3 py-1.5 text-body">
           <span className="w-40 shrink-0 truncate" title={r.name}>{r.name}</span>
           <span className="relative h-2 flex-1 bg-line" role="img" aria-label={`${r.name}: ${r.value}${unit}`}>
             <span className="absolute inset-y-0 left-0" style={{ width: `${Math.min(100, (r.value / max) * 100)}%`, background: color }} />
@@ -37,32 +37,32 @@ export default function FoodWaterModule() {
     <section className="mt-6" aria-label="Water and food stress">
       <div className="flex flex-wrap items-center gap-3">
         <KindTag kind="observed" />
-        <span className="text-xs text-dim">Most recent national figures from the World Bank (years shown). These move slowly.</span>
+        <span className="text-body text-dim">Most recent national figures from the World Bank (years shown). These move slowly.</span>
       </div>
 
       <h3 className="label mt-6">Freshwater withdrawal as % of available freshwater</h3>
       <Bars rows={water} unit="%" color="var(--accent)" max={Math.max(...water.map((r) => r.value))} />
-      <p className="mt-2 text-xs leading-relaxed text-dim">
+      <p className="mt-2 text-body leading-relaxed text-dim">
         A value above 100% means withdrawals exceed renewable supply, which is possible when a country uses desalinated or
         fossil groundwater. {ind.data.sources.water}.
       </p>
 
       <h3 className="label mt-8">Prevalence of undernourishment (% of population)</h3>
       <Bars rows={hunger} unit="%" color="var(--conflict)" max={Math.max(...hunger.map((r) => r.value))} />
-      <p className="mt-2 text-xs leading-relaxed text-dim">{ind.data.sources.hunger}.</p>
+      <p className="mt-2 text-body leading-relaxed text-dim">{ind.data.sources.hunger}.</p>
 
       {choke && (
         <>
           <h3 className="label mt-8">Shipping chokepoints: transits vs the past year</h3>
           <ul className="mt-2 divide-y divide-line border border-line">
             {choke.rows?.map((r) => (
-              <li key={r.label} className="flex items-baseline justify-between gap-3 px-3 py-1.5 text-xs">
+              <li key={r.label} className="flex items-baseline justify-between gap-3 px-3 py-1.5 text-body">
                 <span>{r.label}</span>
                 <span className="mono" style={{ color: r.tone === "high" ? "var(--threat)" : r.tone === "elevated" ? "var(--geo)" : "var(--fg)" }}>{r.value}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs leading-relaxed text-dim">{choke.note}</p>
+          <p className="mt-2 text-body leading-relaxed text-dim">{choke.note}</p>
         </>
       )}
     </section>

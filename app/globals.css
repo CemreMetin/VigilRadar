@@ -27,6 +27,15 @@
   --topbar-h: 96px; /* the floating scenario menu (two rows) ends here; the side panels start below it */
 }
 
+/* Type scale: three sizes and one page title. Weights: regular and bold only. */
+@theme {
+  --text-label: 10px; /* labels, units, captions, source lines: mono, uppercase, letter-spaced, dim (see .label) */
+  --text-body: 12px; /* everything on the map view and in lists and tables */
+  --text-read: 13px; /* long reading text on content pages */
+  --text-value: 24px; /* numbers and headline figures: mono, bold */
+  --text-title: 20px; /* the title of a content page */
+}
+
 @theme inline {
   --color-bg: var(--bg);
   --color-panel: var(--panel);
@@ -55,11 +64,12 @@ body {
 
 body {
   font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .mono {
   font-family: var(--font-mono-face), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
   font-variant-numeric: tabular-nums;
 }
 
@@ -344,6 +354,9 @@ body {
 }
 
 /* ---------- Wiki reading area: markdown-style, flat ---------- */
+.wiki {
+  font-size: 13px;
+}
 .wiki table,
 .wiki th,
 .wiki td,
