@@ -13,6 +13,7 @@ import {
   type ScenarioTag,
 } from "@/data/survival";
 import OfflineButton from "./OfflineButton";
+import { ChecklistPrintForm, usePrintSheet } from "./ChecklistPrint";
 import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "./WikiShell";
 
@@ -125,6 +126,7 @@ export default function SurvivalHub() {
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<ScenarioTag | "all">("all");
   const [tier, setTier] = useState<1 | 2>(1);
+  const { start, sheet } = usePrintSheet();
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
@@ -183,6 +185,9 @@ export default function SurvivalHub() {
       <p className="mono mt-2 text-[11px] text-dim">
         Steps from <A href="https://www.ready.gov/plan">Ready.gov: Make a plan</A>.
       </p>
+      <button type="button" onClick={() => start({ kind: "plan" })} className="btn mono no-print mt-4 px-3 py-1.5 text-xs font-bold">
+        PRINT FILL-IN PLAN
+      </button>
 
       </>
     ) },
@@ -277,13 +282,7 @@ export default function SurvivalHub() {
           </fieldset>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={() => window.print()}
-        className="no-print mono mt-4 border border-line px-3 py-1.5 text-xs text-dim hover:border-accent hover:text-accent"
-      >
-        print this list
-      </button>
+      <ChecklistPrintForm defaultTier={tier} onPrint={(o) => start({ kind: "checklist", ...o, checked, filter })} />
 
       </>
     ) },
@@ -347,6 +346,9 @@ export default function SurvivalHub() {
         ))}
         .
       </p>
+      <button type="button" onClick={() => start({ kind: "card" })} className="btn mono no-print mt-4 px-3 py-1.5 text-xs font-bold">
+        PRINT WALLET CARD
+      </button>
 
       </>
     ) },
@@ -391,6 +393,8 @@ export default function SurvivalHub() {
   ];
 
   return (
+    <>
+    {sheet}
     <WikiShell
       title="What can you do?"
       accent="var(--safe)"
@@ -409,5 +413,6 @@ export default function SurvivalHub() {
           : sec,
       )}
     />
+    </>
   );
 }

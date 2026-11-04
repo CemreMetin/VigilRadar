@@ -442,3 +442,7 @@ type Dyad = {
 - Gerilim çifti listesi: yukarıdaki başlangıç listesi yeterli mi, siyasi olarak hassas çiftler (ör. İsrail-İran) nasıl etiketlenecek?
 - Kürate nedensel grafın ilk sürümünü kim yazacak/gözden geçirecek? (Öneri: ben taslak çıkarırım, kaynakları siz doğrularsınız.)
 - Emerging tech (AI/biyogüvenlik) 7. alan olarak v1'e girsin mi? (Öneri: hayır.)
+
+## Yazdırma
+
+Her içerik sayfasında "Print this section" / "Print whole page" düğmeleri vardır; harita kendi yatay sayfasına basılır (açık kâğıt seçeneğiyle). Survive sayfasında işaretlenebilir kontrol listesi, doldurulacak hane planı ve cüzdan kartı (85 x 55 mm) yazdırılır. Her şey tarayıcıda çalışır, çevrimdışı kullanılabilir, hiçbir veri gönderilmez. Doğrulama: `scripts/check-print.mjs` (PDF'ler `out-print/` içine).

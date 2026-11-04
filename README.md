@@ -236,3 +236,7 @@ Licence note: the submarine-cable dataset is CC BY-NC-SA 3.0, so the project is 
 - Bio tab: countries shaded by WHO reports in the last 90 days with a popup listing them, the 50 busiest airports as "How fast a new pathogen can travel", a partial BSL-4 laboratory reference layer (`scripts/build-bsl4-labs.py`: only labs whose Wikipedia article states BSL-4; the Global BioLabs Report publishes totals, not sites) and the days since WHO's last emergency declaration or ending (`data/manual-counters.json`, updated by hand).
 - Country outlines for the shaded layers: Natural Earth 110m, simplified (`scripts/build-countries-geo.py`). Every layer file loads only when its layer is switched on, and each layer says so when its file is unavailable.
 - `npm test` also runs the blast ring, Sun and Moon and bases filter tests; `node scripts/check-layers.mjs` checks all of this in a browser on a served build.
+
+## Printing
+
+Every content page has **Print this section** and **Print whole page** under its title; the map has **Print map** (landscape, with legend, scale, dates and the basemap credit; *Light paper* swaps the dark basemap for a pale one). On Survive, **Print checklist** (grab-and-go, staying put or both; ticks and reasons only if you ask), **Print fill-in plan** and **Print wallet card** (85 x 55 mm) make paper copies. Printing runs in your browser, works offline on cached pages and sends nothing anywhere. `node scripts/check-print.mjs` (on a served build) renders PDFs into `out-print/` and reports page counts.

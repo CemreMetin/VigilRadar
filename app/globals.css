@@ -203,6 +203,44 @@ body {
   .map-legend li { break-inside: avoid; margin-bottom: 1mm; }
   .map-credit { font-size: 7.5pt; color: #444 !important; margin-top: 2mm; }
 }
+/* ---------- Printed Survive sheets: checklist, fill-in plan, wallet card ---------- */
+.print-sheet { display: none; }
+@media print {
+  html[data-print="checklist"] body > *:not(.print-sheet),
+  html[data-print="plan"] body > *:not(.print-sheet),
+  html[data-print="card"] body > *:not(.print-sheet) { display: none !important; }
+  html[data-print="checklist"] .print-sheet, html[data-print="plan"] .print-sheet, html[data-print="card"] .print-sheet { display: block; }
+  .print-sheet h1 { font-size: 17pt; margin: 0 0 1mm; }
+  .print-sheet h2 { font-size: 11pt; margin: 4mm 0 1mm; }
+  .print-sheet h3 { font-size: 8.5pt; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 1mm; border-bottom: 1px solid #000; }
+  .sheet-sub { font-size: 8.5pt; color: #444 !important; margin: 0 0 3mm; }
+  .sheet-fields { display: flex; justify-content: space-between; gap: 8mm; margin: 0 0 4mm; font-size: 10pt; }
+  .fill { display: inline-block; border-bottom: 1px solid #000; height: 1em; vertical-align: baseline; }
+  /* the checklist: categories as headings, items in two columns, an empty box, the name and a short line for a note */
+  .sheet-cats { columns: 2; column-gap: 9mm; }
+  .print-cat { break-inside: avoid; margin: 0 0 3.5mm; }
+  .print-cat ul { list-style: none; margin: 0; padding: 0; }
+  .print-cat li { display: flex; align-items: baseline; gap: 2mm; margin: 0 0 1.6mm; break-inside: avoid; font-size: 9.5pt; line-height: 1.25; }
+  .print-cat .box { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 4mm; height: 4mm; border: 1px solid #000; font-size: 9pt; line-height: 1; transform: translateY(0.6mm); }
+  .print-cat .nm { flex: 0 1 auto; }
+  .print-cat .nm small { display: block; font-size: 7.5pt; color: #444 !important; }
+  .print-cat .short { flex: 1 0 8mm; min-width: 8mm; border-bottom: 1px solid #888; height: 1em; }
+  .print-cat li.less, .print-cat li.less * { color: #777 !important; border-color: #aaa !important; }
+  .sheet-tier.compact .sheet-cats { column-gap: 8mm; }
+  .sheet-tier.compact .print-cat { margin-bottom: 2.5mm; }
+  .sheet-tier.compact .print-cat li { margin-bottom: 1.1mm; font-size: 9pt; }
+  /* the household plan */
+  .plan-row { break-inside: avoid; margin: 0 0 6mm; }
+  .plan-row .mono { font-size: 9.5pt; margin: 0 0 1mm; font-weight: 700; }
+  .plan-row .write { display: block; height: 9mm; border-bottom: 1px solid #000; }
+  /* the wallet card: 85 x 55 mm, dashed cut line */
+  .wallet { width: 85mm; height: 55mm; box-sizing: border-box; border: 1px dashed #000; padding: 3mm 3.5mm; break-inside: avoid; overflow: hidden; }
+  .wallet-title { font-size: 9pt; font-weight: 700; margin: 0 0 1.5mm; }
+  .wallet ul { list-style: none; margin: 0; padding: 0; font-size: 6.4pt; line-height: 1.25; }
+  .wallet li { margin: 0 0 0.7mm; }
+  .wallet-fill { font-size: 7pt; margin: 1.5mm 0 0; }
+  .print-sheet .print-footer { position: fixed; left: 0; bottom: 0; }
+}
 /* the print-only blocks stay out of the screen view */
 @media screen { .print-header, .print-footer, .print-all { display: none; } }
 

@@ -90,5 +90,53 @@ async function printMapPage(name, path) {
 await printMapPage("map-nuclear", "/?sc=nuclear");
 await printMapPage("minimap-solar", "/scenarios/solar-superstorm?tab=explorer");
 
+/** Survive sheets: set options, click, screenshot the sheet (A4 portrait), then render the PDF */
+async function printSheet(name, { tab = "bag", setup, button, expectPages }) {
+  await page.goto(BASE + `/survive?tab=${tab}`, { waitUntil: "load" });
+  await page.waitForTimeout(800);
+  if (setup) await setup(page);
+  await page.getByRole("button", { name: button }).first().click();
+  await page.waitForSelector(".print-sheet", { state: "attached", timeout: 5000 });
+  await page.waitForFunction(() => window.__printed > 0, null, { timeout: 5000 }).catch(() => {});
+  await page.emulateMedia({ media: "print" });
+  await page.setViewportSize({ width: 794, height: 1123 });
+  const info = await page.evaluate(() => ({
+    other: [...document.body.children].filter((e) => !e.classList.contains("print-sheet") && getComputedStyle(e).display !== "none").length,
+    ticks: [...document.querySelectorAll(".print-sheet .box")].filter((b) => b.textContent.trim()).length,
+    items: document.querySelectorAll(".print-sheet .box").length,
+    grey: document.querySelectorAll(".print-sheet li.less").length,
+    why: document.querySelectorAll(".print-sheet .why").length,
+    card: (() => { const w = document.querySelector(".wallet")?.getBoundingClientRect(); return w ? `${(w.width / 96 * 25.4).toFixed(0)}x${(w.height / 96 * 25.4).toFixed(0)} mm` : ""; })(),
+  }));
+  await page.screenshot({ path: `out-print/${name}.png` });
+  const buf = await page.pdf({ preferCSSPageSize: true });
+  writeFileSync(`out-print/${name}.pdf`, buf);
+  await page.emulateMedia({ media: "screen" });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+  const n = pdfPages(buf);
+  check(info.other === 0 && (!expectPages || n === expectPages), `${name}: ${n} page(s)${expectPages ? ` (expected ${expectPages})` : ""}, items ${info.items}, ticked ${info.ticks}, grey ${info.grey}, reasons ${info.why}, other content ${info.other}${info.card ? `, card ${info.card}` : ""}`);
+}
+const form = (page) => page.getByRole("form", { name: "Print the checklist" });
+const pick = (label) => async (page) => { await form(page).getByLabel(label, { exact: true }).check(); };
+await printSheet("survive-grab-blank", { button: /PRINT CHECKLIST/, setup: pick("Grab-and-go"), expectPages: 1 });
+await printSheet("survive-stay-blank", { button: /PRINT CHECKLIST/, setup: pick("Staying put") });
+await printSheet("survive-both-blank", { button: /PRINT CHECKLIST/, setup: pick("Both") });
+await printSheet("survive-grab-reasons", { button: /PRINT CHECKLIST/, setup: async (p) => { await pick("Grab-and-go")(p); await form(p).getByLabel("Include reasons").check(); } });
+await printSheet("survive-both-ticks", {
+  button: /PRINT CHECKLIST/,
+  setup: async (p) => {
+    await p.evaluate(() => localStorage.setItem("monitoring.bag.v1", JSON.stringify(["water-3d", "food-3d", "radio", "flashlight", "meds"])));
+    await p.reload({ waitUntil: "load" });
+    await p.waitForTimeout(600);
+    await pick("Both")(p);
+    await form(p).getByLabel("Include my ticks").check();
+    await p.getByRole("button", { name: "Nuclear" }).first().click().catch(() => {});
+  },
+});
+await printSheet("survive-plan-section", { tab: "plan", button: /Print this section/ }).catch(() => {});
+await printSheet("survive-plan-fill-in", { tab: "plan", button: /PRINT FILL-IN PLAN/, expectPages: 1 });
+await printSheet("survive-wallet-card", { tab: "comms", button: /PRINT WALLET CARD/, expectPages: 1 });
+
 await browser.close();
 process.exit(failed ? 1 : 0);
