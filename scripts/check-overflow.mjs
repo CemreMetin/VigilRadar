@@ -25,5 +25,13 @@ for (const p of paths) {
   if (!ok) bad++;
   console.log(`${ok ? "ok  " : "WIDE"} ${p}${ok ? "" : `  scrollWidth ${r.sw} > ${r.vw}  ${r.wide.join(" | ")}`}`);
 }
+// the search results panel inside the phone menu
+await page.goto(BASE + "/methodology", { waitUntil: "load" });
+await page.getByRole("button", { name: /^MENU/ }).click();
+await page.locator("#wiki-filter:visible").fill("potassium");
+await page.getByRole("option").first().waitFor();
+const sw = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
+if (sw[0] > sw[1] + 1) bad++;
+console.log(`${sw[0] <= sw[1] + 1 ? "ok  " : "WIDE"} search results at 390 px (scrollWidth ${sw[0]}, viewport ${sw[1]})`);
 await browser.close();
 process.exit(bad ? 1 : 0);

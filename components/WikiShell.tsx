@@ -3,7 +3,41 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useLazyJson } from "@/lib/useLazyJson";
 import { PAGE_GROUPS } from "./SiteNav";
+
+type SearchEntry = { url: string; page: string; section: string; text: string };
+
+/** Entries whose text (or title) holds every word of the query; title hits first, then by number of matches. */
+function search(index: SearchEntry[], words: string[]) {
+  return index
+    .map((e) => {
+      const title = `${e.page} ${e.section}`.toLowerCase();
+      if (!words.every((w) => e.text.includes(w) || title.includes(w))) return null;
+      const hits = words.reduce((n, w) => n + e.text.split(w).length - 1, 0);
+      return { e, score: (words.every((w) => title.includes(w)) ? 1000 : 0) + hits };
+    })
+    .filter((r): r is { e: SearchEntry; score: number } => r !== null)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10)
+    .map((r) => r.e);
+}
+
+const escapeRegex = (w: string) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** A short stretch of the text around the first match, with every matching word in bold. */
+function Snippet({ text, words }: { text: string; words: string[] }) {
+  const first = Math.min(...words.map((w) => text.indexOf(w)).filter((i) => i >= 0), text.length);
+  const from = Math.max(0, first - 40);
+  const parts = text.slice(from, from + 150).split(new RegExp(`(${words.map(escapeRegex).join("|")})`));
+  return (
+    <>
+      {from > 0 && "…"}
+      {parts.map((part, i) => (words.includes(part) ? <mark key={i} className="bg-transparent font-bold text-fg">{part}</mark> : part))}
+      …
+    </>
+  );
+}
 
 export type WikiSection = {
   id: string;
@@ -143,6 +177,32 @@ export default function WikiShell({
   }, [sections, openOnParam]);
 
   const q = query.trim().toLowerCase();
+  const words = q.split(/\s+/).filter(Boolean);
+  const { data: searchIndex } = useLazyJson<SearchEntry[]>("/search-index.json", q.length >= 3);
+  const results = useMemo(() => (q.length >= 3 && searchIndex ? search(searchIndex, words) : []), [q, searchIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [picked, setPicked] = useState(0);
+
+  const go = (url: string) => {
+    const [path, id] = url.split("#");
+    setQuery("");
+    if (path === window.location.pathname) open(id);
+    else window.location.assign(url);
+  };
+
+  // "/" jumps to the filter box unless the person is typing somewhere else
+  useEffect(() => {
+    const focusFilter = () => [...document.querySelectorAll<HTMLInputElement>("#wiki-filter")].find((i) => i.offsetParent)?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
+      e.preventDefault();
+      if (document.querySelectorAll("#wiki-filter").length && ![...document.querySelectorAll("#wiki-filter")].some((i) => (i as HTMLElement).offsetParent)) {
+        setMenuOpen(true);
+        requestAnimationFrame(focusFilter);
+      } else focusFilter();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const tree = useMemo(
     () =>
       PAGE_GROUPS.map((g) => ({
@@ -168,10 +228,50 @@ export default function WikiShell({
         id="wiki-filter"
         type="search"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Filter pages"
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setPicked(0);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setQuery("");
+          else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            setPicked((i) => Math.max(0, Math.min(results.length - 1, i + (e.key === "ArrowDown" ? 1 : -1))));
+          } else if (e.key === "Enter" && results[picked]) go(results[picked].url);
+        }}
+        placeholder="Search the site  ( / )"
+        aria-controls="wiki-results"
         className="mono mb-5 w-full border border-line bg-transparent px-2 py-1.5 text-xs placeholder:text-dim focus:outline-none"
       />
+      {q.length >= 3 && (
+        <div id="wiki-results" className="-mt-3 mb-5" aria-live="polite">
+          {results.length === 0 ? (
+            <p className="mono text-[11px] text-dim">{searchIndex ? "No text matches." : "Searching…"}</p>
+          ) : (
+            <ul role="listbox" aria-label="Search results" className="border-l border-line">
+              {results.map((r, i) => (
+                <li key={r.url} role="option" aria-selected={i === picked}>
+                  <a
+                    href={r.url}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      go(r.url);
+                    }}
+                    className={`block break-words py-1 pl-3 hover:text-fg ${i === picked ? "-ml-px border-l border-fg text-fg" : "text-dim"}`}
+                  >
+                    <span className="mono block text-[11px] font-bold text-fg">
+                      {r.page} › {r.section}
+                    </span>
+                    <span className="block text-[11px] leading-snug">
+                      <Snippet text={r.text} words={words} />
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       {tree.map((g) => (
         <div key={g.title} className="mb-5">
           <p className="mono mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-dim opacity-70">{g.title}</p>
