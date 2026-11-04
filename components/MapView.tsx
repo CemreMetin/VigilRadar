@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR, LAYER } from "@/lib/palette";
 import { useEffect, useRef, type MutableRefObject } from "react";
 import type { GeoJSONSource, Map as MlMap, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -118,7 +119,7 @@ function popupBox(e: Entity) {
   box.append(t);
   for (const line of e.lines) {
     const m = document.createElement("div");
-    m.style.cssText = "margin-top:4px;color:#9aa8b3;font-size:11px;line-height:1.4";
+    m.style.cssText = `margin-top:4px;color:${COLOR.mid};font-size:11px;line-height:1.4`;
     m.textContent = line;
     box.append(m);
   }
@@ -129,7 +130,7 @@ function popupBox(e: Entity) {
       a.target = "_blank";
       a.rel = "noopener noreferrer";
     }
-    a.style.cssText = "display:inline-block;margin-top:6px;color:#00e5ff;font-size:11px";
+    a.style.cssText = `display:inline-block;margin-top:6px;color:${COLOR.accent};font-size:11px`;
     a.textContent = e.link.text;
     box.append(a);
   }
@@ -157,7 +158,7 @@ function shapeImage(draw: (c: CanvasRenderingContext2D) => void): ImageData {
   c.beginPath();
   draw(c);
   c.fillStyle = "rgba(255,0,60,0.85)";
-  c.strokeStyle = "#ffffff";
+  c.strokeStyle = COLOR.fg;
   c.lineWidth = 2.2;
   c.fill();
   c.stroke();
@@ -251,29 +252,29 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           id: "fill-reports", type: "fill", source: "countries", layout: { visibility: "none" },
           paint: {
             // one hue (the Bio colour), more reports = more opaque
-            "fill-color": "#b026ff",
+            "fill-color": COLOR.bio,
             "fill-opacity": ["interpolate", ["linear"], ["coalesce", ["feature-state", "reports"], 0], 0, 0, 1, 0.2, 3, 0.4, 6, 0.65],
           },
         });
         map.addLayer({
           id: "fill-exposure", type: "fill", source: "countries", layout: { visibility: "none" },
           paint: {
-            "fill-color": "#c9d1ff",
+            "fill-color": COLOR.space,
             "fill-opacity": ["interpolate", ["linear"], ["coalesce", ["feature-state", "exposure"], 0], 0, 0, 0.05, 0.1, 0.3, 0.28, 0.7, 0.45],
           },
         });
         map.addLayer({
           id: "country-lines", type: "line", source: "countries", layout: { visibility: "none" },
-          paint: { "line-color": "#7d8c97", "line-width": 0.5, "line-opacity": 0.6 },
+          paint: { "line-color": COLOR.dim, "line-width": 0.5, "line-opacity": 0.6 },
         });
         map.addLayer({
           id: "night-fill", type: "fill", source: "night",
-          paint: { "fill-color": "#000000", "fill-opacity": 0.4 },
+          paint: { "fill-color": COLOR.bg, "fill-opacity": 0.4 },
         });
         map.addLayer({
           id: "aurora-core", type: "circle", source: "aurora",
           paint: {
-            "circle-color": "#c9d1ff",
+            "circle-color": COLOR.space,
             "circle-opacity": ["interpolate", ["linear"], ["get", "a"], 5, 0.12, 30, 0.45, 80, 0.85],
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, 2.2, 4, 6],
           },
@@ -281,7 +282,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         map.addLayer({
           id: "cables-lines", type: "line", source: "cables",
           paint: {
-            "line-color": ["case", ["==", ["get", "hi"], 1], "#00e5ff", "#4a6a78"],
+            "line-color": ["case", ["==", ["get", "hi"], 1], COLOR.accent, LAYER.cableDim],
             "line-width": ["case", ["==", ["get", "hi"], 1], 1.1, 0.6],
             "line-opacity": 0.75,
           },
@@ -290,17 +291,17 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           id: "tide-core", type: "circle", source: "tide",
           paint: {
             // mm/yr of sea-level change relative to the land at the gauge: falling = blue, fast rise = red
-            "circle-color": ["interpolate", ["linear"], ["get", "trend"], -5, "#4a90ff", 0, "#7d8c97", 3, "#ffb000", 8, "#ff003c"],
+            "circle-color": ["interpolate", ["linear"], ["get", "trend"], -5, LAYER.cold, 0, COLOR.dim, 3, COLOR.geo, 8, COLOR.threat],
             "circle-opacity": 0.85,
             "circle-radius": 3.5,
-            "circle-stroke-color": "#050505",
+            "circle-stroke-color": COLOR.bg,
             "circle-stroke-width": 0.6,
           },
         });
         map.addLayer({
           id: "orbit-core", type: "circle", source: "orbit",
           paint: {
-            "circle-color": ["match", ["get", "kind"], 1, "#7d8c97", 2, "#ffb000", 3, "#ffffff", "#00e5ff"],
+            "circle-color": ["match", ["get", "kind"], 1, COLOR.dim, 2, COLOR.geo, 3, COLOR.fg, COLOR.accent],
             "circle-radius": ["match", ["get", "kind"], 3, 4, 2, 1.6, 1.4],
             "circle-opacity": ["match", ["get", "kind"], 1, 0.55, 0.9],
           },
@@ -308,7 +309,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         map.addLayer({
           id: "fires-core", type: "circle", source: "fires",
           paint: {
-            "circle-color": "#ff6a00",
+            "circle-color": COLOR.conflict,
             "circle-opacity": ["interpolate", ["linear"], ["get", "n"], 1, 0.45, 20, 0.9],
             "circle-radius": ["interpolate", ["linear"], ["get", "n"], 1, 1.6, 20, 4, 200, 8],
           },
@@ -317,9 +318,9 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           id: "cyclones-core", type: "circle", source: "cyclones",
           paint: {
             // colour by Saffir-Simpson step from sustained wind in knots; size grows with wind
-            "circle-color": ["step", ["get", "wind"], "#7fd3ff", 34, "#2fd4b0", 64, "#ffb000", 96, "#ff6a00", 113, "#ff003c"],
+            "circle-color": ["step", ["get", "wind"], LAYER.windLow, 34, LAYER.stormMid, 64, COLOR.geo, 96, COLOR.conflict, 113, COLOR.threat],
             "circle-radius": ["interpolate", ["linear"], ["get", "wind"], 20, 6, 64, 9, 140, 14],
-            "circle-stroke-color": "#ffffff",
+            "circle-stroke-color": COLOR.fg,
             "circle-stroke-width": 1.5,
           },
         });
@@ -327,7 +328,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           id: "bases-cluster", type: "circle", source: "bases", filter: ["has", "point_count"],
           paint: {
             "circle-color": "rgba(255,255,0,0.22)",
-            "circle-stroke-color": "#FFFF00",
+            "circle-stroke-color": COLOR.geo,
             "circle-stroke-width": 1.2,
             "circle-radius": ["step", ["get", "point_count"], 11, 25, 15, 100, 20],
           },
@@ -335,25 +336,25 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         map.addLayer({
           id: "bases-cluster-count", type: "symbol", source: "bases", filter: ["has", "point_count"],
           layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["Montserrat Medium", "Open Sans Bold", "Noto Sans Regular"], "text-size": 11 },
-          paint: { "text-color": "#FFFF00" },
+          paint: { "text-color": COLOR.geo },
         });
         map.addLayer({
           id: "bases-core", type: "circle", source: "bases", filter: ["!", ["has", "point_count"]],
           paint: {
-            "circle-color": "#FFFF00",
+            "circle-color": COLOR.geo,
             "circle-radius": ["match", ["get", "kind"], "naval", 3.5, 3],
-            "circle-stroke-color": "#050505",
+            "circle-stroke-color": COLOR.bg,
             "circle-stroke-width": 0.8,
           },
         });
         map.addLayer({
           id: "bases-nuc", type: "circle", source: "bases", filter: ["all", ["!", ["has", "point_count"]], ["==", ["get", "nuc"], 1]],
-          paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": 7.5, "circle-stroke-color": "#ff003c", "circle-stroke-width": 1.5 },
+          paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": 7.5, "circle-stroke-color": COLOR.threat, "circle-stroke-width": 1.5 },
         });
         map.addLayer({
           id: "gm-lines", type: "line", source: "gm",
           paint: {
-            "line-color": ["match", ["get", "deg"], 60, "#ff003c", "#ffb000"],
+            "line-color": ["match", ["get", "deg"], 60, COLOR.threat, COLOR.geo],
             "line-width": 1.8,
             "line-dasharray": [3, 2],
             "line-opacity": 0.9,
@@ -371,7 +372,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           id: "dyads", type: "line", source: "dyads",
           layout: { "line-cap": "round" },
           paint: {
-            "line-color": ["interpolate", ["linear"], ["get", "tension"], 15, "#ffb000", 45, "#ff6a00", 65, "#ff003c"],
+            "line-color": ["interpolate", ["linear"], ["get", "tension"], 15, COLOR.geo, 45, COLOR.conflict, 65, COLOR.threat],
             "line-width": ["interpolate", ["linear"], ["get", "tension"], 10, 1, 40, 2, 70, 4],
             "line-opacity": 0.7,
           },
@@ -379,7 +380,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         map.addLayer({
           id: "connections", type: "line", source: "connections",
           layout: { "line-cap": "round" },
-          paint: { "line-color": "#00e5ff", "line-width": 1.8, "line-opacity": 0.95, "line-dasharray": [2, 1.5] },
+          paint: { "line-color": COLOR.accent, "line-width": 1.8, "line-opacity": 0.95, "line-dasharray": [2, 1.5] },
         });
         map.addLayer({
           id: "plants-core", type: "circle", source: "plants",
@@ -387,7 +388,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
             "circle-color": DOMAIN_BY_ID.nuclear.color,
             "circle-opacity": 0.85,
             "circle-radius": ["interpolate", ["linear"], ["get", "mw"], 100, 2.5, 1500, 4, 6000, 7],
-            "circle-stroke-color": "#050505",
+            "circle-stroke-color": COLOR.bg,
             "circle-stroke-width": 0.8,
           },
         });
@@ -397,7 +398,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
             "circle-color": DOMAIN_BY_ID.geophysical.color,
             "circle-opacity": 0.85,
             "circle-radius": ["interpolate", ["linear"], ["get", "mag"], 4.5, 3, 6, 6, 8, 13],
-            "circle-stroke-color": "#050505",
+            "circle-stroke-color": COLOR.bg,
             "circle-stroke-width": 1,
           },
         });
@@ -409,9 +410,9 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
             "circle-stroke-width": 2.5,
             "circle-stroke-color": [
               "match", ["get", "level"],
-              "normal", "#ffffff",
-              "elevated", "#ff003c",
-              "#7d8c97",
+              "normal", COLOR.fg,
+              "elevated", COLOR.threat,
+              COLOR.dim,
             ],
           },
         });
@@ -423,7 +424,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           id: "hubs-core", type: "circle", source: "hubs",
           paint: {
             "circle-color": "rgba(176,38,255,0.25)",
-            "circle-stroke-color": "#b026ff",
+            "circle-stroke-color": COLOR.bio,
             "circle-stroke-width": 1.5,
             "circle-radius": ["interpolate", ["linear"], ["get", "routes"], 100, 4, 600, 9, 1200, 14],
           },
@@ -431,11 +432,11 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         map.addLayer({
           id: "hubs-label", type: "symbol", source: "hubs", minzoom: 2.5,
           layout: { "text-field": ["get", "iata"], "text-font": ["Montserrat Medium", "Open Sans Bold", "Noto Sans Regular"], "text-size": 10, "text-offset": [0, 1.4] },
-          paint: { "text-color": "#d7e2ea", "text-halo-color": "#050505", "text-halo-width": 1 },
+          paint: { "text-color": COLOR.fg, "text-halo-color": COLOR.bg, "text-halo-width": 1 },
         });
         map.addLayer({
           id: "labs-core", type: "circle", source: "labs",
-          paint: { "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": "#ff6ad5", "circle-stroke-width": 2, "circle-radius": 5 },
+          paint: { "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": LAYER.labs, "circle-stroke-width": 2, "circle-radius": 5 },
         });
         map.addLayer({
           id: "target-rings-line", type: "line", source: "target-rings",
@@ -453,9 +454,9 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
         map.addLayer({
           id: "sky-core", type: "circle", source: "sky",
           paint: {
-            "circle-color": ["match", ["get", "kind"], "sun", "#ffd24a", "#d7e2ea"],
+            "circle-color": ["match", ["get", "kind"], "sun", LAYER.sun, COLOR.fg],
             "circle-radius": ["match", ["get", "kind"], "sun", 8, 6],
-            "circle-stroke-color": "#050505",
+            "circle-stroke-color": COLOR.bg,
             "circle-stroke-width": 1.2,
           },
         });
@@ -464,7 +465,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           paint: {
             "circle-color": "rgba(0,0,0,0)",
             "circle-radius": 15,
-            "circle-stroke-color": "#ffffff",
+            "circle-stroke-color": COLOR.fg,
             "circle-stroke-width": 2,
           },
         });
@@ -480,7 +481,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
             t.style.fontWeight = "600";
             t.textContent = title;
             const m = document.createElement("div");
-            m.style.cssText = "margin-top:4px;color:#9aa8b3;font-size:11px;line-height:1.4";
+            m.style.cssText = `margin-top:4px;color:${COLOR.mid};font-size:11px;line-height:1.4`;
             m.textContent = body;
             box.append(t, m);
             import("maplibre-gl").then((ml) => {
@@ -548,7 +549,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
             const row = document.createElement("div");
             row.style.cssText = "margin-top:4px;font-size:11px;line-height:1.4";
             const d = document.createElement("span");
-            d.style.color = "#9aa8b3";
+            d.style.color = COLOR.mid;
             d.textContent = `${it.date} `;
             row.append(d);
             if (it.url) {
@@ -556,7 +557,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
               a.href = it.url;
               a.target = "_blank";
               a.rel = "noopener noreferrer";
-              a.style.color = "#00e5ff";
+              a.style.color = COLOR.accent;
               a.textContent = it.title;
               row.append(a);
             } else row.append(it.title);
@@ -580,7 +581,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           const box = document.createElement("div");
           box.style.minWidth = "230px";
           const badge = document.createElement("div");
-          badge.style.cssText = "font:700 10px monospace;letter-spacing:.1em;color:#ffb000";
+          badge.style.cssText = `font:700 10px monospace;letter-spacing:.1em;color:${COLOR.geo}`;
           badge.textContent = "ILLUSTRATIVE MODEL, NOT A FORECAST";
           const t = document.createElement("div");
           t.style.cssText = "font-weight:600;margin-top:3px";
@@ -594,7 +595,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           ];
           for (const l of lines) {
             const m = document.createElement("div");
-            m.style.cssText = "margin-top:4px;color:#9aa8b3;font-size:11px;line-height:1.4";
+            m.style.cssText = `margin-top:4px;color:${COLOR.mid};font-size:11px;line-height:1.4`;
             m.textContent = l;
             box.append(m);
           }
@@ -689,7 +690,7 @@ export default function MapView({ data, entities, selectedId, onSelect, globe, c
           const b = document.createElement("button");
           b.type = "button";
           b.setAttribute("aria-label", `${c.name}: ${c.stockpile} warheads in military stockpile`);
-          b.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;border:1.5px solid ${DOMAIN_BY_ID.nuclear.color};background:rgba(255,0,60,0.18);color:#ffd6de;font:600 10px var(--font-mono-face),monospace;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0`;
+          b.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;border:1.5px solid ${DOMAIN_BY_ID.nuclear.color};background:rgba(255,0,60,0.18);color:${LAYER.pale};font:700 10px var(--font-mono-face),monospace;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0`;
           if (size >= 30) b.textContent = c.stockpile >= 1000 ? `${(c.stockpile / 1000).toFixed(1)}k` : String(c.stockpile);
           b.addEventListener("click", (e) => {
             e.stopPropagation();

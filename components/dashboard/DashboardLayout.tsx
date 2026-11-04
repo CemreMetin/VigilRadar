@@ -39,7 +39,7 @@ export default function DashboardLayout({
   banner?: ReactNode;
 }) {
   return (
-    <div className={`relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden ${alarm ? "alarm-on" : ""}`} style={{ "--scn": themeColor } as CSSProperties}>
+    <div className={`map-view relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden ${alarm ? "alarm-on" : ""}`} style={{ "--scn": themeColor } as CSSProperties}>
       <section className="relative order-2 h-[58vh] min-h-[320px] lg:absolute lg:inset-0 lg:order-none lg:h-auto lg:min-h-0" aria-label="Map">
         {map}
         {mapOverlay}

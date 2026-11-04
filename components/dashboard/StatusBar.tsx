@@ -37,8 +37,8 @@ export default function StatusBar({
       ? { text: "UPLINK LOST", color: "var(--threat)", dot: "bg-threat" }
       : { text: "INITIALIZING FEEDS", color: "var(--fg-dim)", dot: "bg-dim" }
     : stale || liveFeeds < totalFeeds
-      ? { text: "UPLINK DEGRADED", color: "var(--geo)", dot: "bg-geo" }
-      : { text: "UPLINK NOMINAL", color: "var(--safe)", dot: "bg-safe live-dot" };
+      ? { text: "UPLINK DEGRADED", color: "var(--scn)", dot: "bg-(--scn)" }
+      : { text: "UPLINK NOMINAL", color: "var(--fg-dim)", dot: "bg-dim live-dot" };
 
   return (
     <div className="mono flex flex-wrap items-center gap-x-5 gap-y-1 px-3 py-1.5 text-body" role="status">

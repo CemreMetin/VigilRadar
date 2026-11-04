@@ -18,10 +18,10 @@ export default function HubCard() {
         </ul>
       </Section>
       <div className="flex gap-2 px-3 pb-3">
-        <Link href="/survive" style={{ "--c": "var(--safe)" } as React.CSSProperties} className="btn mono flex-1 px-2 py-1.5 text-center text-body font-bold">
+        <Link href="/survive" className="btn mono flex-1 px-2 py-1.5 text-center text-body font-bold">
           Open checklist
         </Link>
-        <Link href="/survive?tab=maps" style={{ "--c": "var(--safe)" } as React.CSSProperties} className="btn mono px-2 py-1.5 text-center text-body font-bold">
+        <Link href="/survive?tab=maps" className="btn mono px-2 py-1.5 text-center text-body font-bold">
           Offline maps
         </Link>
       </div>

@@ -48,7 +48,7 @@ function KpGauge({ counter }: { counter: Counter }) {
   return (
     <>
       <div className="flex items-baseline gap-3">
-        <span className="mono readout-in text-value font-bold" style={{ color: kp >= 5 ? "var(--threat)" : "var(--space)" }}>{counter.value}</span>
+        <span className="mono readout-in text-value font-bold" style={{ color: kp >= 5 ? "var(--threat)" : "var(--fg)" }}>{counter.value}</span>
         <span className="mono text-body text-dim"><Term id="kp">Kp</Term> now · {counter.unit?.split("·")[1]?.trim()}</span>
       </div>
       {/* nine segments: Kp 0-9. Filled up to the current value; a tick marks the 24 h peak. */}
@@ -135,10 +135,10 @@ export default function Readout({
     return (
       <>
         <div className="grid grid-cols-2 border-b border-line">
-          <Big label="M5+ · 24H" value={String(d1)} color="var(--geo)" />
-          <Big label="STRONGEST · 7D" value={strongest ? `M${strongest.magnitude?.toFixed(1)}` : "–"} color="var(--geo)" />
-          <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} color="var(--bio)" sub={`${countries.size} countries`} />
-          <Big label="VOLCANOES ABOVE BASELINE" value={`${up}/${world.volcanoes.length}`} color={up ? "var(--threat)" : "var(--fg)"} />
+          <Big label="M5+ · 24H" value={String(d1)} />
+          <Big label="STRONGEST · 7D" value={strongest ? `M${strongest.magnitude?.toFixed(1)}` : "–"} />
+          <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} sub={`${countries.size} countries`} />
+          <Big label="VOLCANOES ABOVE BASELINE" value={`${up}/${world.volcanoes.length}`} />
         </div>
         <Section open title="Recent earthquakes">
           <QuakeList quakes={quakes} now={now} selectedId={selectedId} onSelect={onSelect} />
@@ -155,8 +155,8 @@ export default function Readout({
     return (
       <>
         <div className="grid grid-cols-2 border-b border-line">
-          <Big label="DOOMSDAY CLOCK" value={clock?.value ?? "–"} color="var(--threat)" sub="to midnight (symbolic)" />
-          <Big label="MILITARY STOCKPILE" value={n(arsenals.totals.stockpile)} color="var(--geo)" sub="warheads, Jan 2026" />
+          <Big label="DOOMSDAY CLOCK" value={clock?.value ?? "–"} sub="to midnight (symbolic)" />
+          <Big label="MILITARY STOCKPILE" value={n(arsenals.totals.stockpile)} sub="warheads, Jan 2026" />
         </div>
         <Section title="Clock setting, 2020 to 2026 (seconds)">
           <div className="flex h-10 items-end gap-1" role="img" aria-label="Doomsday Clock seconds to midnight 2020 to 2026: 100, 100, 100, 90, 90, 89, 85">
@@ -224,11 +224,10 @@ export default function Readout({
     return (
       <>
         <div className="grid grid-cols-2 border-b border-line">
-          <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} color="var(--bio)" />
+          <Big label="WHO REPORTS · 90D" value={c("outbreaks")?.value ?? "–"} />
           <Big
             label="DAYS SINCE LAST WHO EMERGENCY CHANGE"
             value={pheicDays === null ? "–" : String(pheicDays)}
-            color="var(--bio)"
             sub={pheic ? `${pheic.value} ${pheic.unit ?? ""}; polio still in force` : "unavailable"}
           />
         </div>
@@ -261,7 +260,7 @@ export default function Readout({
         <Section open title="Supervolcano watchlist">
           <ul className="divide-y divide-line border border-line">
             {world.volcanoes.map((v) => {
-              const col = v.level === "elevated" ? "var(--threat)" : v.level === "normal" ? "var(--safe)" : "var(--fg-dim)";
+              const col = v.level === "elevated" ? "var(--scn)" : "var(--fg-dim)";
               return (
                 <li key={v.id}>
                   <button type="button" onClick={() => onSelect(`volcano:${v.id}`)} className="flex w-full items-center gap-3 px-2.5 py-1.5 text-left hover:bg-accent/10">
@@ -292,8 +291,8 @@ export default function Readout({
     return (
       <>
         <div className="grid grid-cols-2 border-b border-line">
-          <Big label="CONFLICT REPORTS · 7D" value={news?.value ?? "–"} color="var(--conflict)" sub={news?.trendLabel} />
-          <Big label="CHOKEPOINTS LOW" value={choke?.value ?? "–"} color="var(--geo)" sub="of tracked straits and canals" />
+          <Big label="CONFLICT REPORTS · 7D" value={news?.value ?? "–"} sub={news?.trendLabel} />
+          <Big label="CHOKEPOINTS LOW" value={choke?.value ?? "–"} sub="of tracked straits and canals" />
         </div>
         <Section open title="Most-reported countries (armed conflict, 7 d)">
           <ul>

@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR } from "@/lib/palette";
 import Link from "next/link";
 import { useJson } from "@/lib/useJson";
 import { Card, Ext, KindTag, Loading, Term } from "./ui";
@@ -54,13 +55,13 @@ function LineChart({
           return (
             <g key={i}>
               <line x1={L} x2={W - R} y1={yy(v)} y2={yy(v)} stroke="rgba(0,229,255,0.08)" />
-              <text x={L - 6} y={yy(v) + 3} textAnchor="end" fontSize="10" fill="#7d8c97" fontFamily="monospace">{v.toFixed(vmax - vmin > 20 ? 0 : 1)}</text>
+              <text x={L - 6} y={yy(v) + 3} textAnchor="end" fontSize="10" fill={COLOR.dim} fontFamily="monospace">{v.toFixed(vmax - vmin > 20 ? 0 : 1)}</text>
             </g>
           );
         })}
-        {zeroLine && <line x1={L} x2={W - R} y1={yy(0)} y2={yy(0)} stroke="#7d8c97" strokeDasharray="2 3" />}
+        {zeroLine && <line x1={L} x2={W - R} y1={yy(0)} y2={yy(0)} stroke={COLOR.dim} strokeDasharray="2 3" />}
         {[minY, Math.round((minY + maxY) / 2 / 10) * 10, maxY].map((y) => (
-          <text key={y} x={x(y)} y={height - 6} textAnchor="middle" fontSize="10" fill="#7d8c97" fontFamily="monospace">{y}</text>
+          <text key={y} x={x(y)} y={height - 6} textAnchor="middle" fontSize="10" fill={COLOR.dim} fontFamily="monospace">{y}</text>
         ))}
         <polyline points={pts} fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round" />
         <circle cx={x(last.y)} cy={yy(last.v)} r="3.5" fill={color} />
@@ -125,14 +126,14 @@ export default function TrajectoryView() {
       {loading || error || !data ? <Loading error={error} /> : (
         <>
           <p className="mt-3 flex items-center gap-3 text-read"><KindTag kind="observed" /> Global surface temperature, annual mean</p>
-          <LineChart data={data.giss.annual} color="#ffb000" unit=" °C" label="Global temperature anomaly" zeroLine />
+          <LineChart data={data.giss.annual} color={COLOR.geo} unit=" °C" label="Global temperature anomaly" zeroLine />
           <p className="mt-1 text-body leading-relaxed text-dim">
             NASA GISTEMP <Term id="anomaly">anomaly relative to 1951-1980</Term> (not the pre-industrial baseline used for the 1.5 °C target, which is roughly 0.3 °C
             cooler). <Ext href={data.giss.source.url}>{data.giss.source.name} ↗</Ext>
           </p>
 
           <p className="mt-6 flex items-center gap-3 text-read"><KindTag kind="observed" /> Atmospheric CO₂ at Mauna Loa, annual mean</p>
-          <LineChart data={data.co2.annual} color="#00e5ff" unit=" ppm" label="Atmospheric CO2" />
+          <LineChart data={data.co2.annual} color={COLOR.accent} unit=" ppm" label="Atmospheric CO2" />
           <p className="mt-1 text-body text-dim">
             Pre-industrial level was about 280 ppm. <Ext href={data.co2.source.url}>{data.co2.source.name} ↗</Ext>
           </p>

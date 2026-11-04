@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR } from "@/lib/palette";
 import { useMemo } from "react";
 
 export type MiniPoint = { lon: number; lat: number; color: string };
@@ -35,7 +36,7 @@ export default function MiniContext({
       {[-120, -60, 0, 60, 120].map((x) => <line key={x} x1={x + 180} x2={x + 180} y1={0} y2={180} stroke="var(--line)" strokeWidth={0.5} />)}
       {[-60, -30, 0, 30, 60].map((y) => <line key={y} y1={90 - y} y2={90 - y} x1={0} x2={360} stroke="var(--line)" strokeWidth={y === 0 ? 0.9 : 0.5} />)}
       {dots}
-      {selected && <circle cx={selected.lon + 180} cy={90 - selected.lat} r={5} fill="none" stroke="#fff" strokeWidth={1.2} />}
+      {selected && <circle cx={selected.lon + 180} cy={90 - selected.lat} r={5} fill="none" stroke={COLOR.fg} strokeWidth={1.2} />}
     </svg>
   );
 }

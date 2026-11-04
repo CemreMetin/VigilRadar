@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR } from "@/lib/palette";
 import type { SolarNow, AsteroidsFile, Counter, CyclonesFile, FiresFile, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
 import { Bar, Big, Section, Spark } from "./parts";
 import { Term } from "../ui";
@@ -39,8 +40,8 @@ export function IceReadout({ world, tide }: { world: WorldState; tide: TideGauge
   return (
     <>
       <div className="grid grid-cols-2 border-b border-line">
-        <Big label="SEA LEVEL" value={sl ? `${sl.value} mm` : "–"} color="var(--accent)" sub="since 1993, satellite altimetry" />
-        <Big label="ARCTIC SEA ICE" value={ice?.value ?? "–"} color="var(--accent)" sub="million km²" />
+        <Big label="SEA LEVEL" value={sl ? `${sl.value} mm` : "–"} sub="since 1993, satellite altimetry" />
+        <Big label="ARCTIC SEA ICE" value={ice?.value ?? "–"} sub="million km²" />
       </div>
       <Section open title="Global mean sea level (annual means)">
         <Spark values={sl?.history ?? []} color="var(--accent)" label="Global mean sea level, annual means" />
@@ -99,14 +100,14 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
       <div className="flex items-stretch border-b border-line">
         <div className="min-w-0 flex-[1.4] border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Nearest</p>
-          <p className="mono text-value font-bold leading-tight" style={{ color: "var(--space)" }}>
+          <p className="mono text-value font-bold leading-tight">
             {nearest ? `${nearest.ld.toFixed(2)} LD` : "–"}
           </p>
           <p className="mono truncate text-label text-dim">{nearest ? `${nearest.des} · ${nearest.date.slice(5, 11)}` : ""}</p>
         </div>
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">&lt; 1 LD</p>
-          <p className="mono text-value font-bold leading-tight" style={{ color: inside ? "var(--geo)" : "var(--fg)" }}>{inside}</p>
+          <p className="mono text-value font-bold leading-tight">{inside}</p>
           <p className="mono text-label text-dim">of {byDist.length}</p>
         </div>
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0" title="NASA Sentry: objects with a non-zero impact chance in 100 years; Torino scale above 0">
@@ -173,16 +174,16 @@ export function OrbitReadout({ world, file }: { world: WorldState; file: OrbitFi
   const { counts } = file;
   const max = Math.max(counts.satellites, counts.starlink, counts.debris, 1);
   const rows: [string, number, string][] = [
-    ["Other satellites", counts.satellites, "#00e5ff"],
-    ["Starlink", counts.starlink, "#7d8c97"],
-    ["Tracked debris", counts.debris, "#ffb000"],
+    ["Other satellites", counts.satellites, COLOR.accent],
+    ["Starlink", counts.starlink, COLOR.dim],
+    ["Tracked debris", counts.debris, COLOR.geo],
   ];
   return (
     <>
       <div className="flex items-stretch border-b border-line">
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Active</p>
-          <p className="mono text-value font-bold leading-tight" style={{ color: "#6fa8ff" }}>{(counts.satellites + counts.starlink).toLocaleString("en-US")}</p>
+          <p className="mono text-value font-bold leading-tight">{(counts.satellites + counts.starlink).toLocaleString("en-US")}</p>
         </div>
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Debris</p>
@@ -252,7 +253,7 @@ export function WeatherReadout({ world, file, fires }: { world: WorldState; file
       <div className="flex items-stretch border-b border-line">
         <div className="flex-1 border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Active</p>
-          <p className="mono text-value font-bold leading-tight" style={{ color: "#2fd4b0" }}>{storms.length}</p>
+          <p className="mono text-value font-bold leading-tight">{storms.length}</p>
         </div>
         <div className="flex-[1.6] border-r border-line px-3 py-2 last:border-r-0">
           <p className="label">Strongest</p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR, LAYER } from "@/lib/palette";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GeoJSONSource, Map as MlMap } from "maplibre-gl";
 import { greatCircle } from "@/lib/arcs";
@@ -64,21 +65,21 @@ export default function PandemicModule() {
     map.addSource("ap-points", { type: "geojson", data: empty as never });
     map.addLayer({
       id: "ap-lines", type: "line", source: "ap-lines", filter: ["<=", ["get", "t"], 0],
-      paint: { "line-color": "#b026ff", "line-opacity": 0.35, "line-width": 0.8 },
+      paint: { "line-color": COLOR.bio, "line-opacity": 0.35, "line-width": 0.8 },
     });
     map.addLayer({
       id: "ap-points", type: "circle", source: "ap-points", filter: ["<=", ["get", "t"], 0],
       paint: {
         "circle-radius": ["interpolate", ["linear"], ["get", "deg"], 20, 2.5, 600, 5, 3000, 8],
-        "circle-color": ["interpolate", ["linear"], ["get", "t"], 0, "#b026ff", 40, "#d58cff", 80, "#f0d4ff", 160, "#ffffff"],
-        "circle-stroke-color": "#050505",
+        "circle-color": ["interpolate", ["linear"], ["get", "t"], 0, COLOR.bio, 40, LAYER.pandemicMid, 80, LAYER.pandemicLate, 160, COLOR.fg],
+        "circle-stroke-color": COLOR.bg,
         "circle-stroke-width": 0.6,
         "circle-opacity": 0.95,
       },
     });
     map.addLayer({
       id: "ap-origin", type: "circle", source: "ap-points", filter: ["==", ["get", "origin"], 1],
-      paint: { "circle-radius": 9, "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": "#ff003c", "circle-stroke-width": 2.5 },
+      paint: { "circle-radius": 9, "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": COLOR.threat, "circle-stroke-width": 2.5 },
     });
     layersReady.current = true;
   }, [map, data]);

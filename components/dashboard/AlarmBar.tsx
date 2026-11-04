@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR } from "@/lib/palette";
 import type { Alert } from "@/lib/alerts";
 import { relTime } from "@/lib/format";
 
@@ -31,7 +32,7 @@ export default function AlarmBar({
   if (!shown) return null;
   const isCritical = shown.level === "critical";
   const more = (isCritical ? critical.length : notices.length) - 1;
-  const color = isCritical ? "#ff1a3c" : "var(--geo)";
+  const color = isCritical ? COLOR.threat : "var(--geo)";
 
   return (
     <div
@@ -39,7 +40,7 @@ export default function AlarmBar({
       className="mono flex flex-wrap items-center gap-x-3 gap-y-1 border px-3 py-1.5 text-body"
       style={{ borderColor: color, background: `color-mix(in srgb, ${color} ${isCritical ? 26 : 12}%, var(--panel-solid))` }}
     >
-      <span className="font-bold tracking-wider" style={{ color: isCritical ? "#fff" : color }}>
+      <span className="font-bold tracking-wider" style={{ color: isCritical ? COLOR.fg : color }}>
         {isCritical ? "CRITICAL" : "NOTICE"}
       </span>
       <span className="min-w-0 flex-1 truncate">

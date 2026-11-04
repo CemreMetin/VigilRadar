@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR, LAYER } from "@/lib/palette";
 import { useEffect, useState } from "react";
 import type { Map as MlMap } from "maplibre-gl";
 import { geomagLat, geomagLines } from "@/lib/geomag";
@@ -28,7 +29,7 @@ export default function SolarModule() {
     map.addLayer({
       id: "gm-lines", type: "line", source: "gm",
       paint: {
-        "line-color": ["match", ["get", "deg"], 60, "#ff003c", "#ffb000"],
+        "line-color": ["match", ["get", "deg"], 60, COLOR.threat, COLOR.geo],
         "line-width": 2,
         "line-dasharray": [3, 2],
         "line-opacity": 0.9,
@@ -47,7 +48,7 @@ export default function SolarModule() {
           {
             id: "cables", type: "line", source: "cables",
             paint: {
-              "line-color": ["case", ["==", ["get", "hi"], 1], "#00e5ff", "#4a6a78"],
+              "line-color": ["case", ["==", ["get", "hi"], 1], COLOR.accent, LAYER.cableDim],
               "line-width": ["case", ["==", ["get", "hi"], 1], 1.1, 0.6],
               "line-opacity": 0.75,
             },

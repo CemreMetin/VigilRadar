@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR, LAYER } from "@/lib/palette";
 import { useEffect, useRef, useState } from "react";
 import { moon, sun } from "@/lib/sky";
 import type { AsteroidsFile } from "@/lib/types";
@@ -84,13 +85,13 @@ export default function AsteroidOrbit({ file, now, zoom }: { file: AsteroidsFile
         <text x={c + 4} y={c - rad(1) - 3} fontSize={9} fill="var(--fg)" className="mono">Moon orbit · 1 LD</text>
 
         {/* the Moon where it is now, and the Sun's direction at the edge */}
-        <circle cx={m.x} cy={m.y} r={5} fill="#d7e2ea" stroke="#050505" strokeWidth={1.2}>
+        <circle cx={m.x} cy={m.y} r={5} fill={COLOR.fg} stroke={COLOR.bg} strokeWidth={1.2}>
           <title>The Moon now (direction from its current position)</title>
         </circle>
         <text x={m.x + 8} y={m.y + 3} fontSize={9} fill="var(--fg)" className="mono">Moon</text>
-        <line x1={s0.x} y1={s0.y} x2={s1.x} y2={s1.y} stroke="#ffd24a" strokeWidth={1.6} />
-        <circle cx={s1.x} cy={s1.y} r={3.5} fill="#ffd24a" />
-        <text x={s1.x + (s1.x >= c ? 6 : -6)} y={s1.y + 3} fontSize={9} textAnchor={s1.x >= c ? "start" : "end"} fill="#ffd24a" className="mono">Sun</text>
+        <line x1={s0.x} y1={s0.y} x2={s1.x} y2={s1.y} stroke={LAYER.sun} strokeWidth={1.6} />
+        <circle cx={s1.x} cy={s1.y} r={3.5} fill={LAYER.sun} />
+        <text x={s1.x + (s1.x >= c ? 6 : -6)} y={s1.y + 3} fontSize={9} textAnchor={s1.x >= c ? "start" : "end"} fill={LAYER.sun} className="mono">Sun</text>
 
         {pts.map((p) => (
           <circle

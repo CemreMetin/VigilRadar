@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR } from "@/lib/palette";
 import { useMemo, useState } from "react";
 import { EDGES, NODES, type CausalEdge } from "@/data/causal";
 import { ref } from "@/data/references";
@@ -53,14 +54,14 @@ export default function CausalGraph() {
         <svg viewBox={`0 0 ${W} ${H}`} className="min-w-[760px]" role="group" aria-label="Causal links between risks">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#7d8c97" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill={COLOR.dim} />
             </marker>
             <marker id="arrow-sel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#00e5ff" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill={COLOR.accent} />
             </marker>
           </defs>
           {["Drivers", "Mechanisms", "Outcomes"].map((t, i) => (
-            <text key={t} x={COLX[i]} y={16} textAnchor="middle" fontSize="10" fill="#7d8c97" fontFamily="monospace" letterSpacing="2">
+            <text key={t} x={COLX[i]} y={16} textAnchor="middle" fontSize="10" fill={COLOR.dim} fontFamily="monospace" letterSpacing="2">
               {t.toUpperCase()}
             </text>
           ))}
@@ -69,7 +70,7 @@ export default function CausalGraph() {
             const on = e.id === sel;
             return (
               <g key={e.id}>
-                <path d={path(e)} fill="none" stroke={on ? "#00e5ff" : "#7d8c97"} strokeWidth={on ? st.width + 1 : st.width} strokeDasharray={st.dash} opacity={on ? 1 : st.opacity * 0.7} markerEnd={on ? "url(#arrow-sel)" : "url(#arrow)"} />
+                <path d={path(e)} fill="none" stroke={on ? COLOR.accent : COLOR.dim} strokeWidth={on ? st.width + 1 : st.width} strokeDasharray={st.dash} opacity={on ? 1 : st.opacity * 0.7} markerEnd={on ? "url(#arrow-sel)" : "url(#arrow)"} />
                 {/* wide invisible stroke makes thin lines easy to click */}
                 <path d={path(e)} fill="none" stroke="transparent" strokeWidth="12" style={{ cursor: "pointer" }} onClick={() => setSel(e.id)}>
                   <title>{`${NODES.find((n) => n.id === e.from)!.label} → ${NODES.find((n) => n.id === e.to)!.label} (${st.label})`}</title>
@@ -79,11 +80,11 @@ export default function CausalGraph() {
           })}
           {NODES.filter((n) => used.has(n.id)).map((n) => {
             const p = pos(n.id);
-            const color = DOMAIN_BY_ID[n.domain as DomainId]?.color ?? "#7d8c97";
+            const color = DOMAIN_BY_ID[n.domain as DomainId]?.color ?? COLOR.dim;
             return (
               <g key={n.id}>
-                <rect x={p.x - NW / 2} y={p.y - NH / 2} width={NW} height={NH} fill="#0a0f14" stroke={color} strokeWidth="1.2" />
-                <text x={p.x} y={p.y + 4} textAnchor="middle" fontSize="11" fill="#d7e2ea">{n.label}</text>
+                <rect x={p.x - NW / 2} y={p.y - NH / 2} width={NW} height={NH} fill="var(--panel-solid)" stroke={color} strokeWidth="1.2" />
+                <text x={p.x} y={p.y + 4} textAnchor="middle" fontSize="11" fill={COLOR.fg}>{n.label}</text>
               </g>
             );
           })}

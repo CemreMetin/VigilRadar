@@ -132,6 +132,14 @@ body {
   outline-offset: 2px;
 }
 
+/* The map view chrome is grey plus the active group colour: --accent, the dividers and focus rings follow --scn (set per group in DashboardLayout).
+   Cyan stays the accent on content pages. The map layers keep their own colours. */
+.map-view {
+  --accent: var(--scn);
+  --line: rgba(215, 226, 234, 0.14);
+  --line-strong: rgba(215, 226, 234, 0.34);
+}
+
 /* Matte: nothing pulses or blinks. The live dot is a plain solid dot. */
 
 /* MapLibre popup restyle */
@@ -294,7 +302,7 @@ body {
 /* Scenario tab: flat, 1px border; hover tints the fill, selected is a solid matte fill */
 .tab-btn {
   --c: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  border: 1px solid var(--line-strong);
   background-color: transparent;
   color: var(--fg);
   cursor: pointer;
@@ -309,6 +317,12 @@ body {
 }
 .tab-btn .tab-bar {
   display: none;
+}
+
+/* Layer toggle rows are dim until hovered, focused or switched on */
+.toggle-row:hover,
+.toggle-row:focus-visible {
+  color: var(--fg);
 }
 
 /* Layer toggle rows: an accent edge slides in on hover */

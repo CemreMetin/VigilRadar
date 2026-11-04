@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR, LAYER } from "@/lib/palette";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { arsenals } from "@/lib/arsenals";
@@ -665,7 +666,7 @@ export default function Dashboard() {
     .join("  |  ");
 
   const signal = mode.signal(world);
-  const SIGNAL_COLOR = { normal: "var(--safe)", elevated: "var(--geo)", high: "var(--threat)", none: "var(--fg-dim)" } as const;
+  const SIGNAL_COLOR = { normal: "var(--fg-dim)", elevated: "var(--scn)", high: "var(--threat)", none: "var(--fg-dim)" } as const;
 
   const tabs: [Tab, string][] = [
     ["readout", "Readout"],
@@ -687,7 +688,7 @@ export default function Dashboard() {
       {layersOn.has("volcanoes") && <p>◉ supervolcano: white normal, red above baseline, grey no feed</p>}
       {layersOn.has("bases") && (
         <p>
-          <span style={{ color: "#FFFF00" }}>●</span> military base (Wikidata; coverage uneven, not an order of battle).{" "}
+          <span style={{ color: COLOR.geo }}>●</span> military base (Wikidata; coverage uneven, not an order of battle).{" "}
           {basesFile ? `Showing ${shownBases.length.toLocaleString("en-US")} of ${basesFile.bases.length.toLocaleString("en-US")}${showHistorical ? "" : " (former states hidden)"}. A red ring marks a base that is also in the nuclear reference list.` : "Loading bases…"}
         </p>
       )}
@@ -701,7 +702,7 @@ export default function Dashboard() {
       {(layersOn.has("cables") || layersOn.has("cablesAll")) && <p>Long undersea internet cables need powered repeaters. A strong geomagnetic storm can induce currents that damage them, cutting internet links between continents.</p>}
       {layersOn.has("outbreaks") && <p><span style={{ color: "var(--bio)" }}>■</span> darker purple: more WHO reports in the last 90 days (reports, not outbreaks). {countries.failed ? "Country outlines unavailable, so no shading." : ""}</p>}
       {layersOn.has("hubs") && <p><span style={{ color: "var(--bio)" }}>◯</span> How fast a new pathogen can travel: the 50 busiest airports by route count. {airports.failed ? "Airport data unavailable. " : ""}<Link href="/scenarios/pandemic-x" className="underline">Pandemic explorer</Link></p>}
-      {layersOn.has("labs") && <p><span style={{ color: "#ff6ad5" }}>◯</span> <Term id="bsl4">BSL-4</Term> labs: partial reference list, not a risk ranking. {labs.failed ? "Unavailable right now." : ""}</p>}
+      {layersOn.has("labs") && <p><span style={{ color: LAYER.labs }}>◯</span> <Term id="bsl4">BSL-4</Term> labs: partial reference list, not a risk ranking. {labs.failed ? "Unavailable right now." : ""}</p>}
       {globeEff && <p>3D: the shaded side is night; the Sun and Moon markers are computed from the clock.</p>}
       {modeId === "orbit" && <p>Dots are positions at the snapshot time; objects move about 7 km/s</p>}
       {layersOn.has("geomag") && <p><span style={{ color: "var(--geo)" }}>┄</span> 50° <span style={{ color: "var(--threat)" }}>┄</span> 60° geomagnetic latitude</p>}

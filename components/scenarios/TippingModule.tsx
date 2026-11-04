@@ -1,5 +1,6 @@
 "use client";
 
+import { COLOR } from "@/lib/palette";
 import { KindTag } from "@/components/ui";
 
 // Armstrong McKay et al. (2022), Science 377:eabn7950. Threshold best estimate and range, in °C of
@@ -58,17 +59,17 @@ export default function TippingModule() {
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((t) => (
             <g key={t}>
               <line x1={x(t)} x2={x(t)} y1={TOP - 6} y2={H - 24} stroke="rgba(0,229,255,0.08)" />
-              <text x={x(t)} y={H - 10} textAnchor="middle" fontSize="10" fill="#7d8c97" fontFamily="monospace">{t}°</text>
+              <text x={x(t)} y={H - 10} textAnchor="middle" fontSize="10" fill={COLOR.dim} fontFamily="monospace">{t}°</text>
             </g>
           ))}
           {/* observed warming band (WMO long-term estimate 1.34-1.41) */}
-          <rect x={x(1.34)} y={TOP - 6} width={x(1.41) - x(1.34)} height={H - TOP - 18} fill="#00e5ff" opacity="0.55" />
-          <text x={x(1.375)} y={TOP - 42} textAnchor="middle" fontSize="9" fill="#00e5ff" fontFamily="monospace">now ~1.4</text>
+          <rect x={x(1.34)} y={TOP - 6} width={x(1.41) - x(1.34)} height={H - TOP - 18} fill={COLOR.accent} opacity="0.55" />
+          <text x={x(1.375)} y={TOP - 42} textAnchor="middle" fontSize="9" fill={COLOR.accent} fontFamily="monospace">now ~1.4</text>
           {/* projections */}
           {SSP.map((s, i) => (
             <g key={s.id}>
-              <line x1={x(s.v)} x2={x(s.v)} y1={TOP - 38 + LABEL_ROWS[[1, 2, 0][i]]} y2={H - 24} stroke="#ffb000" strokeDasharray="5 4" />
-              <text x={x(s.v)} y={TOP - 42 + LABEL_ROWS[[1, 2, 0][i]]} textAnchor="middle" fontSize="9" fill="#ffb000" fontFamily="monospace">{s.id} {s.v}°</text>
+              <line x1={x(s.v)} x2={x(s.v)} y1={TOP - 38 + LABEL_ROWS[[1, 2, 0][i]]} y2={H - 24} stroke={COLOR.geo} strokeDasharray="5 4" />
+              <text x={x(s.v)} y={TOP - 42 + LABEL_ROWS[[1, 2, 0][i]]} textAnchor="middle" fontSize="9" fill={COLOR.geo} fontFamily="monospace">{s.id} {s.v}°</text>
             </g>
           ))}
           {/* elements */}
@@ -76,9 +77,9 @@ export default function TippingModule() {
             const y = TOP + i * ROW + ROW / 2;
             return (
               <g key={e.name}>
-                <text x={LEFT - 8} y={y + 3} textAnchor="end" fontSize="10.5" fill={e.core ? "#d7e2ea" : "#9aa8b3"}>{e.name}</text>
-                <line x1={x(e.lo)} x2={x(e.hi)} y1={y} y2={y} stroke="#b026ff" strokeWidth="3" strokeDasharray="1 3" strokeLinecap="round" />
-                <circle cx={x(e.best)} cy={y} r="4" fill={e.core ? "#b026ff" : "none"} stroke="#b026ff" strokeWidth="1.5" />
+                <text x={LEFT - 8} y={y + 3} textAnchor="end" fontSize="10.5" fill={e.core ? COLOR.fg : COLOR.mid}>{e.name}</text>
+                <line x1={x(e.lo)} x2={x(e.hi)} y1={y} y2={y} stroke={COLOR.bio} strokeWidth="3" strokeDasharray="1 3" strokeLinecap="round" />
+                <circle cx={x(e.best)} cy={y} r="4" fill={e.core ? COLOR.bio : "none"} stroke={COLOR.bio} strokeWidth="1.5" />
               </g>
             );
           })}
