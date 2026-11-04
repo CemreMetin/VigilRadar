@@ -4,7 +4,7 @@ import dyadsFile from "@/data/dyads.json";
 import SiteNav from "@/components/SiteNav";
 import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
-import { Card, Ext, KindTag, TierBadge } from "@/components/ui";
+import { Card, Ext, KindTag, Term, TierBadge } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Methodology · Monitoring",
@@ -45,12 +45,12 @@ export default function MethodologyPage() {
     { id: "tension", label: "The tension index for country pairs", group: "Computed values", content: (
       <>
         <P>
-          For each tracked pair the site looks at how news reports their interactions over the last 30 days, using the GDELT event
+          For each tracked pair the site looks at how news reports their interactions over the last 30 days, using the <Term id="gdelt">GDELT</Term> event
           database (events coded automatically from news with the CAMEO scheme). It computes four things, weighted by how many articles
           mention each event:
         </P>
         <UL>
-          <li><span className="text-fg">Cooperation vs conflict score</span> (Goldstein scale, −10 hostile to +10 cooperative). Weight 40%, using (1 − score/10)/2.</li>
+          <li><span className="text-fg">Cooperation vs conflict score</span> (<Term id="goldstein">Goldstein scale</Term>, −10 hostile to +10 cooperative). Weight 40%, using (1 − score/10)/2.</li>
           <li><span className="text-fg">Share of coverage that is material conflict</span> (force, attacks, as opposed to verbal conflict). Weight 30%, scaled so 50% or more counts as full.</li>
           <li><span className="text-fg">Average media tone</span>. Weight 15%, using (1 − tone/10)/2.</li>
           <li><span className="text-fg">Surge</span>: the last 7 days&apos; event rate against the 30-day average, on a log scale where a fourfold jump counts as full. Weight 15%.</li>

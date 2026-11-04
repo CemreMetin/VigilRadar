@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { GLOSSARY, type GlossaryId } from "@/data/glossary";
 
 /** Shared building blocks for content pages. Server-safe (no hooks). */
 
@@ -24,6 +25,17 @@ export function H2({ id, children }: { id?: string; children: ReactNode }) {
     <h2 id={id} className="label mt-10 scroll-mt-4">
       {children}
     </h2>
+  );
+}
+
+/** A term with a dotted underline: its one-line definition on hover or focus, and a link to the Glossary. Use it on the first appearance only. */
+export function Term({ id, children }: { id: GlossaryId; children: ReactNode }) {
+  const entry = GLOSSARY.find((g) => g.id === id);
+  if (!entry) return <>{children}</>;
+  return (
+    <Link href={`/glossary?tab=${entry.topic}#${id}`} title={entry.short} className="underline decoration-dotted underline-offset-2">
+      {children}
+    </Link>
   );
 }
 

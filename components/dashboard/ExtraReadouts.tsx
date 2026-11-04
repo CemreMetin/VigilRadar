@@ -2,6 +2,7 @@
 
 import type { SolarNow, AsteroidsFile, Counter, CyclonesFile, FiresFile, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
 import { Bar, Big, Section, Spark } from "./parts";
+import { Term } from "../ui";
 import PassFinder from "./PassFinder";
 
 /** Readouts for the Ice & Sea and Asteroid tabs. Published figures and observations only. */
@@ -151,8 +152,8 @@ export function AsteroidReadout({ world, file }: { world: WorldState; file: Aste
       </Section>
       <Section title="About these numbers">
         <p className="text-[11px] font-light leading-relaxed text-dim">
-          LD = lunar distance (384,400 km). A listed approach is a flyby, not an impact. Sizes are rough ranges from brightness (H) with two assumed reflectivities, not measurements.
-          Sentry lists objects with a non-zero chance of impact within 100 years; Torino 0 means no hazard.{" "}
+          <Term id="ld">LD</Term> = lunar distance (384,400 km). A listed approach is a flyby, not an impact. Sizes are rough ranges from brightness (H) with two assumed reflectivities, not measurements.
+          Sentry lists objects with a non-zero chance of impact within 100 years; <Term id="torino">Torino</Term> 0 means no hazard.{" "}
           {ctr ? `Source: ${ctr.source.name}, updated ${ctr.cadence}.` : ""}
         </p>
       </Section>

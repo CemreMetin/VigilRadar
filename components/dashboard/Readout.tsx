@@ -6,6 +6,7 @@ import type { Mode } from "@/lib/lenses";
 import { nearestSite } from "@/lib/blast";
 import type { AsteroidsFile, Counter, CyclonesFile, FiresFile, SolarNow, TargetsFile, MonitorEvent, OrbitFile, TideGaugesFile, WorldState } from "@/lib/types";
 import { AsteroidReadout, IceReadout, OrbitReadout, WeatherReadout } from "./ExtraReadouts";
+import { Term } from "../ui";
 import { Bar, Big, Section, Spark } from "./parts";
 
 /**
@@ -48,7 +49,7 @@ function KpGauge({ counter }: { counter: Counter }) {
     <>
       <div className="flex items-baseline gap-3">
         <span className="mono readout-in text-3xl font-bold" style={{ color: kp >= 5 ? "var(--threat)" : "var(--space)" }}>{counter.value}</span>
-        <span className="mono text-[11px] font-light text-dim">Kp now · {counter.unit?.split("·")[1]?.trim()}</span>
+        <span className="mono text-[11px] font-light text-dim"><Term id="kp">Kp</Term> now · {counter.unit?.split("·")[1]?.trim()}</span>
       </div>
       {/* nine segments: Kp 0-9. Filled up to the current value; a tick marks the 24 h peak. */}
       <div className="mt-3 flex gap-0.5" role="img" aria-label={`Kp ${counter.value} of 9, 24 hour peak ${peak.toFixed(1)}`}>
@@ -338,7 +339,7 @@ function SolarReadout({ kp, solar, scaleDetail }: { kp: Counter | undefined; sol
     <>
       {scaleDetail && (
         <Section open title={`NOAA ${scaleDetail} scale`} meta={d?.scales ? `now ${scaleDetail}${d.scales[scaleDetail].n}` : undefined}>
-          <p className="text-[12px] font-light leading-relaxed text-dim">{SCALE_INFO[scaleDetail].what}</p>
+          <p className="text-[12px] font-light leading-relaxed text-dim">{SCALE_INFO[scaleDetail].what} <Term id="noaa-scales">About the G, S and R scales</Term></p>
           <table className="mono mt-2 w-full text-[11px]">
             <tbody>
               {SCALE_INFO[scaleDetail].levels.map(([lvl, def]) => (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useJson } from "@/lib/useJson";
 import type { WorldState } from "@/lib/types";
-import { Card, Ext, KindTag, Loading } from "./ui";
+import { Card, Ext, KindTag, Loading, Term } from "./ui";
 import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "./WikiShell";
 import CounterPanel from "./CounterPanel";
@@ -65,7 +65,7 @@ export default function HealthView() {
     <WikiShell
       title="Health"
       accent="var(--bio)"
-      intro={<>The World Health Organization publishes a Disease Outbreak News (DON) report when it judges an event worth international
+      intro={<>The World Health Organization publishes a <Term id="don">Disease Outbreak News (DON)</Term> report when it judges an event worth international
         attention. This page lists the recent ones. It is a window onto what WHO is flagging, not a count of every outbreak in the world.</>}
       {...PAGE_META.health}
       updated={data?.generatedAt.slice(0, 10) ?? PAGE_META.health.updated}

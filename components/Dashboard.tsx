@@ -48,6 +48,7 @@ import FreshnessTable from "./FreshnessTable";
 import AlarmBar from "./dashboard/AlarmBar";
 import AsteroidOrbit from "./dashboard/AsteroidOrbit";
 import ViewControls from "./dashboard/ViewControls";
+import { Term } from "./ui";
 import type { MiniPoint } from "./dashboard/MiniContext";
 import MapView, { type MapControls, type MapData } from "./MapView";
 
@@ -684,7 +685,7 @@ export default function Dashboard() {
       {(layersOn.has("cables") || layersOn.has("cablesAll")) && <p>Long undersea internet cables need powered repeaters. A strong geomagnetic storm can induce currents that damage them, cutting internet links between continents.</p>}
       {layersOn.has("outbreaks") && <p><span style={{ color: "var(--bio)" }}>■</span> darker purple: more WHO reports in the last 90 days (reports, not outbreaks). {countries.failed ? "Country outlines unavailable, so no shading." : ""}</p>}
       {layersOn.has("hubs") && <p><span style={{ color: "var(--bio)" }}>◯</span> How fast a new pathogen can travel: the 50 busiest airports by route count. {airports.failed ? "Airport data unavailable. " : ""}<Link href="/scenarios/pandemic-x" className="underline">Pandemic explorer</Link></p>}
-      {layersOn.has("labs") && <p><span style={{ color: "#ff6ad5" }}>◯</span> BSL-4 labs: partial reference list, not a risk ranking. {labs.failed ? "Unavailable right now." : ""}</p>}
+      {layersOn.has("labs") && <p><span style={{ color: "#ff6ad5" }}>◯</span> <Term id="bsl4">BSL-4</Term> labs: partial reference list, not a risk ranking. {labs.failed ? "Unavailable right now." : ""}</p>}
       {globeEff && <p>3D: the shaded side is night; the Sun and Moon markers are computed from the clock.</p>}
       {modeId === "orbit" && <p>Dots are positions at the snapshot time; objects move about 7 km/s</p>}
       {layersOn.has("geomag") && <p><span style={{ color: "var(--geo)" }}>┄</span> 50° <span style={{ color: "var(--threat)" }}>┄</span> 60° geomagnetic latitude</p>}

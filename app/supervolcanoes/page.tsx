@@ -3,7 +3,7 @@ import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
 import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
-import { Card } from "@/components/ui";
+import { Card, Term } from "@/components/ui";
 import VolcanoCards from "@/components/VolcanoCards";
 
 export const metadata: Metadata = {
@@ -54,7 +54,7 @@ export default function SupervolcanoesPage() {
         title="Supervolcanoes"
         accent="var(--geo)"
         intro={<>
-          Six calderas that have each produced at least one supereruption (VEI 7 or larger). Status comes from the official
+          Six <Term id="caldera">calderas</Term> that have each produced at least one supereruption (<Term id="vei">VEI</Term> 7 or larger). Status comes from the official
           observatories where they publish an open feed. &quot;Normal&quot; is the usual state and nearly every volcano is normal nearly
           all the time.
         </>}

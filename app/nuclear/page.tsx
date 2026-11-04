@@ -7,6 +7,7 @@ import { arsenals } from "@/lib/arsenals";
 import dyadsFile from "@/data/dyads.json";
 import SiteNav from "@/components/SiteNav";
 import { PAGE_META } from "@/data/pages";
+import { Term } from "@/components/ui";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import type { PlantsFile } from "@/lib/types";
 
@@ -47,7 +48,7 @@ export default async function NuclearPage() {
     { id: "overview", label: "Overview", group: "Weapons", content: (<>
             <div className="mt-3 grid gap-px border border-line bg-line sm:grid-cols-3">
         <div className="bg-panel-solid p-4">
-          <p className="label">Doomsday Clock</p>
+          <p className="label"><Term id="doomsday-clock">Doomsday Clock</Term></p>
           <p className="mono mt-1 text-3xl" style={{ color: "var(--threat)" }}>
             {clock?.value}
           </p>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useJson } from "@/lib/useJson";
-import { Card, Ext, KindTag, Loading } from "./ui";
+import { Card, Ext, KindTag, Loading, Term } from "./ui";
 import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "./WikiShell";
 
@@ -127,7 +127,7 @@ export default function TrajectoryView() {
           <p className="mt-3 flex items-center gap-3 text-sm"><KindTag kind="observed" /> Global surface temperature, annual mean</p>
           <LineChart data={data.giss.annual} color="#ffb000" unit=" °C" label="Global temperature anomaly" zeroLine />
           <p className="mt-1 text-[11px] leading-relaxed text-dim">
-            NASA GISTEMP anomaly relative to 1951-1980 (not the pre-industrial baseline used for the 1.5 °C target, which is roughly 0.3 °C
+            NASA GISTEMP <Term id="anomaly">anomaly relative to 1951-1980</Term> (not the pre-industrial baseline used for the 1.5 °C target, which is roughly 0.3 °C
             cooler). <Ext href={data.giss.source.url}>{data.giss.source.name} ↗</Ext>
           </p>
 
