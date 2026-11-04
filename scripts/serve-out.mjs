@@ -7,6 +7,15 @@ import { extname, join, normalize } from "node:path";
 
 const PORT = Number(process.argv[2] ?? 8081);
 const ROOT = join(process.cwd(), "out");
+// the "/*" block of out/_headers (Cloudflare Pages format) is sent on every response, like the CDN does
+const HEADERS = existsSync(join(ROOT, "_headers"))
+  ? Object.fromEntries(
+      readFileSync(join(ROOT, "_headers"), "utf8")
+        .split(/\r?\n/)
+        .filter((l) => /^\s+\S+:/.test(l))
+        .map((l) => [l.slice(0, l.indexOf(":")).trim(), l.slice(l.indexOf(":") + 1).trim()]),
+    )
+  : {};
 const TYPES = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css",
   ".json": "application/json", ".webmanifest": "application/manifest+json", ".png": "image/png", ".ico": "image/x-icon",
@@ -31,6 +40,6 @@ createServer((req, res) => {
     file = join(ROOT, "404.html");
     status = 404;
   }
-  res.writeHead(status, { "Content-Type": TYPES[extname(file)] ?? "application/octet-stream", "Cache-Control": "no-cache" });
+  res.writeHead(status, { "Content-Type": TYPES[extname(file)] ?? "application/octet-stream", "Cache-Control": "no-cache", ...HEADERS });
   res.end(readFileSync(file));
 }).listen(PORT, () => console.log(`serving out/ on http://localhost:${PORT}`));
