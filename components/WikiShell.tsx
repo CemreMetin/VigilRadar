@@ -279,7 +279,7 @@ export default function WikiShell({
                 </section>
               )}
               {sections.map((sec) => (
-                <section key={sec.id} className="print-section">
+                <section key={sec.id} className="print-section" data-section={sec.id} data-label={sec.label}>
                   <h2 className="mono">{sec.label.toUpperCase()}</h2>
                   {sec.content}
                 </section>
