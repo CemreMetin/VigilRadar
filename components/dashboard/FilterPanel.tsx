@@ -128,13 +128,13 @@ export default function FilterPanel({
                   type="button"
                   aria-pressed={on}
                   onClick={() => onToggle(id)}
-                  style={{ "--c": info.color } as CSSProperties}
+                  style={{ "--c": info.color, color: on ? "var(--fg)" : "var(--fg-dim)" } as CSSProperties}
                   className="card-btn toggle-row relative flex w-full items-center gap-2 overflow-hidden px-2.5 py-1.5 text-left"
                   title={info.blurb}
                 >
                   <span className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: on ? info.color : "transparent", border: `1px solid ${info.color}` }} aria-hidden />
-                  <span className="min-w-0 flex-1 truncate text-body font-bold">{info.label}</span>
-                  <span className="mono shrink-0 text-body font-bold tabular-nums" style={{ color: on ? info.color : "var(--fg-dim)" }}>
+                  <span className={`min-w-0 flex-1 truncate text-body ${on ? "font-bold" : ""}`}>{info.label}</span>
+                  <span className="mono shrink-0 text-body font-bold tabular-nums" style={{ color: "inherit" }}>
                     {n !== undefined ? n.toLocaleString("en-US") : on ? "ON" : "OFF"}
                   </span>
                 </button>

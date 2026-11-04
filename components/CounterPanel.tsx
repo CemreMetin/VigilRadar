@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { DOMAIN_BY_ID } from "@/lib/domains";
 import type { Counter, Tone } from "@/lib/types";
 
 const TONE_COLOR: Record<Tone, string> = {
-  normal: "var(--accent)",
-  elevated: "var(--geo)",
+  normal: "var(--fg)",
+  elevated: "var(--scn)",
   high: "var(--threat)",
 };
 const TONE_LABEL: Record<Tone, string> = {
@@ -61,7 +60,6 @@ export default function CounterPanel({
   return (
     <ul className="divide-y divide-line">
       {counters.map((c) => {
-        const dom = DOMAIN_BY_ID[c.domain];
         const tone = c.tone ?? "normal";
         const isOpen = open === c.id;
         const reviewDue = c.manual && c.reviewBy && c.reviewBy < today;
@@ -73,7 +71,7 @@ export default function CounterPanel({
               onClick={() => setOpen(isOpen ? null : c.id)}
               className="flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-accent/10"
             >
-              <span className="mt-1 inline-block h-2 w-2 shrink-0" style={{ background: dom.color }} aria-hidden />
+              <span className="mt-1 inline-block h-2 w-2 shrink-0" style={{ background: tone === "normal" ? "var(--line-strong)" : TONE_COLOR[tone] }} aria-hidden />
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
                   <span className="label">{c.label}</span>
@@ -82,14 +80,14 @@ export default function CounterPanel({
                   {reviewDue && <span className="label text-geo">review due</span>}
                 </span>
                 <span className="mt-0.5 flex items-baseline gap-2">
-                  <span className="mono text-value leading-none" style={{ color: TONE_COLOR[tone] }}>
+                  <span className="mono text-value leading-none text-fg">
                     {c.value}
                   </span>
                   {c.unit && <span className="mono text-body text-dim">{c.unit}</span>}
                 </span>
               </span>
-              {c.history && <Sparkline values={c.history} color={dom.color} />}
-              <span className="mono mt-0.5 shrink-0 text-body font-bold text-accent" aria-hidden>
+              {c.history && <Sparkline values={c.history} color="var(--fg-dim)" />}
+              <span className="mono mt-0.5 shrink-0 text-body font-bold text-dim" aria-hidden>
                 {isOpen ? "−" : "+"}
               </span>
               <span className="sr-only">Status: {TONE_LABEL[tone]}</span>

@@ -58,7 +58,7 @@ export default function TopBar({
                 style={{ "--c": g.color } as CSSProperties}
                 className="tab-btn relative flex w-fit shrink-0 items-baseline gap-2 whitespace-nowrap px-3 py-2 text-left sm:px-5"
               >
-                <span className="mono text-body font-bold uppercase tracking-wider" style={{ color: on ? "#fff" : g.color }}>
+                <span className={`mono text-body uppercase tracking-wider ${on ? "font-bold" : ""}`} style={{ color: on ? g.color : "var(--fg-dim)" }}>
                   {g.title}
                 </span>
                 <span className="mono hidden text-label text-dim sm:inline" aria-hidden>
@@ -82,8 +82,8 @@ export default function TopBar({
                   aria-selected={on}
                   onClick={() => onSelect(m.id)}
                   title={m.stat(world)}
-                  style={{ borderBottomColor: on ? m.color : "transparent", color: on ? m.color : "var(--fg)" }}
-                  className={`mono shrink-0 whitespace-nowrap border-b-2 px-0.5 pb-1 text-body font-bold uppercase tracking-wider hover:opacity-100 ${on ? "" : "opacity-70"}`}
+                  style={{ borderBottomColor: on ? m.color : "transparent", color: on ? m.color : "var(--fg-dim)" }}
+                  className={`mono shrink-0 whitespace-nowrap border-b-2 px-0.5 pb-1 text-body uppercase tracking-wider hover:text-fg ${on ? "font-bold" : ""}`}
                 >
                   {m.title}
                 </button>

@@ -22,11 +22,11 @@ export function Section({ title, children, open = false, meta }: { title: string
 
 export const Disclose = Section;
 
-export function Big({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
+export function Big({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="p-3 odd:border-r odd:border-line [&:nth-child(n+3)]:border-t [&:nth-child(n+3)]:border-line">
       <p className="label">{label}</p>
-      <p className="mono readout-in mt-1 text-value font-bold leading-none" style={{ color }}>
+      <p className="mono readout-in mt-1 text-value font-bold leading-none">
         {value}
       </p>
       {sub && <p className="mono mt-1 text-label text-dim">{sub}</p>}
