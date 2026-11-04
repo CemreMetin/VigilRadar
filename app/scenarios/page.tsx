@@ -5,6 +5,7 @@ import SiteNav from "@/components/SiteNav";
 import { TierBadge, type Tier } from "@/components/ui";
 import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
+import ScenarioTable from "@/components/ScenarioTable";
 
 export const metadata: Metadata = {
   title: "Scenarios · Monitoring",
@@ -40,7 +41,7 @@ function Cards({ list }: { list: Scenario[] }) {
   );
 }
 
-const sections: WikiSection[] = (["A", "B", "C"] as Tier[]).map((t) => {
+const tierSections: WikiSection[] = (["A", "B", "C"] as Tier[]).map((t) => {
   const list = SCENARIOS.filter((s) => s.tier === t);
   return {
     id: `tier-${t.toLowerCase()}`,
@@ -53,6 +54,8 @@ const sections: WikiSection[] = (["A", "B", "C"] as Tier[]).map((t) => {
     ),
   };
 });
+
+const sections: WikiSection[] = [{ id: "compare", label: "Compare", content: <ScenarioTable /> }, ...tierSections];
 
 export default function ScenariosPage() {
   return (
