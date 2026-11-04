@@ -6,6 +6,7 @@ import manual from "@/data/manual-counters.json";
 import { arsenals } from "@/lib/arsenals";
 import dyadsFile from "@/data/dyads.json";
 import SiteNav from "@/components/SiteNav";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import type { PlantsFile } from "@/lib/types";
 
@@ -214,6 +215,7 @@ export default async function NuclearPage() {
         title="Nuclear"
         accent="var(--threat)"
         intro="Who has how many warheads, and what the most-cited symbolic clock says. These are published estimates, not live data."
+        {...PAGE_META.nuclear}
         sections={sections}
       />
     </>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PAGE_META } from "@/data/pages";
 import { ref } from "@/data/references";
 import { SCENARIOS, SCENARIO_BY_ID, type Evidence } from "@/data/scenarios";
 import LiveIndicators from "@/components/scenarios/LiveIndicators";
@@ -148,20 +149,6 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
 
       </>
     ) },
-    { id: "refs", label: "References", group: "Evidence", content: (
-      <>
-        <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-xs leading-relaxed text-dim">
-          {s.refs.map((rid) => {
-            const r = ref(rid);
-            return (
-              <li key={rid}>
-                {r.text} <Ext href={r.url}>link ↗</Ext>
-              </li>
-            );
-          })}
-        </ol>
-      </>
-    ) },
   ];
 
   return (
@@ -178,6 +165,9 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
             </span>
           </>
         }
+        updated={PAGE_META.scenarios.updated}
+        keyPoints={s.keyPoints}
+        sources={s.refs.map((rid) => ({ label: ref(rid).text, url: ref(rid).url }))}
         sections={sections}
       />
     </>

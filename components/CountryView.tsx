@@ -6,6 +6,7 @@ import { useJson } from "@/lib/useJson";
 import type { ProfilesFile } from "@/lib/types";
 import { arsenals } from "@/lib/arsenals";
 import { Card, Ext, KindTag, Loading } from "./ui";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "./WikiShell";
 
 const n = (v: number) => v.toLocaleString("en-US");
@@ -168,6 +169,8 @@ export default function CountryView() {
   return (
     <WikiShell
       title="Countries"
+      {...PAGE_META.country}
+      updated={data?.generatedAt.slice(0, 10) ?? PAGE_META.country.updated}
       openOnParam={{ c: "overview" }}
       intro={<>Everything this site knows about one country on one page: nuclear status, tension pairs, outbreak reports, armed
         conflict in the news, supervolcanoes, water and food indicators. Signals listed together happen at the same time, which is not

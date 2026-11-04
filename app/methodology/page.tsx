@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import dyadsFile from "@/data/dyads.json";
 import SiteNav from "@/components/SiteNav";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import { Card, Ext, KindTag, TierBadge } from "@/components/ui";
 
@@ -221,6 +222,7 @@ export default function MethodologyPage() {
         title="Methodology"
         intro={<>How things on this site are made, so you can judge them. This is a personal, ad-free project; the aim is to be useful and honest
           about uncertainty rather than dramatic.</>}
+        {...PAGE_META.methodology}
         sections={sections}
       />
     </>

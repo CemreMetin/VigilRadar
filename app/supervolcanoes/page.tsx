@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "@/components/SiteNav";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
-import { Card, Ext } from "@/components/ui";
+import { Card } from "@/components/ui";
 import VolcanoCards from "@/components/VolcanoCards";
 
 export const metadata: Metadata = {
@@ -45,20 +46,6 @@ export default function SupervolcanoesPage() {
         </Card>
 
     </>) },
-    { id: "sources", label: "Sources", group: "Context", content: (<>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
-          <li><Ext href="https://www.usgs.gov/observatories/yvo">USGS Yellowstone Volcano Observatory</Ext>, <Ext href="https://www.usgs.gov/programs/VHP">USGS Volcano Hazards Program</Ext></li>
-          <li><Ext href="https://www.ov.ingv.it/">INGV Osservatorio Vesuviano</Ext> (Campi Flegrei)</li>
-          <li><Ext href="https://www.geonet.org.nz/volcano">GeoNet</Ext> (Taupō, New Zealand)</li>
-          <li><Ext href="https://volcano.si.edu/">Smithsonian Global Volcanism Program</Ext> (eruption history)</li>
-        </ul>
-        <p className="mt-6 text-sm">
-          What a supereruption could do:{" "}
-          <Link href="/scenarios/supervolcano" className="text-accent hover:underline">Supervolcano scenario →</Link>
-          {" · "}
-          <Link href="/?sc=volcano" className="text-accent hover:underline">Show on the map →</Link>
-        </p>
-    </>) },
   ];
   return (
     <>
@@ -71,6 +58,7 @@ export default function SupervolcanoesPage() {
           observatories where they publish an open feed. &quot;Normal&quot; is the usual state and nearly every volcano is normal nearly
           all the time.
         </>}
+        {...PAGE_META.supervolcanoes}
         sections={sections}
       />
     </>

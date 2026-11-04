@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useJson } from "@/lib/useJson";
 import { Card, Ext, KindTag, Loading } from "./ui";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "./WikiShell";
 
 type Series = {
+  generatedAt: string;
   giss: { baseline: string; annual: { y: number; v: number }[]; source: { name: string; url: string } };
   co2: { annual: { y: number; v: number }[]; source: { name: string; url: string } };
 };
@@ -199,7 +201,7 @@ export default function TrajectoryView() {
       </p>
     </>) },
   ];
-  return <WikiShell title="Trajectory" intro={<>Where we are, where the climate is heading under different choices, and what experts think about the largest risks. The three
+  return <WikiShell title="Trajectory" {...PAGE_META.trajectory} updated={data?.generatedAt.slice(0, 10) ?? PAGE_META.trajectory.updated} intro={<>Where we are, where the climate is heading under different choices, and what experts think about the largest risks. The three
         kinds of statement are always marked: <KindTag kind="observed" /> measurements, <KindTag kind="projection" /> scenarios that
         depend on choices, <KindTag kind="expert" /> personal judgements.</>} sections={sections} />;
 }

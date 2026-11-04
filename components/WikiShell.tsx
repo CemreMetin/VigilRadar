@@ -31,13 +31,22 @@ const isActivePage = (path: string, href: string) => path === href || path.start
 export default function WikiShell({
   title,
   intro,
-  sections,
+  updated,
+  keyPoints,
+  sources,
+  sections: given,
   accent = "var(--accent)",
   aside,
   openOnParam,
 }: {
   title: string;
   intro?: ReactNode;
+  /** "Last updated": the data date or the content date, whichever the page shows */
+  updated?: string;
+  /** at most four bullets, shown on the first section */
+  keyPoints?: string[];
+  /** the links the page cites; they become its last section, "Sources" */
+  sources?: { label: string; url: string }[];
   sections: WikiSection[];
   accent?: string;
   /** shown above the content on every section (for example the offline button) */
@@ -46,6 +55,31 @@ export default function WikiShell({
   openOnParam?: Record<string, string>;
 }) {
   const path = usePathname() ?? "";
+  const sections = useMemo<WikiSection[]>(
+    () =>
+      sources?.length
+        ? [
+            ...given,
+            {
+              id: "sources",
+              label: "Sources",
+              content: (
+                <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-xs leading-relaxed text-dim">
+                  {sources.map((x) => (
+                    <li key={x.url}>
+                      {x.label}{" "}
+                      <a href={x.url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                        link ↗
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              ),
+            },
+          ]
+        : given,
+    [given, sources],
+  );
   const [activeId, setActiveId] = useState(sections[0].id);
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -167,6 +201,17 @@ export default function WikiShell({
             {title}
           </h1>
           {intro && <div className="mt-3 text-sm leading-relaxed text-dim">{intro}</div>}
+          {updated && <p className="mono mt-2 text-[11px] text-dim">Last updated: {updated}</p>}
+          {keyPoints && index <= 0 && (
+            <section aria-label="Key points" className="mt-4 border border-line p-3">
+              <p className="label">Key points</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed">
+                {keyPoints.slice(0, 4).map((k) => (
+                  <li key={k}>{k}</li>
+                ))}
+              </ul>
+            </section>
+          )}
           {aside && <div className="no-print mt-5">{aside}</div>}
 
           <h2 className="mono mt-8 border-t border-line pt-4 text-sm font-bold tracking-[0.14em]" style={{ color: accent }}>

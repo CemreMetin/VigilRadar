@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useJson } from "@/lib/useJson";
 import type { WorldState } from "@/lib/types";
 import { Card, Ext, KindTag, Loading } from "./ui";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "./WikiShell";
 import CounterPanel from "./CounterPanel";
 
@@ -54,13 +55,8 @@ export default function HealthView() {
       </Card>
 
     </>) },
-    { id: "sources", label: "Other sources", group: "Context", content: (<>
-      <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
-        <li><Ext href="https://www.ecdc.europa.eu/en/threats-and-outbreaks">ECDC: threats and outbreaks</Ext> <span className="text-dim">· Europe</span></li>
-        <li><Ext href="https://wahis.woah.org/">WOAH WAHIS</Ext> <span className="text-dim">· animal diseases, including avian influenza</span></li>
-        <li><Ext href="https://www.who.int/emergencies/disease-outbreak-news">WHO Disease Outbreak News</Ext></li>
-      </ul>
-      <p className="mt-6 text-sm">
+    { id: "related", label: "Related", group: "Context", content: (<>
+      <p className="mt-3 text-sm">
         What a fast-spreading new pathogen could do: <Link href="/scenarios/pandemic-x" className="text-accent hover:underline">Pandemic X explorer →</Link>
       </p>
     </>) },
@@ -71,6 +67,8 @@ export default function HealthView() {
       accent="var(--bio)"
       intro={<>The World Health Organization publishes a Disease Outbreak News (DON) report when it judges an event worth international
         attention. This page lists the recent ones. It is a window onto what WHO is flagging, not a count of every outbreak in the world.</>}
+      {...PAGE_META.health}
+      updated={data?.generatedAt.slice(0, 10) ?? PAGE_META.health.updated}
       sections={sections}
     />
   );

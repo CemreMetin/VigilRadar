@@ -21,6 +21,8 @@ export type Scenario = {
   tier: Tier;
   group: Group;
   summary: string;
+  /** at most four bullets: the short version of the page */
+  keyPoints: string[];
   chain: { step: string; evidence: Evidence }[];
   analogs: string[];
   estimates: { who: string; what: string; kind: "expert" | "observed" | "projection"; ref: string }[];
@@ -41,6 +43,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Supervolcanic eruption",
     tier: "A",
     group: "Geophysical",
+    keyPoints: [
+      "A VEI 8 eruption (more than 1,000 km³ of material) has not happened in human history; Tambora in 1815 was a smaller VEI 7 and still cooled the planet for about a year.",
+      "The danger is climate and harvests, not the blast: a stratospheric sulfate haze cools the surface for one to several years.",
+      "Unrest at calderas is common and almost never ends in an eruption; recurrence intervals are not a countdown.",
+      "Toby Ord's own estimate is 1 in 10,000 per century of an existential catastrophe.",
+    ],
     summary:
       "A VEI 8 eruption throws out more than a thousand cubic kilometres of material. None has happened in human history; the largest recent one, Tambora in 1815, was a smaller VEI 7 and still cooled the planet for a year. The risk from a supereruption is dominated by what the ash and sulfur do to the climate and harvests, not by the blast.",
     chain: [
@@ -74,6 +82,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Nuclear war and nuclear winter",
     tier: "A",
     group: "Nuclear",
+    keyPoints: [
+      "Blast, fire and fallout are well understood; the climate effect of soot is modelled, not observed.",
+      "Xia et al. (2022): a regional India-Pakistan war injecting 5 Tg of soot would cut global calorie production by about 7%.",
+      "Food production is the main way a regional war could become a global one.",
+      "Official guidance after a detonation: get inside, stay inside, stay tuned, for at least 24 hours (Ready.gov).",
+    ],
     summary:
       "The immediate effects of nuclear weapons (blast, fire, fallout) are well understood. The larger uncertainty is the climate effect: burning cities could loft soot into the stratosphere, dim sunlight and shorten growing seasons worldwide. Climate-model studies agree the effect scales with the number of weapons used, and food production is the main way a regional war could become a global one.",
     chain: [
@@ -108,6 +122,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Pandemic X (natural)",
     tier: "A",
     group: "Health",
+    keyPoints: [
+      "COVID-19 showed how fast air travel carries a virus and how much damage a pandemic does without being an extinction threat.",
+      "The explorer shows the order in which cities might be reached, from a published method and airline routes (mostly 2017).",
+      "Treat the order of arrival as informative and the absolute days as rough.",
+      "Most protection comes from early, simple measures: follow national public-health guidance.",
+    ],
     summary:
       "A new respiratory pathogen that spreads before it is noticed. COVID-19 showed how quickly air travel carries a virus around the world and how much damage a pandemic does without being an extinction threat. The explorer on this page uses a published method to show the order in which cities might be reached.",
     chain: [
@@ -140,6 +160,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Solar superstorm (Carrington-class)",
     tier: "A",
     group: "Space",
+    keyPoints: [
+      "The 1859 Carrington event disrupted telegraphs worldwide; a far weaker storm blacked out Quebec for about nine hours in 1989.",
+      "Long conductors such as power lines and pipelines carry the induced currents; satellites and navigation are affected too.",
+      "Published estimates of a Carrington-class event range from about 1.5% to 85% per decade; Riley's figure is about 10 to 12%.",
+      "Prepare for a long power cut and do not rely on GPS alone.",
+    ],
     summary:
       "A coronal mass ejection strong enough to induce damaging currents in long power lines and pipelines, disable satellites and disrupt navigation. The 1859 Carrington event disrupted telegraph systems worldwide, with reports of sparks and fires; a far weaker storm in 1989 blacked out Quebec for about nine hours. A repeat today would hit a much more electrified world.",
     chain: [
@@ -173,6 +199,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Asteroid or comet impact",
     tier: "A",
     group: "Space",
+    keyPoints: [
+      "Small objects hit often and harmlessly; city-destroying ones are rare; civilisation-threatening ones are very rare.",
+      "In 2022 NASA's DART mission showed that an asteroid can be nudged.",
+      "The close-approach list shows known objects that miss Earth; Sentry tracks those with a non-zero impact chance over about a century, almost all vanishingly small.",
+      "Toby Ord's own estimate is 1 in 1,000,000 per century.",
+    ],
     summary:
       "Impacts shaped Earth's history: the Chicxulub impact about 66 million years ago is linked to the mass extinction that ended the dinosaurs. Small objects hit often and harmlessly; city-destroying ones are rare; civilisation-threatening ones are very rare. For the first time in history we can look for them, and in 2022 NASA's DART mission showed one can be nudged.",
     chain: [
@@ -202,6 +234,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Cascadia megathrust earthquake and tsunami",
     tier: "A",
     group: "Geophysical",
+    keyPoints: [
+      "The Cascadia zone last ruptured on 26 January 1700, an earthquake of about magnitude 9 documented by Japanese tsunami records.",
+      "Coastal communities would have minutes, not hours, between the shaking and the tsunami.",
+      "USGS (2025): a 10 to 15% chance of a magnitude ~9 earthquake in the next 50 years.",
+      "On strong shaking move to high ground; do not wait for a siren.",
+    ],
     summary:
       "The Cascadia subduction zone off the US and Canadian Pacific Northwest last ruptured on 26 January 1700, an earthquake of about magnitude 9 documented by Japanese tsunami records. It will rupture again. Coastal communities would have minutes, not hours, between the shaking and the tsunami.",
     chain: [
@@ -224,6 +262,12 @@ export const SCENARIOS: Scenario[] = [
     title: "A large earthquake near Istanbul (Marmara)",
     tier: "A",
     group: "Geophysical",
+    keyPoints: [
+      "The North Anatolian Fault runs under the Sea of Marmara close to Istanbul, and the stretch south of the city has not had a major rupture for a long time.",
+      "Damage depends overwhelmingly on building quality and enforcement.",
+      "Estimates of an M7 or larger earthquake are in the tens of percent over a few decades and depend on the model.",
+      "Nobody can predict the date; probabilities describe decades, not months.",
+    ],
     summary:
       "The North Anatolian Fault runs under the Sea of Marmara, close to Istanbul. Segments of it have broken one after another through the 20th century, and the stretch south of Istanbul has not produced a major rupture for a long time. Türkiye has lived through this: the 1999 İzmit earthquake and the 2023 Kahramanmaraş earthquakes.",
     chain: [
@@ -250,6 +294,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Megaflood: the ARkStorm",
     tier: "A",
     group: "Climate & ocean",
+    keyPoints: [
+      "A USGS scenario based on the 1861-62 storms that flooded California's Central Valley.",
+      "Weeks of atmospheric rivers cause flooding and landslides, and the infrastructure failures last long after.",
+      "USGS (2010): scenario losses up to $725 billion, mostly flooding and business interruption.",
+      "Know your flood risk and evacuation route; floods contaminate drinking water.",
+    ],
     summary:
       "A scenario by the US Geological Survey based on a real event: the 1861-62 storm sequence that flooded California's Central Valley. A chain of atmospheric rivers would drop weeks of rain, flooding cities and farmland and triggering landslides. It is a good model of how a weather extreme becomes a long-lasting infrastructure disaster.",
     chain: [
@@ -271,6 +321,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Lethal heat and humidity (wet-bulb)",
     tier: "A",
     group: "Climate & ocean",
+    keyPoints: [
+      "Sweating stops working when the air is both hot and humid; the combined measure is wet-bulb temperature.",
+      "A theoretical limit near 35 °C wet-bulb is often cited, but lab tests on healthy young adults found harm below that.",
+      "Heat plus a blackout is the dangerous combination, and older or ill people are more vulnerable.",
+      "Know where a cool place is, drink water and check on neighbours.",
+    ],
     summary:
       "Humans cool themselves by sweating, which stops working when the air is both hot and humid. The combined measure is wet-bulb temperature. A long-cited theoretical ceiling is 35 °C, but laboratory tests on healthy young adults found harm well below that, and older or ill people are more vulnerable. Heat waves are already among the deadliest weather events.",
     chain: [
@@ -294,6 +350,11 @@ export const SCENARIOS: Scenario[] = [
     title: "Antibiotic resistance",
     tier: "A",
     group: "Health",
+    keyPoints: [
+      "This is a slow loss of the antibiotics that surgery, chemotherapy and care of premature babies rely on, not a sudden event.",
+      "Murray et al. (2022): in 2019 about 4.95 million deaths were associated with bacterial resistance, 1.27 million directly attributable.",
+      "Use antibiotics only when prescribed and finish the course; vaccines also reduce the need.",
+    ],
     summary:
       "Bacteria evolve resistance to the drugs that kill them, and overuse speeds it up. This is not a sudden event but a slow loss of an invention modern medicine relies on: surgery, cancer chemotherapy and caring for premature babies all depend on antibiotics that work.",
     chain: [
@@ -315,6 +376,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Mega-drought and breadbasket failure",
     tier: "A",
     group: "Food & water",
+    keyPoints: [
+      "A large share of the world's grain comes from a few regions and a few shipping chokepoints.",
+      "Price spikes, more than absolute shortages, have preceded unrest and hunger; Russia banned wheat exports after its 2010 heat wave.",
+      "The link between food prices and conflict is real but contested; many other factors matter.",
+      "A few weeks of shelf-stable food buffer price shocks.",
+    ],
     summary:
       "A large share of the world's grain comes from a handful of regions and a few shipping chokepoints. A simultaneous drought or heat wave in several of them, or a blockade, can push food prices up sharply. Price spikes, more than absolute shortages, have preceded unrest and hunger.",
     chain: [
@@ -339,6 +406,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Kessler syndrome (orbital debris cascade)",
     tier: "A",
     group: "Space",
+    keyPoints: [
+      "Every collision in low Earth orbit makes fragments that can cause more collisions (Kessler and Cour-Palais, 1978).",
+      "In 2009 two intact satellites collided for the first time.",
+      "A full runaway cascade is a model result; the real question is how debris builds up in specific orbits.",
+      "Carry a paper map and a compass; do not rely on satellite navigation alone.",
+    ],
     summary:
       "Every collision in low Earth orbit makes fragments that can cause more collisions. Kessler and Cour-Palais described the risk in 1978. In 2009 two intact satellites collided for the first time. A runaway cascade would make some orbits unusable for years and take out services we rely on without noticing.",
     chain: [
@@ -361,6 +434,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Climate tipping cascade",
     tier: "B",
     group: "Climate & ocean",
+    keyPoints: [
+      "Armstrong McKay et al. (2022) assessed 16 tipping elements; five may already be at risk at today's warming.",
+      "WMO (2025): 2024 was about 1.55 ± 0.13 °C above 1850-1900.",
+      "Thresholds and timescales are uncertain, and passing a threshold does not mean the change is instant.",
+      "The cause is collective; personal preparedness helps with floods, heat and storms.",
+    ],
     summary:
       "Parts of the climate system (ice sheets, ocean circulation, permafrost, rainforest) may have thresholds beyond which change becomes self-sustaining. Armstrong McKay and colleagues (2022) assessed 16 such elements; five may already be at risk at today's warming, and more become likely at 1.5-2 °C.",
     chain: [
@@ -386,6 +465,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Engineered pandemic",
     tier: "B",
     group: "Health",
+    keyPoints: [
+      "Cheaper biotechnology raises the worry that a deliberate or accidental release could be worse than a natural pandemic.",
+      "This page deliberately gives no technical detail.",
+      "Toby Ord's own estimate is 1 in 30 per century; other experts rate the risk much lower.",
+      "The shared defence is public-health surveillance and preparedness.",
+    ],
     summary:
       "Advances in biotechnology make it cheaper to work with pathogens, which raises the worry that a deliberate or accidental release could be worse than a natural pandemic. This page deliberately gives no technical detail. It exists because expert estimates for this risk are among the highest in the existential-risk literature.",
     chain: [
@@ -408,6 +493,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Grid or cyber collapse",
     tier: "B",
     group: "Technology",
+    keyPoints: [
+      "Electricity, communications, water, fuel and payments depend on each other.",
+      "The cyberattack on Ukraine's grid in December 2015 showed that the first step is possible.",
+      "How long an outage lasts depends on how long it takes to restore physical equipment.",
+      "The kit is the same as for any long outage: water, food, light, radio, cash and paper contacts.",
+    ],
     summary:
       "Modern life runs on tightly coupled systems: electricity, communications, water, fuel and payments all depend on each other. A cyberattack, a solar storm or a cascading technical failure could take out several at once. The cyberattack on Ukraine's grid in December 2015 showed the first part is possible.",
     chain: [
@@ -427,6 +518,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Ocean deoxygenation and acidification",
     tier: "B",
     group: "Climate & ocean",
+    keyPoints: [
+      "The ocean absorbs about 30% of the CO₂ we emit, which makes seawater more acidic, and warmer water holds less oxygen.",
+      "Schmidtko et al. (2017): global ocean oxygen content fell by more than 2% between 1960 and 2010.",
+      "The worry is a slow loss of the ocean life that people depend on for food.",
+      "Little personal action applies; the response is collective.",
+    ],
     summary:
       "The ocean absorbs about 30% of the CO₂ we emit, which makes seawater more acidic, and warmer water holds less oxygen. Together they stress corals, shellfish and fisheries. The worry is a slow loss of ocean life that people depend on for food, not a sudden event.",
     chain: [
@@ -448,6 +545,11 @@ export const SCENARIOS: Scenario[] = [
     title: "Biodiversity and pollinator decline",
     tier: "B",
     group: "Food & water",
+    keyPoints: [
+      "IPBES (2019): about 1 million species are threatened with extinction.",
+      "Klein et al. (2007): crops that depend on animal pollination account for about 35% of global crop production by volume.",
+      "The risk is a gradual loss of yield and resilience, not a single event.",
+    ],
     summary:
       "The 2019 IPBES assessment estimated that around a million species are threatened with extinction. For food, the most direct link is pollination: a large share of crops benefits from animal pollinators. The risk is gradual loss of yield and resilience rather than a single event.",
     chain: [
@@ -469,6 +571,12 @@ export const SCENARIOS: Scenario[] = [
     title: "Advanced AI risk",
     tier: "B",
     group: "Technology",
+    keyPoints: [
+      "Some researchers argue that capable AI could cause catastrophic harm; others consider this speculative.",
+      "Grace et al. (2024): between 38% and 51% of 2,778 AI researchers gave at least a 10% chance to outcomes as bad as human extinction; answers varied widely.",
+      "There is no live data: these are opinions, not measurements.",
+      "Toby Ord's own estimate is 1 in 10 per century.",
+    ],
     summary:
       "Some researchers argue that increasingly capable AI systems could cause catastrophic harm, through misuse or through systems that pursue goals humans did not intend. Others consider this speculative. There is no live data to track, so this page only shows what experts say, and how much they disagree.",
     chain: [
@@ -493,6 +601,11 @@ export const SCENARIOS: Scenario[] = [
     title: "Pathogens released by thawing permafrost",
     tier: "C",
     group: "Health",
+    keyPoints: [
+      "Frozen soil preserves microbes, and some old ones can wake up (shown for amoeba viruses and anthrax spores).",
+      "An anthrax outbreak in Siberia in 2016 was linked to a thawed carcass.",
+      "A human pandemic from permafrost is a thought experiment with no documented example.",
+    ],
     summary:
       "Frozen soil preserves microbes. As permafrost thaws, some old microbes can wake up. This has been shown for viruses that infect amoebae, and an anthrax outbreak in Siberia in 2016 was linked to a thawed carcass. A new human pandemic from permafrost is a thought experiment with no documented example.",
     chain: [
@@ -513,6 +626,11 @@ export const SCENARIOS: Scenario[] = [
     title: "Cumbre Vieja mega-tsunami",
     tier: "C",
     group: "Geophysical",
+    keyPoints: [
+      "A 2001 paper warned that a collapse of Cumbre Vieja could send a giant tsunami across the Atlantic.",
+      "Later modelling (Løvholt et al., 2008) found much smaller waves.",
+      "Treated as largely refuted and kept here because it is widely cited.",
+    ],
     summary:
       "A 2001 paper warned that a collapse of the Cumbre Vieja volcano on La Palma could send a giant tsunami across the Atlantic. Later modelling found much smaller waves, and geologists doubt a single huge collapse. It is mainly a cautionary tale about a worst-case model becoming a headline.",
     chain: [
@@ -533,6 +651,11 @@ export const SCENARIOS: Scenario[] = [
     title: "Gamma-ray burst or nearby supernova",
     tier: "C",
     group: "Space",
+    keyPoints: [
+      "A gamma-ray burst or supernova close enough and aimed at Earth could strip part of the ozone layer.",
+      "It has been proposed as a cause of an ancient mass extinction, but the evidence is thin.",
+      "Toby Ord's own estimate is 1 in 1 billion per century.",
+    ],
     summary:
       "A gamma-ray burst or supernova close enough and aimed at Earth could strip part of the ozone layer. It has been proposed as a cause of an ancient mass extinction, but the evidence is thin. The odds in any given century are extremely small.",
     chain: [
@@ -552,6 +675,11 @@ export const SCENARIOS: Scenario[] = [
     title: "Magnetic pole reversal catastrophe",
     tier: "C",
     group: "Physics",
+    keyPoints: [
+      "The magnetic poles have flipped many times, most recently about 780,000 years ago.",
+      "The scientific consensus is that there is no link to mass extinction; life has survived many reversals.",
+      "A weaker field would increase some satellite and radiation risks, but not cause an apocalypse.",
+    ],
     summary:
       "Earth's magnetic poles have flipped many times, most recently about 780,000 years ago. Popular stories say a reversal would strip away the atmosphere or cause mass extinction. The scientific consensus is that there is no such link; the field weakens during a reversal, but life has survived many.",
     chain: [
@@ -571,6 +699,11 @@ export const SCENARIOS: Scenario[] = [
     title: "Vacuum decay and particle-physics accidents",
     tier: "C",
     group: "Physics",
+    keyPoints: [
+      "Higgs measurements suggest the vacuum may be metastable.",
+      "The estimated lifetime exceeds the age of the universe by many orders of magnitude.",
+      "There would be no warning and nothing to prepare for.",
+    ],
     summary:
       "Measurements of the Higgs boson suggest our vacuum may be metastable: in principle it could decay into a lower-energy state, destroying everything. The estimated lifetime exceeds the age of the universe by many orders of magnitude. Before the Large Hadron Collider started, safety reviews also assessed hypothetical micro black holes and strangelets and found no danger.",
     chain: [

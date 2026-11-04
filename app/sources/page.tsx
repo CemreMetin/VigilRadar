@@ -4,13 +4,14 @@ import path from "node:path";
 import { DOMAIN_BY_ID } from "@/lib/domains";
 import FreshnessTable from "@/components/FreshnessTable";
 import SiteNav from "@/components/SiteNav";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import type { WorldState } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Sources · Monitoring" };
 
 const PLANNED = [
-  { name: "NASA EONET, FIRMS (storms, fires, floods) as a map layer", domain: "Climate & Water", phase: "later" },
+  { name: "NASA EONET (storms, floods) as a map layer", domain: "Climate & Water", phase: "later" },
   { name: "Drought Monitor, GRACE-FO", domain: "Climate & Water", phase: "later" },
   { name: "ECDC and WOAH feeds (currently linked, not ingested)", domain: "Pandemic & Health", phase: "later" },
   { name: "IAEA PRIS (current reactor status, to replace the older plant dataset)", domain: "Nuclear", phase: "later" },
@@ -136,6 +137,8 @@ export default async function SourcesPage() {
       <WikiShell
         title="Sources"
         intro="Every number on this site comes from an open source listed here, with its licence. This is a personal, ad-free project. Observations, forecasts and expert estimates are always visually distinct."
+        {...PAGE_META.sourcesPage}
+        updated={world?.generatedAt.slice(0, 10) ?? PAGE_META.sourcesPage.updated}
         sections={sections}
       />
     </>

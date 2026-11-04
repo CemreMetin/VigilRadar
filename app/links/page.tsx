@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import CausalGraph from "@/components/CausalGraph";
 import SiteNav from "@/components/SiteNav";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
 
 export const metadata: Metadata = {
@@ -37,6 +38,7 @@ export default function LinksPage() {
       <WikiShell
         title="How the risks feed each other"
         intro="Risks rarely arrive alone: a volcano becomes a food problem, a war becomes a health problem. This map shows the links where research says one thing can cause another."
+        {...PAGE_META.links}
         sections={sections}
       />
     </>

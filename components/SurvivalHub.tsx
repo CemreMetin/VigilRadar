@@ -13,6 +13,7 @@ import {
   type ScenarioTag,
 } from "@/data/survival";
 import OfflineButton from "./OfflineButton";
+import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "./WikiShell";
 
 const STORAGE_KEY = "monitoring.bag.v1";
@@ -393,13 +394,8 @@ export default function SurvivalHub() {
     <WikiShell
       title="What can you do?"
       accent="var(--safe)"
-      intro={
-        <>
-          The risks on this site are large, but your best preparation is dull and local: water, food, light, medicine, a way to get news and a plan your
-          household has practised. The same kit covers an earthquake, a flood, a long power cut or a pandemic wave. Nothing here asks for an account, and
-          your ticks never leave this device.
-        </>
-      }
+      intro="A calm preparedness guide from official sources: plan, checklist, shelter, communication, offline maps. It works offline and needs no account."
+      {...PAGE_META.survive}
       aside={<OfflineButton />}
       openOnParam={{ for: "bag" }}
       sections={sections.map((sec, i) =>
