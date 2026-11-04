@@ -24,6 +24,15 @@
   --grp-earth: #ffb000; /* amber */
   --grp-space: #3ec7ff; /* sky blue */
 
+  /* Map view grid: 4px steps, fixed column widths, defined once. Every panel offset is built from these. */
+  --gap: 12px; /* distance of the panels from the window edge and from each other */
+  --left-w: 252px;
+  --right-w: 364px;
+  --foot-h: 44px; /* status bar zone along the bottom edge */
+  --left-edge: calc(var(--gap) * 2 + var(--left-w)); /* where the map area starts, right of the left panel */
+  --right-edge: calc(var(--gap) * 2 + var(--right-w)); /* where it ends, left of the right panel */
+  --row-h: 32px; /* one height for list rows */
+  --pad: 12px; /* one padding inside panels */
   --topbar-h: 96px; /* the floating scenario menu (two rows) ends here; the side panels start below it */
 }
 

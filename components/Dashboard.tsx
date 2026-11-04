@@ -867,7 +867,7 @@ export default function Dashboard() {
           <MapHud color={mode.color} id={mode.id} />
           {mode.id === "asteroid" && <AsteroidOrbit file={asteroids} now={now} zoom={mapZoom} />}
           {freshnessOpen && world && (
-            <section className="panel-scn absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-12 lg:left-[270px] lg:w-[min(760px,calc(100%-660px))]" aria-label="Data freshness">
+            <section className="panel-scn absolute inset-x-2 bottom-2 z-30 max-h-[70%] overflow-y-auto scroll-thin p-3 lg:inset-x-auto lg:bottom-[calc(var(--foot-h)+var(--gap))] lg:left-(--left-edge) lg:w-[min(760px,calc(100%-var(--left-edge)-var(--right-edge)))]" aria-label="Data freshness">
               <div className="mb-2 flex items-center justify-between">
                 <p className="label caret">Data freshness</p>
                 <button type="button" className="btn mono px-2 py-0.5 text-body font-bold" onClick={() => setFreshnessOpen(false)}>CLOSE</button>

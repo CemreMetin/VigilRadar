@@ -129,7 +129,7 @@ export default function FilterPanel({
                   aria-pressed={on}
                   onClick={() => onToggle(id)}
                   style={{ "--c": info.color, color: on ? "var(--fg)" : "var(--fg-dim)" } as CSSProperties}
-                  className="card-btn toggle-row relative flex w-full items-center gap-2 overflow-hidden px-2.5 py-1.5 text-left"
+                  className="card-btn toggle-row relative flex min-h-(--row-h) w-full items-center gap-2 overflow-hidden px-(--pad) text-left"
                   title={info.blurb}
                 >
                   <span className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: on ? info.color : "transparent", border: `1px solid ${info.color}` }} aria-hidden />
