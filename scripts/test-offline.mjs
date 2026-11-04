@@ -66,6 +66,12 @@ const persisted = await page
   .then(() => true, () => false);
 check(persisted, "offline: checklist tick persists across reload");
 
+// full-text search works on a saved page with the network off
+await page.goto(`${BASE}/methodology`, { waitUntil: "domcontentloaded" });
+await page.locator("#wiki-filter:visible").fill("potassium iodide");
+const found = await page.getByRole("option").first().innerText({ timeout: 5000 }).catch(() => "");
+check(/what can you do/i.test(found), `offline: search finds "potassium iodide" (${found.replace(/\s+/g, " ").slice(0, 40)})`);
+
 // metrics from the cached world_state
 await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
 await page.getByText(/Doomsday Clock/i).first().waitFor({ timeout: 15_000 }).then(

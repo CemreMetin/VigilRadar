@@ -1,6 +1,6 @@
 /* Monitoring service worker: lets the site (especially /survive/) open with no connection.
  *
- *  - /data/*.json        network first, cached copy when offline (so metrics still show, marked by their own timestamps)
+ *  - /data/*.json, /search-index.json   network first, cached copy when offline (so metrics still show, marked by their own timestamps)
  *  - /_next/static, fonts, icons   cache first (files are content-hashed)
  *  - pages               network first, cached copy when offline
  *  - anything cross-origin (map tiles, etc.) is left alone: the basemap needs a connection.
@@ -12,6 +12,8 @@ const VERSION = "v1";
 const PAGES = `monitoring-pages-${VERSION}`;
 const RUNTIME = `monitoring-runtime-${VERSION}`;
 const DATA = `monitoring-data-${VERSION}`;
+// the search index is data too: network first, cached copy when offline
+const isData = (path) => path.startsWith("/data") || path === "/search-index.json";
 
 self.addEventListener("install", () => self.skipWaiting());
 
@@ -59,7 +61,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  if (url.pathname.startsWith("/data")) {
+  if (isData(url.pathname)) {
     event.respondWith(networkFirst(req, DATA));
   } else if (
     url.pathname.startsWith("/_next/static/") ||
@@ -105,8 +107,7 @@ self.addEventListener("message", (event) => {
       const seen = new Set();
       const found = { count: 0, failed: 0 };
       for (const page of data.pages || []) {
-        const isData = page.startsWith("/data");
-        await fetchAndStore(page, isData ? DATA : PAGES, seen, found);
+        await fetchAndStore(page, isData(page) ? DATA : PAGES, seen, found);
       }
       if (port) port.postMessage({ ok: true, ...found });
     })(),
