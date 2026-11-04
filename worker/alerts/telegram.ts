@@ -7,7 +7,7 @@ import type { Alert } from "../../lib/alerts";
  * channel id (for example @my_channel, or a number for a private chat) in the GitHub secrets.
  */
 
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export function dashboardLink(a: Alert, site: string): string {
   const p = new URLSearchParams({ sc: a.scenario });
@@ -30,7 +30,7 @@ export function formatMessage(a: Alert, site: string): string {
     `Severity: ${a.level.toUpperCase()} (rule: ${esc(a.rule)})`,
     `Coordinates: ${coords}`,
     `Time: ${when}`,
-    `Source: <a href="${esc(a.sourceUrl)}">${esc(a.sourceName)}</a>`,
+    `Source: ${/^https?:\/\//i.test(a.sourceUrl) ? `<a href="${esc(a.sourceUrl)}">${esc(a.sourceName)}</a>` : esc(a.sourceName)}`,
     `Dashboard: <a href="${esc(dashboardLink(a, site))}">open the ${esc(a.scenario)} tab</a>`,
     "",
     "Automatic message from published data; figures can be revised. Not an official warning: follow your national authority.",

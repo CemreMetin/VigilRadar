@@ -41,4 +41,10 @@ assert.match(msg, /Coordinates: 1\.000, 2\.000/);
 assert.match(msg, /https:\/\/site\.example\/\?sc=overview&amp;sel=usgs%3Ax/);
 assert.ok(msg.includes("5 km &lt;N&gt; of A&amp;B"));
 
+// a quote cannot break out of href, and a non-http(s) source link is not made clickable
+const hostile = { ...quakeAlerts([q({ mag: 7.2 })], now)[0], sourceName: "USGS", sourceUrl: 'https://x.example/"onclick="1' };
+assert.ok(formatMessage(hostile, "https://site.example").includes('href="https://x.example/&quot;onclick=&quot;1"'));
+const scripted = formatMessage({ ...hostile, sourceUrl: "javascript:alert(1)" }, "https://site.example");
+assert.ok(!scripted.includes("javascript:") && scripted.includes("Source: USGS"));
+
 console.log("alert rules: all checks passed");

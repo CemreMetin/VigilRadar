@@ -110,6 +110,15 @@ function buildSources(d: MapData): Record<string, FC> {
 }
 
 /** Build popup content with DOM nodes (no innerHTML: text comes from external data). */
+/** Links come from feed data and are set through the DOM, where React's javascript: protection does not apply: only http(s) and same-site paths. */
+const isSafeHref = (href: string) => {
+  try {
+    return ["http:", "https:"].includes(new URL(href, window.location.href).protocol);
+  } catch {
+    return false;
+  }
+};
+
 function popupBox(e: Entity) {
   const box = document.createElement("div");
   box.style.minWidth = "200px";
@@ -123,7 +132,11 @@ function popupBox(e: Entity) {
     m.textContent = line;
     box.append(m);
   }
-  if (e.link) {
+  if (e.link && !isSafeHref(e.link.href)) {
+    const m = document.createElement("div");
+    m.textContent = e.link.text;
+    box.append(m);
+  } else if (e.link) {
     const a = document.createElement("a");
     a.href = e.link.href;
     if (e.link.external) {
