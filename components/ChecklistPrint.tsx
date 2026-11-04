@@ -58,7 +58,7 @@ export function usePrintSheet() {
 
 const Line = ({ w = "60mm" }: { w?: string }) => <span className="fill" style={{ minWidth: w }} />;
 
-function ChecklistSheet({ job }: { job: Extract<SheetJob, { kind: "checklist" }> }) {
+export function ChecklistSheet({ job }: { job: Extract<SheetJob, { kind: "checklist" }> }) {
   const tiers = job.tier === "both" ? ([1, 2] as const) : ([Number(job.tier)] as (1 | 2)[]);
   const scenario = SCENARIO_FILTERS.find((f) => f.id === job.filter)?.label;
   const relevant = (tags: ScenarioTag[]) => job.filter === "all" || tags.length === 0 || tags.includes(job.filter as ScenarioTag);
@@ -121,7 +121,7 @@ const PLAN_ROWS: [string, number][] = [
   ["Pets: food, carrier, vet and who takes them", 2],
 ];
 
-function PlanSheet() {
+export function PlanSheet() {
   return (
     <div className="sheet-plan">
       <h1 className="mono">Household emergency plan</h1>
@@ -147,7 +147,7 @@ function PlanSheet() {
 }
 
 /** the Communication table as a cut-out wallet card, 85 x 55 mm */
-function WalletCard() {
+export function WalletCard() {
   return (
     <div className="sheet-card">
       <p className="sheet-sub">Cut along the dashed line and keep it in your wallet.</p>

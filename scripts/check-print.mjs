@@ -138,5 +138,17 @@ await printSheet("survive-plan-section", { tab: "plan", button: /Print this sect
 await printSheet("survive-plan-fill-in", { tab: "plan", button: /PRINT FILL-IN PLAN/, expectPages: 1 });
 await printSheet("survive-wallet-card", { tab: "comms", button: /PRINT WALLET CARD/, expectPages: 1 });
 
+// preparedness pack: Save as PDF prints plan, checklist, wallet card, shelter guidance and a map, one part per page
+await page.goto(BASE + "/survive/pack", { waitUntil: "load" });
+await page.waitForTimeout(5000);
+await page.getByRole("button", { name: /SAVE AS PDF/ }).click();
+await page.waitForFunction(() => window.__printed > 0, null, { timeout: 8000 }).catch(() => {});
+await page.emulateMedia({ media: "print" });
+const packInfo = await page.evaluate(() => ({ img: !!document.querySelector(".pack-map")?.naturalWidth, other: [...document.querySelectorAll("nav, aside, button")].filter((e) => e.offsetParent).length }));
+const packBuf = await page.pdf({ preferCSSPageSize: true });
+writeFileSync("out-print/survive-pack.pdf", packBuf);
+check(packInfo.img && packInfo.other === 0, `survive-pack: ${pdfPages(packBuf)} pages, map image ${packInfo.img}, chrome ${packInfo.other}`);
+await page.emulateMedia({ media: "screen" });
+
 await browser.close();
 process.exit(failed ? 1 : 0);

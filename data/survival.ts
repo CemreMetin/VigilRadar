@@ -150,3 +150,20 @@ export const OFFLINE_READING = [
   { label: "Organic Maps", url: "https://organicmaps.app/", note: "Free offline maps with walking routes, built on OpenStreetMap." },
   { label: "OsmAnd", url: "https://osmand.net/", note: "Offline OpenStreetMap maps and navigation." },
 ];
+
+/** Radiation shelter guidance (Ready.gov). Shown on /survive and in the preparedness pack. */
+export const SHELTER_GUIDANCE = {
+  lead: "Official guidance (Ready.gov) is three words:",
+  leadBold: "get inside, stay inside, stay tuned.",
+  bullets: [
+    "Go to the nearest solid building, away from windows. A basement or the middle of a building is best.",
+    "If you are caught outside by a blast, Ready.gov advises lying face down to protect your skin, then getting indoors within about 10 minutes, before fallout arrives.",
+    "Stay for at least 24 hours unless officials say otherwise or you face an immediate danger. Close windows, doors and air intakes.",
+    "Afterwards, remove outer clothing (this removes up to 90% of radioactive material, per Ready.gov), wash with soap and water, and avoid unsealed outdoor food until authorities say it is safe.",
+    "Potassium iodide is not a general radiation pill. Take it only if your health authority tells you to.",
+  ],
+  sources: [
+    { label: "Ready.gov: Nuclear explosion", url: "https://www.ready.gov/nuclear-explosion" },
+    { label: "WHO iodine thyroid blocking guideline", url: "https://www.who.int/publications/i/item/9789241550185" },
+  ],
+};

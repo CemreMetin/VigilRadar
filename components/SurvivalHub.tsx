@@ -17,6 +17,7 @@ import { useMyCountry } from "@/lib/myCountry";
 import { useLazyJson } from "@/lib/useLazyJson";
 import type { ProfilesFile } from "@/lib/types";
 import OfflineButton from "./OfflineButton";
+import ShelterGuidance from "./ShelterGuidance";
 import { ChecklistPrintForm, usePrintSheet } from "./ChecklistPrint";
 import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "./WikiShell";
@@ -303,22 +304,7 @@ export default function SurvivalHub() {
     ) },
     { id: "shelter", label: "Radiation shelter", group: "Emergencies", hint: "Get inside, stay inside, stay tuned", content: (
       <>
-      <div className="mt-3 border border-line p-4 text-read leading-relaxed">
-        <p>
-          Official guidance (Ready.gov) is three words: <strong>get inside, stay inside, stay tuned.</strong>
-        </p>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-body text-dim">
-          <li>Go to the nearest solid building, away from windows. A basement or the middle of a building is best.</li>
-          <li>If you are caught outside by a blast, Ready.gov advises lying face down to protect your skin, then getting indoors within about 10 minutes, before fallout arrives.</li>
-          <li>Stay for at least 24 hours unless officials say otherwise or you face an immediate danger. Close windows, doors and air intakes.</li>
-          <li>Afterwards, remove outer clothing (this removes up to 90% of radioactive material, per Ready.gov), wash with soap and water, and avoid unsealed outdoor food until authorities say it is safe.</li>
-          <li>Potassium iodide is not a general radiation pill. Take it only if your health authority tells you to.</li>
-        </ul>
-        <p className="mono mt-3 text-body text-dim">
-          Source: <A href="https://www.ready.gov/nuclear-explosion">Ready.gov: Nuclear explosion</A> ·{" "}
-          <A href="https://www.who.int/publications/i/item/9789241550185">WHO iodine thyroid blocking guideline</A>
-        </p>
-      </div>
+      <ShelterGuidance />
 
       </>
     ) },
@@ -440,6 +426,9 @@ export default function SurvivalHub() {
             </p>
           )}
           <OfflineButton />
+          <p className="mt-3 text-body">
+            <Link href="/survive/pack" className="text-accent hover:underline">Preparedness pack: plan, checklist, wallet card, shelter guidance and a map on paper →</Link>
+          </p>
         </>
       }
       openOnParam={{ for: "bag" }}

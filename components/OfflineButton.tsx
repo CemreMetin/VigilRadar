@@ -8,6 +8,7 @@ const FLAG = "monitoring.offline.v1";
 const PAGES_TO_SAVE = [
   ...PAGE_GROUPS.flatMap((g) => g.pages.map((p) => p.href)),
   ...SCENARIOS.map((s) => `/scenarios/${s.id}`),
+  "/survive/pack",
   "/search-index.json",
   "/data/world_state.json",
   "/data/links.json",
