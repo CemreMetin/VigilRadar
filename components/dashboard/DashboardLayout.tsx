@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+
+const SHEET_HEIGHT = { collapsed: "56px", half: "50dvh", full: "calc(100dvh - 24px)" } as const;
+type SheetSize = keyof typeof SHEET_HEIGHT;
+const SHEET_SIZES: SheetSize[] = ["collapsed", "half", "full"];
 
 /**
  * Page frame for the map view: three strict zones around a full-window map.
@@ -42,6 +46,15 @@ export default function DashboardLayout({
 }) {
   // Focus mode: F hides the three panels so only the map and the ticker remain; F or Escape brings them back
   const [focus, setFocus] = useState(false);
+  // below lg the two side panels share one bottom sheet with tabs: collapsed, half or full height
+  const [sheetTab, setSheetTab] = useState<"layers" | "readout">("readout");
+  const [sheetSize, setSheetSize] = useState<SheetSize>("collapsed");
+  const dragStart = useRef<number | null>(null);
+  const step = (dir: 1 | -1) => setSheetSize((s) => SHEET_SIZES[Math.min(2, Math.max(0, SHEET_SIZES.indexOf(s) + dir))]);
+  const pickTab = (tab: "layers" | "readout") => {
+    setSheetTab(tab);
+    if (sheetSize === "collapsed") setSheetSize("half");
+  };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
@@ -53,7 +66,7 @@ export default function DashboardLayout({
   }, []);
 
   return (
-    <div data-focus={focus || undefined} className={`map-view relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden ${alarm ? "alarm-on" : ""}`} style={{ "--scn": themeColor } as CSSProperties}>
+    <div data-focus={focus || undefined} className={`map-view relative flex min-h-full flex-col max-lg:pb-16 lg:h-screen lg:overflow-hidden ${alarm ? "alarm-on" : ""}`} style={{ "--scn": themeColor } as CSSProperties}>
       <section className="relative order-2 h-[58vh] min-h-[320px] lg:absolute lg:inset-0 lg:order-none lg:h-auto lg:min-h-0" aria-label="Map">
         {map}
         {mapOverlay}
@@ -72,13 +85,53 @@ export default function DashboardLayout({
 
       <div className="panel-scn order-3 border-x-0 lg:absolute lg:bottom-1.5 lg:left-(--gap) lg:right-(--left-w) lg:z-20 lg:order-none lg:border-x">{footer}</div>
 
-      <aside className="focus-hide panel-scn order-4 overflow-y-auto scroll-thin lg:absolute lg:bottom-(--foot-h) lg:left-(--gap) lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-(--left-w)" aria-label="Map layers for this scenario">
+      {/* one bottom sheet below lg (tabs Layers / Readout, drag or tap the handle); on desktop the wrapper disappears and the two panels dock to the sides */}
+      <div
+        className="focus-hide panel-scn order-4 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-40 max-lg:flex max-lg:h-(--sheet-h) max-lg:flex-col max-lg:border-x-0 max-lg:border-b-0 lg:contents"
+        style={{ "--sheet-h": SHEET_HEIGHT[sheetSize] } as CSSProperties}
+        data-sheet={sheetSize}
+      >
+        <div className="flex shrink-0 items-stretch border-b border-line lg:hidden">
+          <button
+            type="button"
+            aria-label={`Resize the panel, now ${sheetSize}. Drag, or press to change.`}
+            aria-expanded={sheetSize !== "collapsed"}
+            className="mono min-h-11 min-w-11 px-3 text-body font-bold touch-none"
+            onPointerDown={(e) => (dragStart.current = e.clientY)}
+            onPointerUp={(e) => {
+              const dy = e.clientY - (dragStart.current ?? e.clientY);
+              dragStart.current = null;
+              if (dy < -30) step(1);
+              else if (dy > 30) step(-1);
+              else setSheetSize((s) => SHEET_SIZES[(SHEET_SIZES.indexOf(s) + 1) % 3]);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowUp") step(1);
+              else if (e.key === "ArrowDown") step(-1);
+              else if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSheetSize((s) => SHEET_SIZES[(SHEET_SIZES.indexOf(s) + 1) % 3]);
+              }
+            }}
+          >
+            {sheetSize === "full" ? "▼" : "▲"}
+          </button>
+          <div role="tablist" aria-label="Panels" className="flex flex-1">
+            {(["layers", "readout"] as const).map((tab) => (
+              <button key={tab} type="button" role="tab" aria-selected={sheetTab === tab} onClick={() => pickTab(tab)} className={`mono min-h-11 flex-1 text-body uppercase tracking-wider ${sheetTab === tab ? "font-bold text-fg" : "text-dim"}`}>
+                {tab === "layers" ? "Layers" : "Readout"}
+              </button>
+            ))}
+          </div>
+        </div>
+      <aside className={`panel-scn overflow-y-auto scroll-thin max-lg:min-h-0 max-lg:flex-1 max-lg:border-0 ${sheetTab === "layers" ? "" : "max-lg:hidden"} ${sheetSize === "collapsed" ? "max-lg:hidden" : ""} lg:absolute lg:bottom-(--foot-h) lg:left-(--gap) lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-(--left-w)`} aria-label="Map layers for this scenario">
         {left}
       </aside>
 
-      <aside className="focus-hide panel-scn order-5 flex min-h-0 flex-col lg:absolute lg:bottom-(--foot-h) lg:right-(--gap) lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-(--right-w)" aria-label="Readouts and actions">
+      <aside className={`panel-scn flex min-h-0 flex-col max-lg:flex-1 max-lg:border-0 ${sheetTab === "readout" ? "" : "max-lg:hidden"} ${sheetSize === "collapsed" ? "max-lg:hidden" : ""} lg:absolute lg:bottom-(--foot-h) lg:right-(--gap) lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-(--right-w)`} aria-label="Readouts and actions">
         {right}
       </aside>
+      </div>
     </div>
   );
 }
