@@ -143,6 +143,9 @@ body {
 
 /* The map view chrome is grey plus the active group colour: --accent, the dividers and focus rings follow --scn (set per group in DashboardLayout).
    Cyan stays the accent on content pages. The map layers keep their own colours. */
+.map-view[data-focus] .focus-hide {
+  display: none;
+}
 .map-view {
   --accent: var(--scn);
   --line: rgba(215, 226, 234, 0.14);

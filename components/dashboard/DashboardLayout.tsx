@@ -1,4 +1,6 @@
-import type { CSSProperties, ReactNode } from "react";
+"use client";
+
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
 /**
  * Page frame for the map view: three strict zones around a full-window map.
@@ -38,11 +40,26 @@ export default function DashboardLayout({
   alarm?: boolean;
   banner?: ReactNode;
 }) {
+  // Focus mode: F hides the three panels so only the map and the ticker remain; F or Escape brings them back
+  const [focus, setFocus] = useState(false);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || (e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
+      if (e.key.toLowerCase() === "f") setFocus((v) => !v);
+      else if (e.key === "Escape") setFocus(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
-    <div className={`map-view relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden ${alarm ? "alarm-on" : ""}`} style={{ "--scn": themeColor } as CSSProperties}>
+    <div data-focus={focus || undefined} className={`map-view relative flex min-h-full flex-col lg:h-screen lg:overflow-hidden ${alarm ? "alarm-on" : ""}`} style={{ "--scn": themeColor } as CSSProperties}>
       <section className="relative order-2 h-[58vh] min-h-[320px] lg:absolute lg:inset-0 lg:order-none lg:h-auto lg:min-h-0" aria-label="Map">
         {map}
         {mapOverlay}
+        <button type="button" aria-pressed={focus} onClick={() => setFocus((v) => !v)} title="Hide or show the panels (F)" className="btn mono absolute right-2 top-2 z-40 min-h-11 px-3 text-body font-bold lg:left-(--left-edge) lg:right-auto lg:top-auto lg:bottom-[calc(var(--foot-h)+var(--gap)+16px)] lg:min-h-0 lg:px-2 lg:py-1">
+          {focus ? "SHOW PANELS" : "FOCUS"}
+        </button>
         {/* view and camera controls: bottom right of the open map, just left of the right panel */}
         <div className="absolute bottom-2 right-2 z-20 lg:bottom-[calc(var(--foot-h)+var(--gap)+16px)] lg:right-(--right-edge)">{controls}</div>
       </section>
@@ -50,16 +67,16 @@ export default function DashboardLayout({
       {alarm && <div className="alarm-frame no-print pointer-events-none fixed inset-0 z-50" aria-hidden />}
 
       {/* stacked bar below lg; on desktop the header has no box of its own (display: contents) and its three parts float over the map */}
-      <header className={`panel-scn relative z-30 order-1 border-x-0 border-t-0 lg:contents ${alarm ? "alarm-bar" : ""}`}>{topBar}</header>
+      <header className={`focus-hide panel-scn relative z-30 order-1 border-x-0 border-t-0 lg:contents ${alarm ? "alarm-bar" : ""}`}>{topBar}</header>
       {banner && <div className="relative z-40 order-1 px-2 py-1 lg:absolute lg:left-(--left-edge) lg:right-(--right-edge) lg:top-[calc(var(--topbar-h)+8px)] lg:p-0">{banner}</div>}
 
       <div className="panel-scn order-3 border-x-0 lg:absolute lg:bottom-1.5 lg:left-(--gap) lg:right-(--left-w) lg:z-20 lg:order-none lg:border-x">{footer}</div>
 
-      <aside className="panel-scn order-4 overflow-y-auto scroll-thin lg:absolute lg:bottom-(--foot-h) lg:left-(--gap) lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-(--left-w)" aria-label="Map layers for this scenario">
+      <aside className="focus-hide panel-scn order-4 overflow-y-auto scroll-thin lg:absolute lg:bottom-(--foot-h) lg:left-(--gap) lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-(--left-w)" aria-label="Map layers for this scenario">
         {left}
       </aside>
 
-      <aside className="panel-scn order-5 flex min-h-0 flex-col lg:absolute lg:bottom-(--foot-h) lg:right-(--gap) lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-(--right-w)" aria-label="Readouts and actions">
+      <aside className="focus-hide panel-scn order-5 flex min-h-0 flex-col lg:absolute lg:bottom-(--foot-h) lg:right-(--gap) lg:top-[calc(var(--topbar-h)+4px)] lg:z-20 lg:w-(--right-w)" aria-label="Readouts and actions">
         {right}
       </aside>
     </div>
