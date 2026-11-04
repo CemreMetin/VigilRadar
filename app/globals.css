@@ -145,16 +145,47 @@ body {
 .maplibregl-ctrl-attrib a { color: var(--fg-dim) !important; }
 
 /* Print: checklists and guides should print as plain black on white */
-@media print {
-  html, body { background: #fff !important; color: #000 !important; height: auto !important; }
-  .no-print { display: none !important; }
-  .panel, .label, .mono { color: #000 !important; background: transparent !important; border-color: #999 !important; }
-  a { color: #000 !important; text-decoration: underline; }
-  * { box-shadow: none !important; }
-  [class*="text-dim"], [class*="text-safe"], [class*="text-accent"] { color: #222 !important; }
-  [class*="border-line"], [class*="divide-line"] > * { border-color: #aaa !important; }
-  [class*="opacity-45"] { opacity: 1 !important; }
+/* ---------- Print: black on white, A4 or Letter, page numbers, source URLs after links ---------- */
+@page {
+  size: auto;
+  margin: 16mm 14mm 18mm;
+  @bottom-right { content: counter(page) " / " counter(pages); font: 8pt var(--font-mono-face), monospace; color: #444; }
 }
+@media print {
+  html, body { background: #fff !important; color: #000 !important; height: auto !important; overflow: visible !important; }
+  body { font: 10.5pt/1.45 var(--font-inter), system-ui, sans-serif; }
+  /* the site is dark on screen; on paper everything is plain, panels get a thin grey border */
+  *, *::before, *::after { background: transparent !important; color: #000 !important; box-shadow: none !important; text-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; animation: none !important; }
+  .panel, .panel-scn, .float-panel { border: 1px solid #bbb !important; }
+  [class*="text-dim"], .label { color: #444 !important; }
+  [class*="border-line"], [class*="divide-line"] > * { border-color: #bbb !important; }
+  [class*="opacity-"] { opacity: 1 !important; }
+  /* chrome that means nothing on paper */
+  .no-print, nav, aside, button, [role="toolbar"], select, input:not([type="checkbox"]), .maplibregl-map, .maplibregl-canvas-container, .alarm-bar, .alarm-frame { display: none !important; }
+  main { padding: 0 !important; }
+  /* wiki pages */
+  .wiki { max-width: 68ch; font-size: 10.5pt; }
+  .wiki h1, .wiki h2, .wiki h3, .wiki h4, .mono { font-family: var(--font-mono-face), ui-monospace, monospace; }
+  h1, h2, h3, h4 { break-after: avoid; }
+  h1 { font-size: 16pt; }
+  h2 { font-size: 11.5pt; margin-top: 14pt; }
+  table, figure, li, details, tr, img, svg, .print-keep, section[aria-label="Key points"], .panel, [class*="border-"][class*="p-"] { break-inside: avoid; }
+  a { text-decoration: underline; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font: 7.5pt var(--font-mono-face), monospace; color: #666 !important; word-break: break-all; }
+  details::details-content { content-visibility: visible; display: block; }
+  /* which container prints: the section on screen, or every section in order */
+  html[data-print="all"] .screen-section, html[data-print="all"] section[aria-label="Key points"]:not(.print-keypoints) { display: none !important; }
+  .print-section { margin-top: 14pt; }
+  .print-keypoints { border: 1px solid #888; padding: 6pt 8pt; margin: 8pt 0; }
+  .print-header { font: 8pt var(--font-mono-face), monospace; color: #444 !important; border-bottom: 1px solid #bbb; margin: 0 0 8pt; padding-bottom: 3pt; }
+  .print-footer { position: fixed; left: 0; bottom: -13mm; width: 75%; margin: 0; font: 7.5pt var(--font-mono-face), monospace; color: #444 !important; }
+  /* evidence keeps its meaning without colour: observed solid, projection dashed, expert dotted (borders are drawn in black, the style stays) */
+  [class*="border-accent"], [class*="border-geo"], [class*="border-bio"], [class*="border-dim"], [class*="border-safe"], [class*="border-threat"], [class*="border-conflict"], [class*="border-space"], [class*="border-fg"] { border-color: #000 !important; }
+  [class*="border-dashed"] { border-style: dashed !important; }
+  [class*="border-dotted"] { border-style: dotted !important; }
+}
+/* the print-only blocks stay out of the screen view */
+@media screen { .print-header, .print-footer, .print-all { display: none; } }
 
 /* ---------- Map view: scenario theme, tabs and micro-interactions ---------- */
 

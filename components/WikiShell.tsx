@@ -83,6 +83,38 @@ export default function WikiShell({
   const [activeId, setActiveId] = useState(sections[0].id);
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [printedOn, setPrintedOn] = useState("");
+  const [dataAsOf, setDataAsOf] = useState("n/a");
+
+  // the data date printed in the footer: from the same world_state.json the map reads (it is cached for offline use)
+  useEffect(() => {
+    fetch("/data/world_state.json")
+      .then((r) => r.json())
+      .then((w: { generatedAt: string }) => setDataAsOf(w.generatedAt.slice(0, 10)))
+      .catch(() => {});
+  }, []);
+
+  /** html[data-print] tells the print stylesheet which container to print; afterprint clears it. */
+  const [printMode, setPrintMode] = useState<"section" | "all" | null>(null);
+  const print = (m: "section" | "all") => {
+    setPrintedOn(new Date().toISOString().slice(0, 10));
+    setPrintMode(m);
+  };
+  useEffect(() => {
+    if (!printMode) return;
+    document.documentElement.dataset.print = printMode;
+    const t = setTimeout(() => window.print(), 80); // the print-only container is in the DOM by now
+    return () => clearTimeout(t);
+  }, [printMode]);
+  useEffect(() => {
+    const clear = () => {
+      delete document.documentElement.dataset.print;
+      setPrintMode(null);
+    };
+    window.addEventListener("afterprint", clear);
+    return () => window.removeEventListener("afterprint", clear);
+  }, []);
+  const printAll = printMode === "all";
 
   const open = useCallback(
     (id: string) => {
@@ -197,6 +229,9 @@ export default function WikiShell({
 
       <main className="min-w-0 flex-1 px-4 pb-24 pt-8 lg:px-10" role="tabpanel" aria-label={active.label}>
         <article className="wiki max-w-3xl">
+          <p className="print-header hidden print:block">
+            {title} · printed {printedOn}
+          </p>
           <h1 className="mono text-xl font-bold tracking-wide" style={{ color: accent }}>
             {title}
           </h1>
@@ -214,10 +249,46 @@ export default function WikiShell({
           )}
           {aside && <div className="no-print mt-5">{aside}</div>}
 
-          <h2 className="mono mt-8 border-t border-line pt-4 text-sm font-bold tracking-[0.14em]" style={{ color: accent }}>
-            {active.label.toUpperCase()}
-          </h2>
-          <div className="mt-1">{active.content}</div>
+          <div className="no-print mt-4 flex flex-wrap gap-2" role="toolbar" aria-label="Print">
+            <button type="button" className="btn mono px-3 py-1 text-[11px] font-bold" onClick={() => print("section")}>
+              Print this section
+            </button>
+            <button type="button" className="btn mono px-3 py-1 text-[11px] font-bold" onClick={() => print("all")}>
+              Print whole page
+            </button>
+          </div>
+
+          <div className="screen-section">
+            <h2 className="mono mt-8 border-t border-line pt-4 text-sm font-bold tracking-[0.14em]" style={{ color: accent }}>
+              {active.label.toUpperCase()}
+            </h2>
+            <div className="mt-1">{active.content}</div>
+          </div>
+
+          {/* the whole page, in order, for printing only */}
+          {printAll && (
+            <div className="print-all hidden print:block">
+              {keyPoints && (
+                <section aria-label="Key points" className="print-keypoints">
+                  <p className="label">Key points</p>
+                  <ul className="list-disc pl-5">
+                    {keyPoints.slice(0, 4).map((k) => (
+                      <li key={k}>{k}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+              {sections.map((sec) => (
+                <section key={sec.id} className="print-section">
+                  <h2 className="mono">{sec.label.toUpperCase()}</h2>
+                  {sec.content}
+                </section>
+              ))}
+            </div>
+          )}
+          <p className="print-footer hidden print:block">
+            Monitoring · monitoring-9l7.pages.dev · printed {printedOn} · data as of {dataAsOf}
+          </p>
 
           <div className="no-print mt-10 flex justify-between gap-3 border-t border-line pt-3">
             {prev ? (
