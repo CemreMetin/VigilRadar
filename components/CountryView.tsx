@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useJson } from "@/lib/useJson";
+import { useMyCountry } from "@/lib/myCountry";
 import type { ProfilesFile } from "@/lib/types";
 import { arsenals } from "@/lib/arsenals";
 import { Card, Ext, KindTag, Loading } from "./ui";
@@ -28,11 +29,19 @@ export default function CountryView() {
   const { data, error, loading } = useJson<ProfilesFile>("/data/country_profiles.json");
   const [iso, setIso] = useState<string>("");
   const [query, setQuery] = useState("");
+  const [mine, setMine] = useMyCountry();
 
   useEffect(() => {
-    const c = new URLSearchParams(window.location.search).get("c");
+    // no ?c= in the URL: open on the stored country instead of the empty state
+    const c = new URLSearchParams(window.location.search).get("c") ?? mine;
+    if (!c) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (c) setIso(c.toUpperCase());
+    setIso(c.toUpperCase());
+    if (!window.location.search.includes("c=")) {
+      window.history.replaceState(null, "", `?c=${c}&tab=overview`);
+      window.dispatchEvent(new Event("hashchange")); // WikiShell re-reads the URL and opens the profile
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const list = useMemo(() => {
@@ -89,7 +98,14 @@ export default function CountryView() {
     </>) },
     ...(p ? [
       { id: "overview", label: p.name, group: "Profile", content: (<>
-        <p className="mono mt-1 text-xs text-dim">{p.iso3} · population {n(p.population)}</p>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <p className="mono text-xs text-dim">{p.iso3} · population {n(p.population)}</p>
+          {mine === p.iso3 ? (
+            <button type="button" className="btn mono px-2 py-1 text-[11px] font-bold" onClick={() => setMine(null)}>My country ✓ · clear</button>
+          ) : (
+            <button type="button" className="btn mono px-2 py-1 text-[11px] font-bold" onClick={() => setMine(p.iso3)}>Set as my country</button>
+          )}
+        </div>
         {p.signals.length > 0 ? (
           <Card className="mt-4">
             <p className="label">Active now (co-occurrence, not cause)</p>
