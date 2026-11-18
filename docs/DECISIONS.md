@@ -29,3 +29,7 @@
 2026-11-18 · wrangler.toml KV id'si `000…0` yer tutucu · gerçek id'yi insan yazar (Bölüm 14.1); `wrangler deploy --dry-run` geçti, gerçek deploy yapılmadı
 2026-11-18 · Faz 3 kapsamı /v1/state ve /v1/health; /v1/vapid, /v1/push/*, /v1/ingest/slow sırasıyla Faz 6 ve Faz 5 · Bölüm 13
 2026-11-18 · `/v1/state` `caches.default` ile 30 sn önbellekte; önbelleğe CORS başlıksız yazılır, çıkışta Origin'e göre eklenir; KV yalnızca önbellek boşken okunur · ücretsiz KV okuma sınırı
+2026-11-18 · Canlı deploy: Radian Collective hesabı, KV `VIGIL` (id wrangler.toml'da), Worker https://vigil-daemon.radian-collective.workers.dev · hesap kimliği repoda yok, `CLOUDFLARE_ACCOUNT_ID` ortam değişkeniyle verilir (wrangler üç hesap görüyor)
+2026-11-18 · İlk `wrangler deploy` sonrası cron ~20 dakika hiç çalışmadı (KV boş, /v1/state 503); aynı sürümün ikinci `wrangler deploy`'undan sonra ilk turda çalıştı · neden bilinmiyor; yeni kurulumda 2–3 dakikada state yoksa yeniden deploy dene
+2026-11-18 · Canlı doğrulama (13:00–13:16 UTC): USGS, EMSC, AFAD, Kandilli (http:// çağrısı Cloudflare Workers'tan) ve tsunami.gov hepsi ok · `enabled: true` kalır; 12 birleşik deprem, TR kutusunda AFAD M4.3 ve Kandilli M4.9 ayrı kayıt, küresel durum NOMINAL
+2026-11-18 · `workers.dev` adresine tarayıcı botları istek atıyor (/ ve /favicon.ico, 404) · normal, önlem gerekmiyor

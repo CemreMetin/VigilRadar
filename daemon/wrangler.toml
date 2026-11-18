@@ -8,4 +8,4 @@ crons = ["* * * * *"]
 # Replace the id with the one printed by `wrangler kv namespace create VIGIL` (docs/SETUP.md, Faz 8).
 [[kv_namespaces]]
 binding = "VIGIL"
-id = "00000000000000000000000000000000"
+id = "fd3d061010fc401f9446aa59a42eb5b5"
