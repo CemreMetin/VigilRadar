@@ -396,7 +396,7 @@ Tsunami Atom ayrıştırma: `entry` başına `title`, `updated`, `geo:lat`, `geo
 |---|---|---|
 | `plants.json` | GeoNuclearData — `https://github.com/cristianst85/GeoNuclearData` (denormalize JSON; depo içindeki tam yolu script bulsun) | Lisans ODbL-1.0, atıf zorunlu. Durumu `Operational` veya `Under Construction` olan reaktörleri al, aynı santralin reaktörlerini tek sahaya indir (ad kökü + 5 km içinde), çıktı: `{id,name,country,lat,lon,status,reactors}`. Koordinatlar yaklaşıktır; arayüzde belirt. |
 | `places.tr.json` | GeoNames — `https://download.geonames.org/export/dump/TR.zip` (CC BY 4.0) | `featureCode=ADM1` satırlarından 81 il: `{code:"TR-06", plate:6, name, lat, lon, coastal}`. Plaka kodu ad eşleştirmesiyle (01 Adana … 81 Düzce). 81 kayıt çıkmazsa script hata versin. |
-| `world.json` | npm `world-atlas/countries-50m.json` | `topojson-client` ile GeoJSON'a çevir, yalnızca geometri + ad. |
+| `world.json` | npm `world-atlas/countries-110m.json` | `topojson-client` ile GeoJSON'a çevir, yalnızca geometri + ad. |
 
 `coastal: true` olan iller (tam liste): Artvin, Rize, Trabzon, Giresun, Ordu, Samsun, Sinop, Kastamonu, Bartın, Zonguldak, Düzce, Sakarya, Kocaeli, İstanbul, Kırklareli, Tekirdağ, Edirne, Çanakkale, Balıkesir, Bursa, Yalova, İzmir, Aydın, Muğla, Antalya, Mersin, Adana, Hatay.
 
