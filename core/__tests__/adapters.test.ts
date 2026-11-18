@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { mergeQuakes } from "../quakes/merge";
 import { parseAfad, parseEmsc, parseKandilli, parseUsgs } from "../quakes/normalize";
 import { parseTsunami } from "../tsunami";
 
@@ -57,5 +58,22 @@ describe("16. adapters", () => {
     const z = json("timezone-result.json");
     expect(Math.abs(Math.round(z.afad.medianHours))).toBe(0);
     expect(Math.round(z.kandilli.medianHours)).toBe(3);
+  });
+});
+
+// The three live records of the Van Gölü M4.3 quake of 2026-11-17, as the sources returned them (zones differ: AFAD and EMSC UTC, Kandilli UTC+3).
+describe("one quake from three real source records", () => {
+  const afad = parseAfad(json("afad.json")).filter((e) => e.sourceId === "734442");
+  const kandilli = parseKandilli("2026.11.17 18:57:45  38.4753   42.9925        2.6  -.-  -.-  4.3   VAN GOLU                                          İlksel");
+  const emsc = parseEmsc({ features: [{ id: "20261117_0000231", properties: { unid: "20261117_0000231", time: "2026-11-17T15:57:45.01Z", lastupdate: "2026-11-17T16:10:00Z", lat: 38.4853, lon: 42.9338, depth: 13.6, mag: 4.3, magtype: "mw", flynn_region: "EASTERN TURKEY" } }] });
+  it("all three timestamps land on the same second, so the Kandilli offset is applied once", () => {
+    expect(Math.abs(kandilli[0].timeMs - afad[0].timeMs)).toBeLessThan(1000);
+    expect(Math.abs(emsc[0].timeMs - afad[0].timeMs)).toBeLessThan(1000);
+  });
+  it("merge into one quake led by AFAD", () => {
+    const m = mergeQuakes([], [...afad, ...kandilli, ...emsc], Date.UTC(2026, 10, 18, 12));
+    expect(m).toHaveLength(1);
+    expect(m[0].sources.map((s) => s.source).sort()).toEqual(["afad", "emsc", "kandilli"]);
+    expect(m[0].best).toMatchObject({ source: "afad", depthKm: 13.61 });
   });
 });
