@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Env, KV } from "../env";
-import { handleRequest } from "../http";
+import { handleRequest, type EdgeCache } from "../http";
 import { runTurn } from "../index";
 import { Store } from "../store";
 
@@ -11,7 +11,8 @@ const NOW = Date.parse("2026-11-18T13:00:00Z"); // minute 0: tsunami feeds are f
 class MemKV implements KV {
   data = new Map<string, { value: string; metadata: unknown }>();
   puts: string[] = [];
-  async get(key: string) { return this.data.get(key)?.value ?? null; }
+  gets = 0;
+  async get(key: string) { this.gets++; return this.data.get(key)?.value ?? null; }
   async getWithMetadata<M>(key: string) { const e = this.data.get(key); return { value: e?.value ?? null, metadata: (e?.metadata ?? null) as M | null }; }
   async put(key: string, value: string, opts?: { metadata?: unknown }) { this.puts.push(key); this.data.set(key, { value, metadata: opts?.metadata }); }
 }
@@ -61,6 +62,39 @@ describe("cron turn", () => {
     const kv = new MemKV();
     await runTurn({ VIGIL: kv } as Env, NOW);
     expect(kv.puts).not.toContain("hb");
+  });
+});
+
+class MemCache implements EdgeCache {
+  m = new Map<string, Response>();
+  async match(k: Request) { return this.m.get(k.url)?.clone(); }
+  async put(k: Request, r: Response) { this.m.set(k.url, r); }
+}
+
+describe("state cache", () => {
+  it("reads KV only on a miss and keeps CORS per origin", async () => {
+    stubSources();
+    const kv = new MemKV();
+    const env = { VIGIL: kv, ALLOWED_ORIGINS: "https://a.test,https://b.test" } as Env;
+    await runTurn(env, NOW);
+    const cache = new MemCache();
+    const call = (origin: string) => handleRequest(new Request("https://x.test/v1/state", { headers: { Origin: origin } }), env, NOW + 1000, cache);
+    kv.gets = 0;
+    const first = await call("https://a.test");
+    const afterMiss = kv.gets;
+    expect(afterMiss).toBeGreaterThan(0);
+    const second = await call("https://b.test");
+    expect(kv.gets).toBe(afterMiss); // served from the cache
+    expect(first.headers.get("Access-Control-Allow-Origin")).toBe("https://a.test");
+    expect(second.headers.get("Access-Control-Allow-Origin")).toBe("https://b.test");
+    expect((await call("https://evil.test")).headers.get("Access-Control-Allow-Origin")).toBeNull();
+    expect((await second.json()).quakes.length).toBeGreaterThan(0);
+  });
+  it("does not cache the 503 before the first turn", async () => {
+    const env = { VIGIL: new MemKV() } as Env;
+    const cache = new MemCache();
+    expect((await handleRequest(new Request("https://x.test/v1/state"), env, NOW, cache)).status).toBe(503);
+    expect(cache.m.size).toBe(0);
   });
 });
 

@@ -1,6 +1,6 @@
 import type { QuakeSource, State } from "../../core/types";
 import type { Env } from "./env";
-import { handleRequest } from "./http";
+import { handleRequest, type EdgeCache } from "./http";
 import { QUAKE_SOURCES, fetchTsunami } from "./sources";
 import { EMPTY_SLOW, buildState, stableOf, type Slow } from "./state";
 import { Store, hashOf } from "./store";
@@ -41,7 +41,7 @@ export async function runTurn(env: Env, nowMs: number): Promise<void> {
 }
 
 const worker = {
-  fetch: (request: Request, env: Env) => handleRequest(request, env, Date.now()),
+  fetch: (request: Request, env: Env) => handleRequest(request, env, Date.now(), (caches as unknown as { default: EdgeCache }).default),
   scheduled: (_event: unknown, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) => ctx.waitUntil(runTurn(env, Date.now())),
 };
 export default worker;

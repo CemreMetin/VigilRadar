@@ -26,6 +26,6 @@
 2026-11-18 · Adaptörler (ham → QuakeEvent) core/quakes/normalize.ts ve core/tsunami.ts içinde saf fonksiyon; daemon yalnızca fetch eder · Radar yedek yolu aynı kodu tarayıcıda kullanacak
 2026-11-18 · Kalp atışı yalnızca dört deprem kaynağından en az biri yanıt verdiyse yazılır · hepsi çökmüşken "canlı" görünmemek için
 2026-11-18 · State'e ek alan `global.reasonDetail` (yapısal neden) ve yanıta `fastAgeSec`, `slow` · UI nedeni biçimlendirebilsin; spec alanları değişmedi
-2026-11-18 · `/v1/state` Cache API ile önbelleğe alınmıyor, yalnızca `Cache-Control: public, max-age=30` · ücretsiz KV okuma sınırı (günde 100.000) trafikle aşılırsa Faz 4'te eklenir
 2026-11-18 · wrangler.toml KV id'si `000…0` yer tutucu · gerçek id'yi insan yazar (Bölüm 14.1); `wrangler deploy --dry-run` geçti, gerçek deploy yapılmadı
 2026-11-18 · Faz 3 kapsamı /v1/state ve /v1/health; /v1/vapid, /v1/push/*, /v1/ingest/slow sırasıyla Faz 6 ve Faz 5 · Bölüm 13
+2026-11-18 · `/v1/state` `caches.default` ile 30 sn önbellekte; önbelleğe CORS başlıksız yazılır, çıkışta Origin'e göre eklenir; KV yalnızca önbellek boşken okunur · ücretsiz KV okuma sınırı

@@ -25,7 +25,11 @@ async function load(env: Env, nowMs: number) {
   return { state, hb, slow, fastAgeSec, stale };
 }
 
-export async function handleRequest(request: Request, env: Env, nowMs: number): Promise<Response> {
+/** The slice of the Workers Cache API used here (`caches.default`). */
+export interface EdgeCache { match(key: Request): Promise<Response | undefined>; put(key: Request, res: Response): Promise<void> }
+const STATE_TTL_SEC = 30;
+
+export async function handleRequest(request: Request, env: Env, nowMs: number, cache?: EdgeCache): Promise<Response> {
   const c = cors(request, env);
   const url = new URL(request.url);
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...c, "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Max-Age": "86400" } });
@@ -37,10 +41,19 @@ export async function handleRequest(request: Request, env: Env, nowMs: number): 
   }
 
   if (url.pathname === "/v1/state") {
+    // Cached without CORS headers (they differ per Origin); they are added on the way out. KV is read only on a miss.
+    const key = new Request(`${url.origin}/v1/state`);
+    const withCors = (r: Response) => { const h = new Headers(r.headers); for (const [k, v] of Object.entries(c)) h.set(k, v); return new Response(r.body, { status: r.status, headers: h }); };
+    const hit = await cache?.match(key);
+    if (hit) return withCors(hit);
+
     const { state, hb, slow, fastAgeSec, stale } = await load(env, nowMs);
     if (!state) return json({ error: "no state yet" }, 503, { ...c, "Cache-Control": "no-store" });
     const global = stale ? { level: "STALE", reason: "fast lane heartbeat is older than 15 minutes", reasonDetail: { kind: "stale", lastHeartbeatMs: hb?.fastMs ?? null } } : state.global;
-    return json({ ...state, global, fastMs: hb?.fastMs ?? state.fastMs, sources: hb?.sources ?? state.sources, fastAgeSec, slow }, 200, { ...c, "Cache-Control": "public, max-age=30" });
+    const body = { ...state, global, fastMs: hb?.fastMs ?? state.fastMs, sources: hb?.sources ?? state.sources, fastAgeSec, slow };
+    const res = json(body, 200, { "Cache-Control": `public, max-age=${STATE_TTL_SEC}` });
+    await cache?.put(key, res.clone());
+    return withCors(res);
   }
   return json({ error: "not found" }, 404, c);
 }
