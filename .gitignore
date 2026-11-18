@@ -42,3 +42,6 @@ next-env.d.ts
 public/vendor/
 .cache/
 /out-print/
+
+# graphify output
+graphify-out/
