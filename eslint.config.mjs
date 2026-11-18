@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "**/.wrangler/**",
     // Copied third-party worker files (see scripts/copy-vendor.mjs)
     "public/vendor/**",
   ]),

@@ -2,7 +2,7 @@ import type { QuakeSource, State } from "../../core/types";
 import type { Env } from "./env";
 import { handleRequest, type EdgeCache } from "./http";
 import { QUAKE_SOURCES, fetchTsunami } from "./sources";
-import { EMPTY_SLOW, buildState, stableOf, type Slow } from "./state";
+import { EMPTY_SLOW, buildState, stableOf, type Slow } from "../../core/build-state";
 import { Store, hashOf } from "./store";
 
 interface Hb { fastMs: number; sources: State["sources"] }

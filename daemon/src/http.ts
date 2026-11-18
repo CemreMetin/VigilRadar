@@ -1,7 +1,7 @@
 import { CONFIG } from "../../core/config";
 import type { State } from "../../core/types";
 import type { Env } from "./env";
-import { type Slow } from "./state";
+import { type Slow } from "../../core/build-state";
 import { Store } from "./store";
 
 interface Hb { fastMs: number; sources: State["sources"] }

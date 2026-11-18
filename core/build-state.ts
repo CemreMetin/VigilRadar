@@ -1,10 +1,10 @@
-import { quakeLinks, conflictLinks, markChronic } from "../../core/cascade";
-import { mergeQuakes } from "../../core/quakes/merge";
-import { severityByProvince } from "../../core/severity";
-import { globalStatus } from "../../core/status";
-import type { ChokepointFlow, ConflictCluster, Province, QuakeEvent, QuakeSource, Severity, Site, SourceKey, State, StatusReason, TsunamiBulletin } from "../../core/types";
-import placesJson from "../../public/data/static/places.tr.json";
-import plantsJson from "../../public/data/static/plants.json";
+import { quakeLinks, conflictLinks, markChronic } from "./cascade";
+import { mergeQuakes } from "./quakes/merge";
+import { severityByProvince } from "./severity";
+import { globalStatus } from "./status";
+import type { ChokepointFlow, ConflictCluster, Province, QuakeEvent, QuakeSource, Severity, Site, SourceKey, State, StatusReason, TsunamiBulletin } from "./types";
+import placesJson from "../public/data/static/places.tr.json";
+import plantsJson from "../public/data/static/plants.json";
 
 const HOUR = 3_600_000;
 export const PROVINCES = (placesJson as { places: Province[] }).places;
