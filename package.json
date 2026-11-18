@@ -16,7 +16,7 @@
     "test:alerts": "tsx worker/alerts/rules.test.ts",
     "data:fast": "tsx worker/build-world-state.ts --fast",
     "postbuild": "node scripts/flatten-segments.mjs && node scripts/build-search-index.mjs",
-    "test": "tsx worker/alerts/rules.test.ts && tsx lib/passes.test.ts && tsx worker/feeds/fires.test.ts && tsx lib/blast.test.ts && tsx lib/sky.test.ts && tsx lib/bases.test.ts"
+    "test": "tsx worker/alerts/rules.test.ts && tsx lib/passes.test.ts && tsx worker/feeds/fires.test.ts && tsx lib/blast.test.ts && tsx lib/sky.test.ts && tsx lib/bases.test.ts && vitest run"
   },
   "dependencies": {
     "fflate": "^0.8.3",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
@@ -37,6 +37,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
+    "vitest": "^5.1.1",
     "wrangler": "4.157.0"
   }
 }
