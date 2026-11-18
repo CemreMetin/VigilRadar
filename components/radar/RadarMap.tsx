@@ -88,7 +88,8 @@ export default function RadarMap({ state, nowMs, onSelect, focus }: Props) {
           map.on("mouseleave", id, () => (map.getCanvas().style.cursor = ""));
         }
         map.on("click", (e) => {
-          const hit = map.queryRenderedFeatures(e.point, { layers: QUAKE_LAYERS })[0];
+          const { x, y } = e.point; // a 12 px box: the chokepoint lines are 1.5 px thin and fingers are not exact
+          const hit = map.queryRenderedFeatures([[x - 6, y - 6], [x + 6, y + 6]], { layers: QUAKE_LAYERS })[0];
           if (hit) latest.current.onSelect({ kind: KIND[hit.layer.id], id: String(hit.properties?.id) });
         });
 

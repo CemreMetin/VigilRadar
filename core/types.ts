@@ -89,6 +89,7 @@ export interface ChokepointFlow {
   id: string; name: string; lat: number; lon: number;
   recent: number | null; baseline: number | null; dev: number | null;
   level: FlowState; dataThrough: string | null; available: boolean;
+  series?: number[]; // last 30 daily transit counts, oldest first (the slow lane fills it in Faz 5)
 }
 export type SourceKey = QuakeSource | "tsunami";
 export interface SourceStatus { ok: boolean; ms: number } // ms: last successful fetch
