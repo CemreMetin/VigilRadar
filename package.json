@@ -13,6 +13,7 @@
     "prebuild": "npm run vendor --silent",
     "postinstall": "node scripts/copy-vendor.mjs",
     "alerts": "tsx worker/alerts.ts",
+    "daemon:dry-run": "wrangler deploy --dry-run --config daemon/wrangler.toml --outdir .wrangler-dryrun",
     "data:static": "node scripts/data/build-plants.mjs && node scripts/data/build-places.mjs && node scripts/data/build-world.mjs",
     "test:alerts": "tsx worker/alerts/rules.test.ts",
     "data:fast": "tsx worker/build-world-state.ts --fast",

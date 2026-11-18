@@ -1,0 +1,11 @@
+name = "vigil-daemon"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+[triggers]
+crons = ["* * * * *"]
+
+# Replace the id with the one printed by `wrangler kv namespace create VIGIL` (docs/SETUP.md, Faz 8).
+[[kv_namespaces]]
+binding = "VIGIL"
+id = "00000000000000000000000000000000"

@@ -1,0 +1,13 @@
+{
+ "checkedAt": "2026-11-18T12:53:47.579Z",
+ "afad": {
+  "events": 23,
+  "matched": 20,
+  "medianHours": -0.000011111111111111112
+ },
+ "kandilli": {
+  "events": 500,
+  "matched": 32,
+  "medianHours": 2.9996111111111112
+ }
+}

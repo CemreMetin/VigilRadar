@@ -18,3 +18,14 @@
 2026-11-18 · `build-plants`: durum Operational/Under Construction, ad kökü + 5 km ile siteye indirgeme; 193 saha, Akkuyu 4 reaktör · yaklaşık koordinat, arayüzde belirtilecek (Faz 4)
 2026-11-18 · Eski WRI `nuclear_plants.json` ve `places.json` dokunulmadı (eski sayfalar kullanıyor); yeni veri `public/data/static/` altında ayrı
 2026-11-18 · `world.json 110m, 3 ondalık · Radar yedek yolunda yalnızca Faz 4'te yüklenir
+2026-11-18 · Saat dilimi (scripts/probe/timezone.mjs, EMSC ile eşleştirme, 20 AFAD ve 32 Kandilli eşleşmesi): AFAD UTC (medyan fark 0,000 sa), Kandilli UTC+3 yerel saat (medyan 3,000 sa) · adaptörde AFAD_UTC_OFFSET_H=0, KANDILLI_UTC_OFFSET_H=3 sabitleri; sonuç core/__fixtures__/samples/timezone-result.json
+2026-11-18 · Kandilli: http çalışıyor (200), https zaman aşımı (UND_ERR_CONNECT_TIMEOUT) · önce http, hata olursa https denenir, `enabled: true`
+2026-11-18 · AFAD yedek POST (GetEventsByFilter) 401 verdi · yalnızca birincil `apiv2/event/filter` kullanılıyor; yedek eklenmedi
+2026-11-18 · USGS ve EMSC CORS `*` (yedek yol Faz 4'te kullanılabilir); AFAD, Kandilli, tsunami.gov CORS yok, yalnızca Worker çeker
+2026-11-18 · Tsunami seviyesi `Category:` satırından okunur, özet metninden değil · "Information" bültenlerinin metni "warning, advisory, or watch" sözcüklerini içerir; spec'in "anahtar kelime" tarifi sahte `warning` üretirdi
+2026-11-18 · Adaptörler (ham → QuakeEvent) core/quakes/normalize.ts ve core/tsunami.ts içinde saf fonksiyon; daemon yalnızca fetch eder · Radar yedek yolu aynı kodu tarayıcıda kullanacak
+2026-11-18 · Kalp atışı yalnızca dört deprem kaynağından en az biri yanıt verdiyse yazılır · hepsi çökmüşken "canlı" görünmemek için
+2026-11-18 · State'e ek alan `global.reasonDetail` (yapısal neden) ve yanıta `fastAgeSec`, `slow` · UI nedeni biçimlendirebilsin; spec alanları değişmedi
+2026-11-18 · `/v1/state` Cache API ile önbelleğe alınmıyor, yalnızca `Cache-Control: public, max-age=30` · ücretsiz KV okuma sınırı (günde 100.000) trafikle aşılırsa Faz 4'te eklenir
+2026-11-18 · wrangler.toml KV id'si `000…0` yer tutucu · gerçek id'yi insan yazar (Bölüm 14.1); `wrangler deploy --dry-run` geçti, gerçek deploy yapılmadı
+2026-11-18 · Faz 3 kapsamı /v1/state ve /v1/health; /v1/vapid, /v1/push/*, /v1/ingest/slow sırasıyla Faz 6 ve Faz 5 · Bölüm 13

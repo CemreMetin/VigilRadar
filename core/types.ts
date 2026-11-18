@@ -84,3 +84,27 @@ export type StatusReason =
   | { kind: "province-severity"; quakeId: string; severity: Severity; mag: number; place: string; timeMs: number }
   | { kind: "province-tsunami"; quakeId: string; mag: number; place: string; timeMs: number };
 export interface StatusResult { level: Level; reason: StatusReason | null }
+
+export interface ChokepointFlow {
+  id: string; name: string; lat: number; lon: number;
+  recent: number | null; baseline: number | null; dev: number | null;
+  level: FlowState; dataThrough: string | null; available: boolean;
+}
+export type SourceKey = QuakeSource | "tsunami";
+export interface SourceStatus { ok: boolean; ms: number } // ms: last successful fetch
+
+/** What GET /v1/state returns (VIGIL.md 6.4). `reasonDetail` is an addition: the structured form of `reason`. */
+export interface State {
+  v: 1;
+  generatedMs: number;
+  fastMs: number;
+  sources: Record<SourceKey, SourceStatus>;
+  quakes: MergedQuake[];
+  tsunami: TsunamiBulletin[];
+  conflicts: ConflictCluster[];
+  conflictsMs: number | null;
+  chokepoints: ChokepointFlow[];
+  links: Link[];
+  global: { level: Level; reason: string | null; reasonDetail?: StatusReason | null };
+  provinceLevels: Record<string, Record<string, Severity>>;
+}
