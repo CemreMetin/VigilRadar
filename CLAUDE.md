@@ -1,10 +1,10 @@
-﻿# Monitoring Rules
+# Vigil
 
-## Tech Stack
-- Web Status Dashboard
+Projenin tek belgesi `VIGIL.md`. Başka geçerli belge yoktur. `docs/archive/` içindeki eski SPEC ve README yalnızca geçmiş içindir; oradaki kararlar geçersizdir.
 
-## Token & Architecture Guardrails
-- Dosyanın tamamını asla yeniden basma; yalnızca değişen metot veya bloğu diff olarak ver.
-- Görsel süsleme, renk veya stil detaylarına girmeden önce veri modelini ve fonksiyonel omurgayı doğrula.
-- Dolgu açıklamaları ve nezaket cümlelerini atla; doğrudan çalışan kodu sun.
-- Mimariyi bozacak yeni harici kütüphane ekleme.
+- Kısım A bağlamdır, bir kez oku.
+- Kısım B bağlayıcıdır. Bölüm 0'daki kurallara uy, Bölüm 13'teki faz sırasıyla ilerle.
+- Soru sorma. Belgenin cevaplamadığı ayrıntıda en basit seçeneği uygula ve `docs/DECISIONS.md`'ye bir satır yaz.
+- Her fazın sonunda typecheck, lint, test ve build yeşil olmadan sonraki faza geçme.
+- Bu Next.js sürümü (16.x) eğitim verindekinden farklı: kod yazmadan önce `AGENTS.md`'yi oku.
+- Mimariyi bozacak yeni harici kütüphane ekleme (izinli liste: VIGIL.md Bölüm 0, kural 9).
