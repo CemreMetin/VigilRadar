@@ -151,7 +151,7 @@ Büyüklük arttıkça etki alanı genişler. Vigil büyüklüğe, ilin merkezin
 | Seviye | Anlamı | Örnek | Bildirim |
 |---|---|---|---|
 | **P0** | Yıkıcı olabilir | 7.0 büyüklük, 150 km içinde | Gider |
-| **P1** | Güçlü hissedilmiş olabilir | 6.0 büyüklük, 150 km içinde | Gider |
+| **P1** | Güçlü hissedilmiş olabilir | 6.0 büyüklük, 100 km içinde | Gider |
 | **P2** | Hissedilmiş olabilir | 5.0 büyüklük, 120 km içinde | Gitmez; yalnızca uygulamada görünür |
 
 Bu bir **kaba tahmindir**, resmi şiddet haritası değildir; ekranda da öyle yazar. Tam tablo Kısım B, Bölüm 5.1 ve 5.3'tedir.
@@ -423,10 +423,10 @@ export const CONFIG = {
     [4.5, null, 15, 60],
     [5.0, null, 40, 120],
     [5.5, 15, 80, 200],
-    [6.0, 40, 150, 300],
-    [6.5, 80, 250, 500],
-    [7.0, 150, 400, 800],
-    [7.5, 250, 500, 1000],
+    [6.0, 40, 100, 300],
+    [6.5, 80, 150, 500],
+    [7.0, 150, 250, 800],
+    [7.5, 250, 350, 1000],
   ],
   provinceExtentKm: 25,         // il merkezine mesafeden düşülür (alt sınır 0)
   // [minMag, santral bağlantı yarıçapı km] — episantr mesafesi
@@ -782,7 +782,7 @@ Bu bloğa başka frekans **ekleme**. İl bazlı frekans tablosu üretme.
 `vitest`, `core/__tests__/`. Sabit örnekler `core/__fixtures__/` altında, yoklama script'lerinin kaydettiği gerçek yanıtlardan türetilir.
 
 **Zorunlu senaryolar**
-1. **Kahramanmaraş 2023-02-06** (M7.8, 37.23K 37.01D, derinlik 10 km): Kahramanmaraş ve Gaziantep → P0. Ankara → P2 veya yok (P0/P1 olmamalı). Akkuyu sahasına (36.14K 33.54D) `quake→plant` bağlantısı oluşur. Küresel → CRITICAL.
+1. **Kahramanmaraş 2023-02-06** (M7.8, 37.23K 37.01D, derinlik 10 km): Kahramanmaraş, Gaziantep, Hatay ve Malatya → P0. Ankara → P2 (2023'te Ankara'da sarsıntı hafif hissedildi; P0/P1 çıkması tablonun hatalı olduğunu gösterir). Akkuyu sahasına (36.14K 33.54D) `quake→plant` bağlantısı oluşur. Küresel → CRITICAL.
 2. **Tohoku 2011-03-11** (M9.1, 38.30K 142.37D, derinlik 29 km): Fukushima Daiichi'ye bağlantı oluşur. Küresel → CRITICAL.
 3. **Santrale 90 km'de M5.0:** bağlantı oluşmaz, küresel NOMINAL.
 4. **Fiji, M7.0, derinlik 550 km:** küresel ELEVATED (CRITICAL değil), hiçbir il için seviye yok, küresel kanal bildirimi **gitmez** (derinlik > 100).
@@ -818,7 +818,7 @@ Bu bloğa başka frekans **ekleme**. İl bazlı frekans tablosu üretme.
 - Mevcut ana ekran bileşenlerini silmeden taşı: senaryolar → `/library`, sayaçlar → `/metrics`. Ana sayfa geçici olarak boş bir kabuk olur.
 - `.github/workflows/` altındaki veri iş akışını incele: site derlemesini tetikleyen zamanlanmış veri işlerini devre dışı bırak (Faz 5 yenisini getirir). Dağıtım iş akışı yalnızca `main`'e push'ta çalışsın; `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` yoksa dağıtım adımı hata vermeden atlanmalı.
 
-**Faz 1 — `core/`**: config, tipler, geo, normalize, merge, severity, cascade, status, tsunami, conflict, chokepoints + Bölüm 12'nin 1–15. testleri (adaptör testleri Faz 3'te).
+**Faz 1 — `core/`**: config, tipler, geo, normalize, merge, severity, cascade, status, tsunami, conflict, chokepoints + Bölüm 12'nin 1–6 ve 11–15. testleri (7–10 bildirim testleri Faz 6'da, adaptör testleri Faz 3'te).
 
 **Faz 2 — Statik veri**: `build-plants`, `build-places`, `build-world` script'leri; çıktılar `public/data/static/`'e işlenir. Doğrulamalar: 81 il, 28 kıyı ili, en az 150 santral sahası, Akkuyu listede.
 

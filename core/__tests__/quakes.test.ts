@@ -13,13 +13,11 @@ const state = (q: MergedQuake[], nowMs: number, links = quakeLinks(q, PLANTS, []
 describe("1. Kahramanmaraş 2023-02-06", () => {
   const now = KM.timeMs + 10 * 60_000;
   const quakes = mergeQuakes([], [KM], now);
-  it("Kahramanmaraş and Gaziantep are P0", () => {
-    expect(severityFor(P.kahramanmaras, KM)).toBe("P0");
-    expect(severityFor(P.gaziantep, KM)).toBe("P0");
+  it("Kahramanmaraş, Gaziantep, Hatay and Malatya are P0", () => {
+    for (const p of [P.kahramanmaras, P.gaziantep, P.hatay, P.malatya]) expect(severityFor(p, KM), p.name).toBe("P0");
   });
-  it("Ankara is not P0", () => {
-    // The 5.1 table gives P1 for Ankara (about 470 km, M7.8). VIGIL.md 12 asks for P2 or none: see docs/DECISIONS.md.
-    expect(severityFor(P.ankara, KM)).not.toBe("P0");
+  it("Ankara is exactly P2", () => {
+    expect(severityFor(P.ankara, KM)).toBe("P2");
   });
   it("links to the Akkuyu site and the global status is CRITICAL", () => {
     expect(quakeLinks(quakes, PLANTS, [], now).map((l) => l.toId)).toEqual([AKKUYU.id]);

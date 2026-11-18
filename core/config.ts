@@ -15,10 +15,10 @@ export const CONFIG = {
     [4.5, null, 15, 60],
     [5.0, null, 40, 120],
     [5.5, 15, 80, 200],
-    [6.0, 40, 150, 300],
-    [6.5, 80, 250, 500],
-    [7.0, 150, 400, 800],
-    [7.5, 250, 500, 1000],
+    [6.0, 40, 100, 300],
+    [6.5, 80, 150, 500],
+    [7.0, 150, 250, 800],
+    [7.5, 250, 350, 1000],
   ],
   provinceExtentKm: 25, // subtracted from the distance to the province centre (floor 0)
   // [minMag, plant link radius km]: epicentre distance

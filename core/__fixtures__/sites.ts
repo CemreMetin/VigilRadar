@@ -5,6 +5,8 @@ import type { Province, QuakeEvent, Site } from "../types";
 export const PROVINCES: Record<string, Province> = {
   kahramanmaras: { code: "TR-46", name: "Kahramanmaraş", lat: 37.58, lon: 36.94, coastal: false },
   gaziantep: { code: "TR-27", name: "Gaziantep", lat: 37.07, lon: 37.38, coastal: false },
+  hatay: { code: "TR-31", name: "Hatay", lat: 36.2, lon: 36.16, coastal: true },
+  malatya: { code: "TR-44", name: "Malatya", lat: 38.35, lon: 38.31, coastal: false },
   ankara: { code: "TR-06", name: "Ankara", lat: 39.93, lon: 32.86, coastal: false },
   istanbul: { code: "TR-34", name: "İstanbul", lat: 41.01, lon: 28.98, coastal: true },
   izmir: { code: "TR-35", name: "İzmir", lat: 38.42, lon: 27.14, coastal: true },
