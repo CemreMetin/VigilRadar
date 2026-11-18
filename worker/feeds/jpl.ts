@@ -106,7 +106,7 @@ export async function asteroidFeed(): Promise<{ counters: Counter[]; file: Aster
           tone: r.ld <= 1 ? ("elevated" as Tone) : ("normal" as Tone),
         };
       }),
-      href: "/scenarios/asteroid",
+      href: "/library/asteroid",
     },
   ];
   // Directions from Horizons for the closest few; any that fail keep today's data (no direction, drawn by date)

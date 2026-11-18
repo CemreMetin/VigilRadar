@@ -26,7 +26,7 @@ function Cards({ list }: { list: Scenario[] }) {
     <ul className="mt-3 grid gap-3 sm:grid-cols-2">
       {list.map((s) => (
         <li key={s.id}>
-          <Link href={`/scenarios/${s.id}`} className="block h-full border border-line bg-panel-solid p-4 hover:border-line-strong">
+          <Link href={`/library/${s.id}`} className="block h-full border border-line bg-panel-solid p-4 hover:border-line-strong">
             <div className="flex items-center justify-between gap-2">
               <span className="label">{s.group}</span>
               <TierBadge tier={s.tier} />

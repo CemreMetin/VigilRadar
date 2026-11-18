@@ -38,8 +38,8 @@ console.log("      caches:", JSON.stringify(cacheCounts));
 await context.setOffline(true);
 const EXPECT = {
   "/survive": "What can you do",
-  "/scenarios/supervolcano": "Supervolcanic eruption",
-  "/scenarios/pandemic-x": "Pandemic X",
+  "/library/supervolcano": "Supervolcanic eruption",
+  "/library/pandemic-x": "Pandemic X",
   "/trajectory": "Trajectory",
   "/methodology": "Methodology",
 };

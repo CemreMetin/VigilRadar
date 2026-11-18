@@ -4,8 +4,8 @@ import { chromium } from "playwright-core";
 import { readdirSync } from "node:fs";
 
 const BASE = process.argv[2] ?? "http://localhost:8081";
-const scenarios = readdirSync("out/scenarios", { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `/scenarios/${d.name}`);
-const paths = ["/", "/scenarios", "/survive", "/trajectory", "/nuclear", "/health", "/supervolcanoes", "/country?c=TUR", "/country?c=USA", "/links", "/methodology", "/sources", ...scenarios];
+const scenarios = readdirSync("out/library", { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `/library/${d.name}`);
+const paths = ["/", "/library", "/survive", "/trajectory", "/nuclear", "/health", "/supervolcanoes", "/country?c=TUR", "/country?c=USA", "/links", "/methodology", "/sources", ...scenarios];
 
 const browser = await chromium.launch({ channel: "msedge", headless: true }).catch(() => chromium.launch({ channel: "chrome", headless: true }));
 const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true })).newPage();

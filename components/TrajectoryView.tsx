@@ -154,7 +154,7 @@ export default function TrajectoryView() {
         These are scenarios of what follows from different emission paths, not predictions: the path is a human choice. Sea-level
         rise would continue for centuries beyond 2100, and the high end is uncertain because of ice-sheet behaviour.{" "}
         <Ext href="https://www.ipcc.ch/report/ar6/wg1/chapter/summary-for-policymakers/">IPCC AR6 WGI SPM ↗</Ext>.
-        Tipping points are on the <Link href="/scenarios/climate-tipping" className="text-accent hover:underline">climate tipping scenario</Link>.
+        Tipping points are on the <Link href="/library/climate-tipping" className="text-accent hover:underline">climate tipping scenario</Link>.
       </p>
 
     </>) },
@@ -197,7 +197,7 @@ export default function TrajectoryView() {
       <p className="mt-4 text-body leading-relaxed text-dim">
         These are personal judgements by experts, built from limited evidence and not comparable to measurements. They differ by orders
         of magnitude between authors and methods, which is itself the finding. This site never adds probabilities of its own. See{" "}
-        <Link href="/scenarios" className="text-accent hover:underline">the scenarios</Link> for the reasoning behind each, and{" "}
+        <Link href="/library" className="text-accent hover:underline">the scenarios</Link> for the reasoning behind each, and{" "}
         <Link href="/methodology#kinds" className="text-accent hover:underline">how the labels work</Link>.
       </p>
     </>) },

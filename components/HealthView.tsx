@@ -57,7 +57,7 @@ export default function HealthView() {
     </>) },
     { id: "related", label: "Related", group: "Context", content: (<>
       <p className="mt-3 text-read">
-        What a fast-spreading new pathogen could do: <Link href="/scenarios/pandemic-x" className="text-accent hover:underline">Pandemic X explorer →</Link>
+        What a fast-spreading new pathogen could do: <Link href="/library/pandemic-x" className="text-accent hover:underline">Pandemic X explorer →</Link>
       </p>
     </>) },
   ];

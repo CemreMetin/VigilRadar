@@ -11,10 +11,10 @@ const check = (ok, msg) => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${msg}`);
 };
 
-const scenarios = readdirSync("out/scenarios", { withFileTypes: true }).filter((d) => d.isDirectory() && !d.name.startsWith("_")).map((d) => `/scenarios/${d.name}`);
+const scenarios = readdirSync("out/library", { withFileTypes: true }).filter((d) => d.isDirectory() && !d.name.startsWith("_")).map((d) => `/library/${d.name}`);
 // pages without a Sources section: the scenarios index (cards only) and the Sources page itself
-const NO_SOURCES = new Set(["/scenarios", "/sources"]);
-const paths = ["/survive", "/scenarios", "/nuclear", "/health", "/supervolcanoes", "/trajectory", "/country", "/links", "/methodology", "/sources", "/glossary", ...scenarios];
+const NO_SOURCES = new Set(["/library", "/sources"]);
+const paths = ["/survive", "/library", "/nuclear", "/health", "/supervolcanoes", "/trajectory", "/country", "/links", "/methodology", "/sources", "/glossary", ...scenarios];
 
 const browser = await chromium.launch({ channel: "msedge", headless: true }).catch(() => chromium.launch({ channel: "chrome", headless: true }));
 const page = await (await browser.newContext({ viewport: { width: 1440, height: 860 } })).newPage();

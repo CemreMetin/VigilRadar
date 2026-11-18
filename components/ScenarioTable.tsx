@@ -45,7 +45,7 @@ export default function ScenarioTable() {
             {rows.map((s) => (
               <tr key={s.id}>
                 <th scope="row" className="p-2 text-left font-bold">
-                  <Link href={`/scenarios/${s.id}`} className="text-accent hover:underline">{tr ? SCENARIO_TR.titles[s.id] ?? s.title : s.title}</Link>
+                  <Link href={`/library/${s.id}`} className="text-accent hover:underline">{tr ? SCENARIO_TR.titles[s.id] ?? s.title : s.title}</Link>
                 </th>
                 <td className="p-2"><TierBadge tier={s.tier} /></td>
                 <td className="p-2 text-dim">{s.group}</td>

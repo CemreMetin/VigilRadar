@@ -4,8 +4,9 @@ type PageLink = { href: string; label: string; blurb: string };
 
 /** The one list of pages: the pages menu, the wiki sidebar and the offline save list all read it. */
 export const PAGE_GROUPS: { title: string; pages: PageLink[] }[] = [
-  { title: "Map", pages: [{ href: "/", label: "Map", blurb: "Live board" }] },
-  { title: "Scenarios", pages: [{ href: "/scenarios", label: "Scenarios", blurb: "What could go wrong, and how well we know it" }] },
+  { title: "Home", pages: [{ href: "/", label: "Home", blurb: "Start" }] },
+  { title: "Scenarios", pages: [{ href: "/library", label: "Library", blurb: "What could go wrong, and how well we know it" }] },
+  { title: "Metrics", pages: [{ href: "/metrics", label: "Metrics", blurb: "The live counters" }] },
   { title: "Survive", pages: [{ href: "/survive", label: "Survive", blurb: "What you can do (works offline)" }] },
   {
     title: "Library",

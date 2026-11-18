@@ -10,7 +10,7 @@ const PAGES = [
   ["/", "map, default layers", 9_000],
   ["/?sc=overview", "map, all layers", 12_000],
   ["/survive", "survive", 2_500],
-  ["/scenarios/pandemic-x", "pandemic explorer", 12_000],
+  ["/library/pandemic-x", "pandemic explorer", 12_000],
   ["/trajectory", "trajectory", 2_500],
 ];
 

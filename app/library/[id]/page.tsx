@@ -16,7 +16,7 @@ export function generateStaticParams() {
   return SCENARIOS.map((s) => ({ id: s.id }));
 }
 
-export async function generateMetadata({ params }: PageProps<"/scenarios/[id]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/library/[id]">): Promise<Metadata> {
   const { id } = await params;
   const s = SCENARIO_BY_ID[id];
   return s ? { title: `${s.title} · Monitoring`, description: s.summary.slice(0, 200) } : {};
@@ -28,7 +28,7 @@ const EVIDENCE: Record<Evidence, { label: string; cls: string; mark: string }> =
   speculative: { label: "speculative", cls: "border-geo text-geo border-dashed", mark: "○" },
 };
 
-export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id]">) {
+export default async function ScenarioPage({ params }: PageProps<"/library/[id]">) {
   const { id } = await params;
   const s = SCENARIO_BY_ID[id];
   if (!s) notFound();
@@ -138,7 +138,7 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
             <ul className="mt-3 flex flex-wrap gap-2">
               {related.map((r) => (
                 <li key={r.id}>
-                  <Link href={`/scenarios/${r.id}`} className="mono border border-line px-2.5 py-1 text-body text-dim hover:border-accent hover:text-accent">
+                  <Link href={`/library/${r.id}`} className="mono border border-line px-2.5 py-1 text-body text-dim hover:border-accent hover:text-accent">
                     {r.title}
                   </Link>
                 </li>
@@ -159,7 +159,7 @@ export default async function ScenarioPage({ params }: PageProps<"/scenarios/[id
         intro={
           <>
             <span className="flex flex-wrap items-center gap-3">
-              <Link href="/scenarios" className="mono text-body hover:text-accent">← all scenarios</Link>
+              <Link href="/library" className="mono text-body hover:text-accent">← all scenarios</Link>
               <TierBadge tier={s.tier} />
               <span className="label">{s.group}</span>
             </span>

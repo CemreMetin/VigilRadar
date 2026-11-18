@@ -17,7 +17,7 @@ export default function SupervolcanoesPage() {
         <VolcanoCards />
         <p className="mt-6 text-read">
           What a supereruption could do:{" "}
-          <Link href="/scenarios/supervolcano" className="text-accent hover:underline">Supervolcano scenario →</Link>
+          <Link href="/library/supervolcano" className="text-accent hover:underline">Supervolcano scenario →</Link>
           {" · "}
           <Link href="/?sc=volcano" className="text-accent hover:underline">Show on the map →</Link>
         </p>

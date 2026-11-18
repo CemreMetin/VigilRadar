@@ -1,0 +1,2 @@
+/scenarios /library 301
+/scenarios/* /library/:splat 301

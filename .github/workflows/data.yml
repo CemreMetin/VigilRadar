@@ -10,12 +10,11 @@
 # Without them the workflow still builds and tests the site; it just skips the deploy step.
 name: data and deploy
 
+# The twice-an-hour schedule and the manual trigger are off (VIGIL.md Faz 0): deploys happen only on a push to main.
+# Faz 5 brings the new scheduled data job back as slow-data.yml.
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: "7,37 * * * *" # twice an hour, off the busy :00 and :30 marks
-  workflow_dispatch:
 
 # Only one run at a time; a newer run waits instead of cancelling a deploy half way
 concurrency:

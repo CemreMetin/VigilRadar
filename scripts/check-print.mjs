@@ -46,7 +46,7 @@ async function printText(name, path, button, after) {
 
 await printText("methodology-all", "/methodology", /Print whole page/);
 await printText("methodology-section", "/methodology", /Print this section/);
-await printText("scenarios-all", "/scenarios", /Print whole page/);
+await printText("scenarios-all", "/library", /Print whole page/);
 await printText("nuclear-all", "/nuclear", /Print whole page/);
 
 /** map printing: click "Print map", render the sheet to PDF and screenshot it, check the image is not blank */
@@ -88,7 +88,7 @@ async function printMapPage(name, path) {
   console.log("      " + info.sheet);
 }
 await printMapPage("map-nuclear", "/?sc=nuclear");
-await printMapPage("minimap-solar", "/scenarios/solar-superstorm?tab=explorer");
+await printMapPage("minimap-solar", "/library/solar-superstorm?tab=explorer");
 
 /** Survive sheets: set options, click, screenshot the sheet (A4 portrait), then render the PDF */
 async function printSheet(name, { tab = "bag", setup, button, expectPages }) {
