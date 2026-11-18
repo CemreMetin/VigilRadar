@@ -42,3 +42,6 @@
 2026-11-19 · `ChokepointFlow.series?: number[]` (son 30 gün, eskiden yeniye) eklendi · boğaz kartının mini çizgisi için; yavaş hat (Faz 5) doldurur, yokken "Günlük seri henüz yok."
 2026-11-19 · Harita tıklamasında 12 px'lik kutu sorgusu · boğaz çizgileri 1,5 px, parmakla tam isabet zor
 2026-11-19 · Bölge seçili değilken kartın "Ne yapmalısın?" bölümü "—", "Sana etkisi" bölümü "İlini seç…" der · aksi halde büyük bir depremde "Yapman gereken bir şey yok" yanlış güvence olurdu
+2026-11-19 · localStorage anahtarları Bölüm 11 ile eşlendi: `vigil.lang` (eski `monitoring:lang`, eski dil tercihi bir kez sıfırlanır), `vigil.lastState` (eski `vigil.state`), `vigil.hintDismissed` (eski `vigil.regionHint`); `vigil.bag` ve `vigil.radio` Alert'te (Faz 7) gelir · /about listesi kodla birebir (test: lib/radar/about.test.ts)
+2026-11-19 · Marka adı: sayfa başlıkları "· VigilRadar", manifest name "VigilRadar" / short_name "Vigil", yazdırma altbilgileri "VigilRadar"; paket adı `monitoring` ve Pages proje adı/alan adı (monitoring-9l7.pages.dev) değişmedi · dağıtım adresini bozmamak için
+2026-11-19 · Eski `/sources` ve `/methodology` sayfaları durur; yeni `/about` Vigil'in kaynaklarını ve gizliliğini anlatır, alt satırdan "kaynaklar · hakkında" ile ulaşılır

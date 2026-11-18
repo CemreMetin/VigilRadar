@@ -7,6 +7,7 @@ import type { Loaded } from "@/lib/radar/load";
 import { reasonText } from "@/lib/radar/format";
 import { useRegion } from "@/lib/radar/region";
 import { useT } from "@/lib/radar/useT";
+import LangSwitch from "@/components/LangSwitch";
 import RegionPicker from "./RegionPicker";
 
 // Colour is never the only cue: every level is also written out. Tokens come from app/globals.css.
@@ -45,6 +46,7 @@ export default function TopBar({ loaded, done, now }: { loaded: Loaded | null; d
         {showHint && (
           <span className="mono flex items-center gap-1 text-label text-accent">{t("pickProvince")}<button type="button" onClick={dismissHint} aria-label={t("dismiss")} className="px-1 text-dim hover:text-fg">×</button></span>
         )}
+        <LangSwitch />
         <RegionPicker region={region} label={province ? province.name : t("regionGlobal")} open={open} setOpen={setOpen} onPick={setRegion} />
       </div>
     </header>

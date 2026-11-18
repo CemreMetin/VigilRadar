@@ -65,6 +65,7 @@ export default function RadarScreen() {
           </span>
           <Link href="/library" className="hover:text-accent">Library</Link>
           <Link href="/metrics" className="hover:text-accent">Metrics</Link>
+          <span><Link href="/about#sources" className="hover:text-accent">{t("sources")}</Link> · <Link href="/about" className="hover:text-accent">{t("about")}</Link></span>
         </div>
         <p className="mt-1 text-label">{c.disclaimer}</p>
       </footer>

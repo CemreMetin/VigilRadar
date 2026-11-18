@@ -3,7 +3,7 @@ import PackView from "@/components/PackView";
 import SiteNav from "@/components/SiteNav";
 
 export const metadata: Metadata = {
-  title: "Preparedness pack · Monitoring",
+  title: "Preparedness pack · VigilRadar",
   description: "A printable pack: household plan, checklist, wallet card, shelter guidance and a map of your country.",
 };
 

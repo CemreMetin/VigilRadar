@@ -7,7 +7,7 @@ import { Card, Term } from "@/components/ui";
 import VolcanoCards from "@/components/VolcanoCards";
 
 export const metadata: Metadata = {
-  title: "Supervolcanoes · Monitoring",
+  title: "Supervolcanoes · VigilRadar",
   description: "A watchlist of six calderas that have produced supereruptions, with live status where public feeds exist.",
 };
 

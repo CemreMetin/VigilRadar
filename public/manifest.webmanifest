@@ -1,7 +1,7 @@
 {
-  "name": "Monitoring: where the world is heading",
-  "short_name": "Monitoring",
-  "description": "A personal, ad-free dashboard of interlinked global risks, with an offline preparedness guide.",
+  "name": "VigilRadar",
+  "short_name": "Vigil",
+  "description": "A calm analysis desk for large earthquakes and conflict events and what they could affect. Not an official warning system.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

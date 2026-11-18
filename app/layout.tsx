@@ -10,12 +10,12 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Monitoring: Where the world is heading",
+  title: "VigilRadar",
   description:
-    "A personal, ad-free dashboard of interlinked global risks: geophysical events, conflict, nuclear tension, outbreaks, climate and space. Every number cites its source.",
+    "A calm, static analysis desk for large earthquakes and conflict events and their possible effect on nuclear plants and sea straits. Not an official warning system.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icons/icon-192.png", apple: "/icons/icon-192.png" },
-  appleWebApp: { capable: true, title: "Monitoring", statusBarStyle: "black" },
+  appleWebApp: { capable: true, title: "VigilRadar", statusBarStyle: "black" },
 };
 
 export const viewport: Viewport = {

@@ -52,7 +52,7 @@ describe("loadState", () => {
   it("nothing cached and nothing reachable gives null; a broken cache is ignored", async () => {
     expect(await loadState(deps({}))).toBeNull();
     const storage = mem();
-    storage.setItem("vigil.state", "{not json");
+    storage.setItem("vigil.lastState", "{not json");
     expect(await loadState(deps({}, { storage }))).toBeNull();
   });
   it("blocked storage does not break loading", async () => {

@@ -7,7 +7,7 @@ import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import { Ext, Int } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "Glossary · Monitoring",
+  title: "Glossary · VigilRadar",
   description: "Plain-language definitions of the abbreviations and units used on this site, each with its primary source.",
 };
 

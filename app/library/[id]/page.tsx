@@ -19,7 +19,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/library/[id]">): Promise<Metadata> {
   const { id } = await params;
   const s = SCENARIO_BY_ID[id];
-  return s ? { title: `${s.title} · Monitoring`, description: s.summary.slice(0, 200) } : {};
+  return s ? { title: `${s.title} · VigilRadar`, description: s.summary.slice(0, 200) } : {};
 }
 
 const EVIDENCE: Record<Evidence, { label: string; cls: string; mark: string }> = {

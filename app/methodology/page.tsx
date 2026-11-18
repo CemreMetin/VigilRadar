@@ -7,7 +7,7 @@ import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import { Card, Ext, KindTag, Term, TierBadge } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "Methodology · Monitoring",
+  title: "Methodology · VigilRadar",
   description: "How the tension index, links, counters and evidence tiers are computed, and what this site does not do.",
 };
 

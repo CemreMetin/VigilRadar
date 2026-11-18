@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 export type Lang = "en" | "tr";
-const KEY = "monitoring:lang";
+const KEY = "vigil.lang";
 const listeners = new Set<() => void>();
 
 function read(): Lang {

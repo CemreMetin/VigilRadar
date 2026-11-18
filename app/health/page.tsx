@@ -3,7 +3,7 @@ import HealthView from "@/components/HealthView";
 import SiteNav from "@/components/SiteNav";
 
 export const metadata: Metadata = {
-  title: "Health · Monitoring",
+  title: "Health · VigilRadar",
   description: "Recent WHO Disease Outbreak News reports, with context on what they do and do not tell you.",
 };
 

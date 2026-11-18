@@ -8,7 +8,7 @@ import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import type { WorldState } from "@/lib/types";
 
-export const metadata: Metadata = { title: "Sources · Monitoring" };
+export const metadata: Metadata = { title: "Sources · VigilRadar" };
 
 const PLANNED = [
   { name: "NASA EONET (storms, floods) as a map layer", domain: "Climate & Water", phase: "later" },

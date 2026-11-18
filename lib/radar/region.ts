@@ -4,7 +4,7 @@ import type { Province } from "@/core/types";
 
 export type Region = "GLOBAL" | string; // "GLOBAL" or a province code such as "TR-06"
 const KEY = "vigil.region";
-const HINT_KEY = "vigil.regionHint";
+const HINT_KEY = "vigil.hintDismissed";
 const listeners = new Set<() => void>();
 
 /** Lower case with Turkish letters folded, so "istanbul", "İSTANBUL" and "Istanbul" all match. */

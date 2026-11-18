@@ -12,7 +12,7 @@ import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import type { PlantsFile } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Nuclear · Monitoring",
+  title: "Nuclear · VigilRadar",
   description:
     "Nuclear arsenals by country (SIPRI, January 2026), the Doomsday Clock, and nuclear power plants, with sources and caveats.",
 };

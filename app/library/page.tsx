@@ -8,7 +8,7 @@ import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import ScenarioTable from "@/components/ScenarioTable";
 
 export const metadata: Metadata = {
-  title: "Scenarios · Monitoring",
+  title: "Scenarios · VigilRadar",
   description:
     "Twenty-three ways things could go badly wrong, each rated by the quality of evidence behind it, with sources, historical anchors and what you can do.",
 };

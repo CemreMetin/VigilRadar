@@ -67,7 +67,7 @@ export async function printMap(map: MlMap, opt: PrintMapOptions, dataAsOf: strin
     for (const l of opt.legend) ul.append(el("li", "", l));
     sheet.append(el("p", "label", "Active layers and legend"), ul);
   }
-  sheet.append(el("p", "map-credit", `Basemap © CARTO, © OpenStreetMap contributors. Printed ${today}; data as of ${dataAsOf}. Monitoring · monitoring-9l7.pages.dev`));
+  sheet.append(el("p", "map-credit", `Basemap © CARTO, © OpenStreetMap contributors. Printed ${today}; data as of ${dataAsOf}. VigilRadar · monitoring-9l7.pages.dev`));
 
   document.body.append(sheet);
   document.documentElement.dataset.print = "map";

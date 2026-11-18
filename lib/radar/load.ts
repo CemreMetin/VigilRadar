@@ -15,7 +15,7 @@ export interface Deps {
   storage: Pick<Storage, "getItem" | "setItem"> | null;
 }
 
-const CACHE_KEY = "vigil.state";
+const CACHE_KEY = "vigil.lastState";
 const FRESH_MS = CONFIG.stale.fastMinutes * 60_000;
 const USGS_URL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson";
 const emscUrl = (nowMs: number) => `https://www.seismicportal.eu/fdsnws/event/1/query?format=json&minmag=4&limit=200&orderby=time&start=${new Date(nowMs - 86_400_000).toISOString()}`;

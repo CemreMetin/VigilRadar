@@ -395,7 +395,7 @@ export default function WikiShell({
             </div>
           )}
           <p className="print-footer hidden print:block">
-            Monitoring · monitoring-9l7.pages.dev · printed {printedOn} · data as of {dataAsOf}
+            VigilRadar · monitoring-9l7.pages.dev · printed {printedOn} · data as of {dataAsOf}
           </p>
 
           <div className="no-print mt-10 flex justify-between gap-3 border-t border-line pt-3">

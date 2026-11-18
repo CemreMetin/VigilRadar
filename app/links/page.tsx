@@ -6,7 +6,7 @@ import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
 
 export const metadata: Metadata = {
-  title: "Links · Monitoring",
+  title: "Links · VigilRadar",
   description: "How risks feed each other: a hand-curated, sourced map of causal links, with the strength of evidence for each.",
 };
 
