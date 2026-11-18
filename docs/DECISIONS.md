@@ -13,3 +13,8 @@
 2026-11-18 · `@types/node` ^20 → ^22 · vitest 5 peer isteği (CI Node 22 ile uyumlu); `--force` kullanılmadı
 2026-11-18 · Test 1 Ankara çelişkisi: P1 sütunu 6.0→100, 6.5→150, 7.0→250, 7.5→350 olarak daraltıldı (VIGIL.md 5.1); Ankara (469 km, M7.8) artık P2 · insan kararı
 2026-11-18 · Testler 7–10 Faz 6'da; VIGIL.md Faz 1 satırı '1–6 ve 11–15' olarak düzeltildi · insan onayı
+2026-11-18 · Faz 2 çıktıları `{source, <liste>}` sarmalında (`places`, `plants`) · lisans atfı (ODbL, CC BY) dosyada taşınsın; world.json düz GeoJSON FeatureCollection
+2026-11-18 · Plaka kodu GeoNames admin1 koduyla değil ad eşleştirmesiyle (admin1 kodları plaka değil, ör. Ankara=68) · Bölüm 4.3
+2026-11-18 · `build-plants`: durum Operational/Under Construction, ad kökü + 5 km ile siteye indirgeme; 193 saha, Akkuyu 4 reaktör · yaklaşık koordinat, arayüzde belirtilecek (Faz 4)
+2026-11-18 · Eski WRI `nuclear_plants.json` ve `places.json` dokunulmadı (eski sayfalar kullanıyor); yeni veri `public/data/static/` altında ayrı
+2026-11-18 · `world.json` 1,7 MB (50m, 3 ondalık) · Radar yedek yolunda yalnızca Faz 4'te yüklenir
