@@ -2,6 +2,10 @@ name = "vigil-daemon"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
 
+[vars]
+ALLOWED_ORIGINS = "http://localhost:3000,https://monitoring-9l7.pages.dev"
+SITE_URL = "https://monitoring-9l7.pages.dev"
+
 [triggers]
 crons = ["* * * * *"]
 

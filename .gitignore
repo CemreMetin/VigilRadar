@@ -49,3 +49,4 @@ graphify-out/
 # wrangler
 .wrangler/
 .wrangler-dryrun/
+.playwright-mcp/
