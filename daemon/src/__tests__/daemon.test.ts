@@ -128,3 +128,44 @@ describe("http", () => {
     expect((await handleRequest(new Request("https://x.test/v1/state", { method: "POST" }), env, NOW)).status).toBe(404);
   });
 });
+
+describe("ingest slow", () => {
+  const slow = { conflicts: [{ id: "c", lat: 48.5, lon: 35.1, label: "x", events: 3, domains: 3, lastSeenMs: NOW, sampleUrls: [] }], conflictsMs: NOW, chokepoints: [{ id: "chokepoint6", name: "Strait of Hormuz", lat: 26, lon: 56, recent: 1, baseline: 2, dev: -0.5, level: "severe", dataThrough: "2026-11-15", available: true }] };
+  const post = (env: Env, body: unknown, token: string | null = "secret", extra: Record<string, string> = {}) =>
+    handleRequest(new Request("https://x.test/v1/ingest/slow", { method: "POST", headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...extra }, body: typeof body === "string" ? body : JSON.stringify(body) }), env, NOW);
+
+  it("stores a valid body under `slow` with the right token", async () => {
+    const kv = new MemKV();
+    const r = await post({ VIGIL: kv, INGEST_TOKEN: "secret" } as Env, slow);
+    expect(r.status).toBe(200);
+    expect(JSON.parse(kv.data.get("slow")!.value).chokepoints[0].id).toBe("chokepoint6");
+  });
+  it("refuses a missing or wrong token and writes nothing; without INGEST_TOKEN the endpoint does not exist", async () => {
+    const kv = new MemKV();
+    const env = { VIGIL: kv, INGEST_TOKEN: "secret" } as Env;
+    expect((await post(env, slow, null)).status).toBe(401);
+    expect((await post(env, slow, "secre")).status).toBe(401);
+    expect((await post(env, slow, "secrett")).status).toBe(401);
+    expect((await post({ VIGIL: kv } as Env, slow)).status).toBe(404);
+    expect(kv.puts).toEqual([]);
+  });
+  it("rejects bad json, a wrong shape and a body over 512 KB", async () => {
+    const kv = new MemKV();
+    const env = { VIGIL: kv, INGEST_TOKEN: "secret" } as Env;
+    expect((await post(env, "{nope")).status).toBe(400);
+    expect((await post(env, { ...slow, conflicts: [{ id: "x" }] })).status).toBe(400);
+    expect((await post(env, { ...slow, chokepoints: "no" })).status).toBe(400);
+    expect((await post(env, "x".repeat(512 * 1024 + 1))).status).toBe(413);
+    expect(kv.puts).toEqual([]);
+  });
+  it("the next cron turn builds the stored slow data into the state", async () => {
+    stubSources();
+    const kv = new MemKV();
+    const env = { VIGIL: kv, INGEST_TOKEN: "secret" } as Env;
+    await post(env, slow);
+    await runTurn(env, NOW);
+    const state = JSON.parse(kv.data.get("state")!.value);
+    expect(state.chokepoints[0].id).toBe("chokepoint6");
+    expect(state.conflicts).toHaveLength(1);
+  });
+});

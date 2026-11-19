@@ -8,6 +8,20 @@ function domainOf(url: string): string | null {
   try { return new URL(url).hostname.replace(/^www\./, "").toLowerCase() || null; } catch { return null; }
 }
 
+/** The three most reported links, one per news site, so the card shows three different sources. */
+function distinctDomainUrls(sorted: readonly GdeltRow[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of sorted) {
+    const d = domainOf(r.sourceUrl) ?? r.sourceUrl;
+    if (seen.has(d)) continue;
+    seen.add(d);
+    out.push(r.sourceUrl);
+    if (out.length === 3) break;
+  }
+  return out;
+}
+
 const accepted = (r: GdeltRow) =>
   (C.rootCodes.includes(r.rootCode as never) || C.extraBaseCodes.includes(r.baseCode as never)) &&
   C.geoTypes.includes(r.geoType as never) &&
@@ -38,7 +52,7 @@ export function clusterConflicts(rows: readonly GdeltRow[], nowMs: number): Conf
       events: list.length,
       domains: domains.size,
       lastSeenMs: Math.max(...list.map((r) => r.dateAddedMs)),
-      sampleUrls: [...list].sort((a, b) => b.numSources - a.numSources).slice(0, 3).map((r) => r.sourceUrl),
+      sampleUrls: distinctDomainUrls([...list].sort((a, b) => b.numSources - a.numSources)),
     });
   }
   return out;

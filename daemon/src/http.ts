@@ -29,9 +29,39 @@ async function load(env: Env, nowMs: number) {
 export interface EdgeCache { match(key: Request): Promise<Response | undefined>; put(key: Request, res: Response): Promise<void> }
 const STATE_TTL_SEC = 30;
 
+const MAX_INGEST_BYTES = 512 * 1024;
+
+/** Equal-length compare without an early exit, so the response time does not tell how many characters matched. */
+function sameToken(a: string, b: string): boolean {
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < Math.max(a.length, b.length); i++) diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  return diff === 0;
+}
+
+/** POST /v1/ingest/slow: the slow lane's output, stored under `slow`; the next cron turn builds it into the state. */
+async function ingestSlow(request: Request, env: Env): Promise<Response> {
+  const none = {};
+  if (!env.INGEST_TOKEN) return json({ error: "not found" }, 404, none);
+  const bearer = /^Bearer (.+)$/.exec(request.headers.get("Authorization") ?? "")?.[1] ?? "";
+  if (!sameToken(bearer, env.INGEST_TOKEN)) return json({ error: "unauthorized" }, 401, none);
+  if (Number(request.headers.get("Content-Length") ?? 0) > MAX_INGEST_BYTES) return json({ error: "too large" }, 413, none);
+  const text = await request.text();
+  if (text.length > MAX_INGEST_BYTES) return json({ error: "too large" }, 413, none);
+  let body: Partial<Slow>;
+  try { body = JSON.parse(text); } catch { return json({ error: "bad json" }, 400, none); }
+  const okMs = body.conflictsMs === null || Number.isFinite(body.conflictsMs);
+  const okConflicts = Array.isArray(body.conflicts) && body.conflicts.length <= 500 && body.conflicts.every((x) => Number.isFinite(x?.lat) && Number.isFinite(x?.lon) && typeof x?.id === "string");
+  const okFlows = Array.isArray(body.chokepoints) && body.chokepoints.length <= 40 && body.chokepoints.every((x) => typeof x?.id === "string" && typeof x?.available === "boolean");
+  if (!okMs || !okConflicts || !okFlows) return json({ error: "bad shape" }, 400, none);
+  const slow: Slow = { conflicts: body.conflicts!, conflictsMs: body.conflictsMs ?? null, chokepoints: body.chokepoints! };
+  await new Store(env.VIGIL).put("slow", slow);
+  return json({ ok: true, conflicts: slow.conflicts.length, chokepoints: slow.chokepoints.length }, 200, { "Cache-Control": "no-store" });
+}
+
 export async function handleRequest(request: Request, env: Env, nowMs: number, cache?: EdgeCache): Promise<Response> {
   const c = cors(request, env);
   const url = new URL(request.url);
+  if (request.method === "POST" && url.pathname === "/v1/ingest/slow") return ingestSlow(request, env);
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...c, "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Max-Age": "86400" } });
   if (request.method !== "GET") return json({ error: "not found" }, 404, c);
 

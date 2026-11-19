@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PLANTS } from "@/core/build-state";
 import { regionStatus } from "@/core/status";
 import type { Level, StatusResult } from "@/core/types";
 import type { Loaded } from "@/lib/radar/load";
@@ -26,10 +27,11 @@ export default function TopBar({ loaded, done, now }: { loaded: Loaded | null; d
     : { level: loaded.state.global.level, reason: loaded.state.global.reasonDetail ?? null };
   const mine: StatusResult | null = !loaded || !province ? null : stale ? global : regionStatus(province, loaded.state.quakes, clock);
 
+  const siteName = (id: string) => PLANTS.find((p) => p.id === id)?.name ?? loaded?.state.chokepoints.find((c) => c.id === id)?.name;
   const row = (label: string, res: StatusResult | null) => (
     <p className="mono min-w-0 truncate text-body">
       <span className="text-dim">{label}: </span>
-      {res ? <><span className={TONE[res.level]}>{res.level}</span>{res.reason && <span className="text-dim"> · {reasonText(res.reason, clock, t, loaded?.lastOkMs)}</span>}</> : <span className="text-dim">—</span>}
+      {res ? <><span className={TONE[res.level]}>{res.level}</span>{res.reason && <span className="text-dim"> · {reasonText(res.reason, clock, t, loaded?.lastOkMs, siteName)}</span>}</> : <span className="text-dim">—</span>}
     </p>
   );
 

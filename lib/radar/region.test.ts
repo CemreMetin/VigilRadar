@@ -31,6 +31,11 @@ describe("reason text", () => {
     expect(agoText(5 * 60_000, t)).toBe("5 dk önce");
     expect(agoText(3 * 86_400_000, t)).toBe("3 gün önce");
   });
+  it("a link reason names the asset, not its id", () => {
+    const r = { kind: "link" as const, linkId: "conflict:79:-151>plant:us-limerick", rule: "conflict→plant" as const };
+    expect(reasonText(r, now, t, undefined, (id) => (id === "us-limerick" ? "Limerick" : undefined))).toBe("conflict → plant · Limerick");
+    expect(reasonText(r, now, t)).toBe("conflict → plant · us-limerick");
+  });
   it("a stale status names the time of the last data", () => {
     expect(reasonText({ kind: "stale", lastHeartbeatMs: Date.UTC(2026, 10, 18, 9, 5) }, now, t)).toBe("son veri 09:05 UTC");
   });

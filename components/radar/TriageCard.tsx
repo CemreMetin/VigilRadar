@@ -153,7 +153,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
             <dl className="mono grid grid-cols-2 gap-x-3 text-body">
               <dt className="text-dim">{t("avg7")}</dt><dd>{Math.round(cp.recent)} {t("perDay")}</dd>
               <dt className="text-dim">{t("base90")}</dt><dd>{Math.round(cp.baseline)} {t("perDay")}</dd>
-              <dt className="text-dim">{t("deviation")}</dt><dd>{(cp.dev * 100).toFixed(0)}% · {cp.level}</dd>
+              <dt className="text-dim">{t("deviation")}</dt><dd>{(cp.dev * 100).toFixed(0)}% · {t(cp.level === "severe" ? "flowSevere" : cp.level === "deviation" ? "flowDeviation" : "flowNormal")}</dd>
             </dl>
           )}
           {cp.dataThrough && <p className="text-dim">{t("dataThrough")}: {new Date(cp.dataThrough).toLocaleDateString(locale, { day: "numeric", month: "short" })}</p>}

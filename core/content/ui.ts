@@ -18,7 +18,7 @@ const tr = {
   evidenceB: "B — medya bildirimi, doğrulanmamış. Konum şehir düzeyindedir.",
   plant: "Nükleer santral", reactors: "reaktör", approx: "Koordinatlar yaklaşıktır.",
   chokepoint: "Boğaz", avg7: "Son 7 gün ortalaması", base90: "90 günlük temel", deviation: "Sapma", dataThrough: "veri", perDay: "geçiş/gün",
-  flowOld: "Veri eski.", noSeries: "Günlük seri henüz yok.",
+  flowOld: "Veri eski.", flowNormal: "normal", flowDeviation: "sapma var", flowSevere: "ağır sapma", noSeries: "Günlük seri henüz yok.",
   cpWatched: "{n} boğaz izleniyor", cpNoDev: "sapma yok", cpDev: "sapma", closeCard: "Kartı kapat",
   checklist: "Kontrol listesi", commsHead: "Haberleşme", pickRegionFirst: "Bölge seç",
 } as const;
@@ -41,7 +41,7 @@ const en: Record<keyof typeof tr, string> = {
   evidenceB: "B — media report, unverified. Location is at city level.",
   plant: "Nuclear plant", reactors: "reactors", approx: "Coordinates are approximate.",
   chokepoint: "Chokepoint", avg7: "7-day average", base90: "90-day baseline", deviation: "Deviation", dataThrough: "data", perDay: "transits/day",
-  flowOld: "Data is old.", noSeries: "No daily series yet.",
+  flowOld: "Data is old.", flowNormal: "normal", flowDeviation: "deviating", flowSevere: "severe", noSeries: "No daily series yet.",
   cpWatched: "{n} chokepoints watched", cpNoDev: "no deviation", cpDev: "deviation", closeCard: "Close card",
   checklist: "Checklist", commsHead: "Communication", pickRegionFirst: "Pick a region",
 };

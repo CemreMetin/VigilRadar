@@ -13,14 +13,14 @@ export function agoText(ms: number, t: T): string {
 const hhmm = (ms: number) => new Date(ms).toISOString().slice(11, 16);
 
 /** The one line that always sits next to a status: what raised it, e.g. `M6.8 · Kamchatka · 3 sa önce`. No status without a reason. */
-export function reasonText(r: StatusReason | null | undefined, nowMs: number, t: T, lastOkMs?: number): string {
+export function reasonText(r: StatusReason | null | undefined, nowMs: number, t: T, lastOkMs?: number, nameOf?: (siteId: string) => string | undefined): string {
   if (!r) return "";
   const when = (ms: number) => agoText(nowMs - ms, t);
   switch (r.kind) {
     case "stale": return `${t("lastData")} ${hhmm(r.lastHeartbeatMs ?? lastOkMs ?? nowMs)} UTC`;
     case "quake": case "pager": case "province-severity": case "province-tsunami": return `M${r.mag} · ${r.place} · ${when(r.timeMs)}`;
     case "tsunami": return `${r.title} · ${when(r.timeMs)}`;
-    case "link": return `${r.rule.replace("→", " → ")} · ${r.linkId.split(">").pop()}`;
+    case "link": { const site = (r.linkId.split(">").pop() ?? "").replace(/^(plant|chokepoint):/, ""); return `${r.rule.replace("→", " → ")} · ${nameOf?.(site) ?? site}`; }
     case "chokepoint": return `${r.id} · ${r.state}`;
   }
 }

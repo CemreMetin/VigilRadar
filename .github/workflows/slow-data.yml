@@ -1,0 +1,51 @@
+# Slow lane (VIGIL.md 4.2): every 30 minutes read GDELT and IMF PortWatch and send the result to the Worker.
+# Nothing is committed and nothing is deployed; the data only goes to POST /v1/ingest/slow.
+#
+# Needs two repository secrets (Settings > Secrets and variables > Actions):
+#   WORKER_URL     the Worker address, e.g. https://vigil-daemon.<account>.workers.dev
+#   INGEST_TOKEN   the same value as the Worker secret INGEST_TOKEN
+# Without them the job finishes green and does nothing. Scheduled workflows run only on the default branch (main).
+name: slow data
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: slow-data
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # the secrets are visible only to this step and to the one that posts, never to npm ci
+      - id: secrets
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+        run: |
+          if [ -n "$WORKER_URL" ] && [ -n "$INGEST_TOKEN" ]; then echo "have=true" >> "$GITHUB_OUTPUT"; else echo "WORKER_URL / INGEST_TOKEN not set: skipping"; fi
+
+      - if: steps.secrets.outputs.have == 'true'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - if: steps.secrets.outputs.have == 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - if: steps.secrets.outputs.have == 'true'
+        run: npm ci
+
+      - if: steps.secrets.outputs.have == 'true'
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+        run: npx tsx scripts/data/slow.mjs
