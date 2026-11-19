@@ -863,7 +863,7 @@ Bu bloğa başka frekans **ekleme**. İl bazlı frekans tablosu üretme.
 3. VAPID anahtarı üret (`npx @pushforge/builder vapid`); `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (bir `mailto:` adresi) sırlarını gir.
 4. Rastgele bir `INGEST_TOKEN` üret; hem Worker sırrına hem GitHub Actions sırrına yaz. `WORKER_URL`'yi GitHub sırrına ekle.
 5. `ALLOWED_ORIGINS` ve `SITE_URL`'yi ayarla; `wrangler deploy`.
-6. Cloudflare Pages ortam değişkenleri: `NEXT_PUBLIC_WORKER_URL`, `NEXT_PUBLIC_TELEGRAM_TR_URL`.
+6. Site derleme değişkenleri: site GitHub Actions'ta derlenip Pages'e yüklendiği için `NEXT_PUBLIC_*` değerleri derleme anında gömülür; Pages panosuna değil GitHub'a girilir: secret `WORKER_URL` (`data.yml` bunu `NEXT_PUBLIC_WORKER_URL` yapar) ve variable `TELEGRAM_TR_URL` (`NEXT_PUBLIC_TELEGRAM_TR_URL`). Ayrıntı: `docs/SETUP.md` adım 6.
 7. GitHub sırları: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (site dağıtımı için).
 
 Bu adımların hiçbiri yapılmamışken de site derlenmeli ve yedek yol üzerinden çalışmalıdır.
