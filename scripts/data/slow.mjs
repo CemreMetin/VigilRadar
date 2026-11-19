@@ -1,5 +1,5 @@
 // Slow lane (VIGIL.md 4.2): GDELT conflict reports + IMF PortWatch chokepoint flow -> POST /v1/ingest/slow.
-// Run with tsx, because it imports core/ (TypeScript):  npx tsx scripts/data/slow.mjs [--dry]
+// Run with tsx, because it imports core/ (TypeScript):  npx tsx scripts/data/slow.mjs [--dry] [--fresh]
 // Needs WORKER_URL and INGEST_TOKEN in the environment; without them (or with --dry) it only prints what it would send.
 // Also writes public/data/static/chokepoints.json (the resolved PortWatch ids and coordinates).
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -8,6 +8,7 @@ import { clusterConflicts, expireClusters } from "../../core/conflict";
 import { CHOKEPOINT_KEYS, chokepointFlow, gdeltUrls, latestGdeltStamp, parseGdeltTsv, resolveChokepoints, toDaily, unavailableChokepoint } from "../../core/slow";
 
 const DRY = process.argv.includes("--dry");
+const FRESH = process.argv.includes("--fresh"); // ignore what the Worker holds, e.g. after the actor rule changed
 const { WORKER_URL, INGEST_TOKEN } = process.env;
 const UA = { "User-Agent": "VigilRadar/1.0" };
 const PW = "https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services";
@@ -21,7 +22,7 @@ async function getJson(url) {
 
 /** What the Worker holds now: its clusters expire 48 h after their last report, and a failed source keeps its old data. */
 async function previous() {
-  if (!WORKER_URL) return null;
+  if (!WORKER_URL || FRESH) return null;
   try { return (await getJson(`${WORKER_URL.replace(/\/$/, "")}/v1/state`)).slow ?? null; } catch { return null; }
 }
 

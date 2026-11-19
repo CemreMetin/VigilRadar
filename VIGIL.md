@@ -492,7 +492,7 @@ Bağlantı `Link {id, fromKind:'quake'|'conflict', fromId, toKind:'plant'|'choke
 - **Türkiye kıyı kuralı (resmi uyarı değildir, kural tabanlıdır):** `mag ≥ 6.5`, `depth ≤ 70 km` ve episantr `coastal:true` bir il merkezine ≤ 100 km ise, o il için `tsunamiAdvice:true`. Bildirime ve karta Bölüm 10.3 metni eklenir. USGS `tsunami=1` bayrağı da aynı etkiyi doğurur.
 
 ### 5.6 Çatışma kümeleri (yavaş hat)
-1. Satır kabulü: `EventRootCode ∈ {19, 20}` veya `EventBaseCode = 183`; `ActionGeo_Type ∈ {3, 4}`; enlem/boylam dolu.
+1. Satır kabulü: `EventRootCode ∈ {19, 20}` veya `EventBaseCode = 183`; `ActionGeo_Type ∈ {3, 4}`; enlem/boylam dolu; **ve aktör kuralı**: taraflardan birinin türü (`Actor1Type1..3Code`, `Actor2Type1..3Code`; sütun 12–14 ve 22–24) `COP` (polis) veya `CRM` (suç) ise satır atılır; aksi halde en az bir taraf `MIL`, `REB`, `SEP` veya `INS` türünde olmalı ya da iki tarafın ülke kodu (`Actor1CountryCode`, `Actor2CountryCode`; sütun 7 ve 17) dolu ve farklı olmalı. Amaç kentsel suç ve polis haberlerinin (ör. Philadelphia, Miami) çatışma sayılmasını önlemektir. Sütunlar ilk dosyada doğrulanır.
 2. `GLOBALEVENTID`'ye göre tekilleştir.
 3. 0,5° ızgara hücresine ata. Hücre başına: olay sayısı, `SOURCEURL` alan adlarının ayrık sayısı, ortalama konum, en sık `ActionGeo_FullName`, en yüksek `NumSources`'lu 3 kaynak adresi.
 4. Küme kabulü: `olay ≥ 3` **ve** `ayrık alan adı ≥ 3`.
@@ -505,8 +505,9 @@ Bağlantı `Link {id, fromKind:'quake'|'conflict', fromId, toKind:'plant'|'choke
 ### 5.8 Durum
 **KÜRESEL**
 - `STALE`: hızlı hat kalp atışı 15 dakikadan eski. Diğer her şeyi ezer.
-- `CRITICAL`: (son 24 sa) `mag ≥ 7.5` ve `depth ≤ 70` · PAGER `orange|red` (72 sa) · tsunami `warning` · kronik olmayan `→plant` bağlantısı · boğaz `severe`.
-- `ELEVATED`: (son 24 sa) `mag ≥ 6.5` · PAGER `yellow` · tsunami `advisory|watch` · kronik olmayan `→chokepoint` bağlantısı · boğaz `deviation`.
+- `CRITICAL`: (son 24 sa) `mag ≥ 7.5` ve `depth ≤ 70` · PAGER `orange|red` (72 sa) · tsunami `warning` · kronik olmayan **deprem** `→plant` bağlantısı · boğaz `severe`.
+- `ELEVATED`: (son 24 sa) `mag ≥ 6.5` · PAGER `yellow` · tsunami `advisory|watch` · kronik olmayan `→chokepoint` bağlantısı · kronik olmayan **çatışma** `→plant` bağlantısı · boğaz `deviation`.
+- **Kanıt sınırı:** çatışma kaynaklı bağlantılar (`conflict→plant`, `conflict→chokepoint`) küresel durumu en fazla `ELEVATED` yapar; `CRITICAL` yalnızca deprem, tsunami, PAGER ve boğaz `severe` kaynaklarından gelir. Çatışma bağlantısı kartta ve haritada aynen görünür; yalnızca durum bandını yükseltmesi sınırlıdır (kanıt etiketi B: medya bildirimi).
 - Aksi halde `NOMINAL`.
 
 **BÖLGEN** (il seçiliyse): son 24 saatte o il için P0 veya `tsunamiAdvice` → `CRITICAL`; P1 → `ELEVATED`; aksi halde `NOMINAL`. İl seçili değilse gösterge "—" ve "İlini seç" bağlantısı.
@@ -676,6 +677,8 @@ PWA: `manifest.webmanifest` (`start_url: /alert`, `display: standalone`, koyu te
 4. **Yerel radyo frekansım:** kullanıcının elle yazdığı tek satır (`localStorage`), açıklama: "Şehrindeki TRT Radyo 1 veya TRT FM frekansını şimdiden öğren ve buraya yaz. Kriz ekranında görünecek."
 5. **Doğru bilinen yanlışlar:** Bölüm 10.7.
 6. **Tatbikat:** "Kriz ekranını dene" düğmesi; kriz modunu sabit örnek olayla ve her yerde `TATBİKAT` etiketiyle açar.
+7. **Aile planı:** Bölüm 10.9'daki alanlar, doldurulabilir form. Yalnızca `localStorage['vigil.plan']`'da durur. Kriz modunda "Haberleşme" bloğunun altında buluşma noktaları ve irtibat kişisi gösterilir.
+8. **Yazdır:** üç düğme — "Çanta listesini yazdır", "Aile planını yazdır" (doldurulmuş ya da boş form), "Cüzdan kartını yazdır" (Bölüm 10.10, 85×55 mm, kesim çizgili). Yalnızca tarayıcının yazdırma işlevi ve `@media print` CSS'i kullanılır; hiçbir veri dışarı gitmez. Üstte not: "Elektrik ve internet gidince kâğıt çalışmaya devam eder."
 
 ### 9.2 Kriz modu
 Tetik: `?e=<id>` ile açılış (bildirime dokunma) · seçili il için son 60 dakikada P0/P1 olay · tatbikat.
@@ -690,6 +693,7 @@ Tetik: `?e=<id>` ile açılış (bildirime dokunma) · seçili il için son 60 d
 - En altta: `Normal moda dön`.
 
 ### 9.3 Service worker
+- Eski sitenin elle yazılmış service worker'ı ve "çevrimdışı kaydet" düğmesi (`public/sw.js`, `components/OfflineButton.tsx`) Edge'de sınanmıştı. Sıfırdan yazmak yerine bunlardan başla; eski sayfaların önbelleklerini bozma.
 - Önbelleğe al: `/alert` kabuğu, statik veriler, içerik. Statikler cache-first; `/v1/state` network-first, başarısızsa son kopya.
 - `push`: yükten bildirim göster (`tag = id`, P0'da `requireInteraction: true`). `notificationclick`: `url`'yi aç veya var olan pencereyi öne getir.
 - Çevrimdışıyken `/alert` açılmalı; çanta, rehber, fener, düdük çalışmalı.
@@ -767,6 +771,18 @@ Bu bloğa başka frekans **ekleme**. İl bazlı frekans tablosu üretme.
 
 ---
 
+### 10.9 Aile planı (alanlar ve açıklamaları)
+1. **Buluşma noktası 1 — mahalle:** Evinin yakınındaki açık alan. "Resmi toplanma alanını e-Devlet'teki AFAD toplanma alanı sorgulamasından öğren."
+2. **Buluşma noktası 2 — mahalle dışı:** "Birinci noktaya ulaşılamazsa gidilecek ikinci yer."
+3. **Şehir dışından irtibat kişisi (ad + telefon):** "Herkes kendi durumunu bu kişiye bildirir. Afetten sonra şehir içi hatlar kilitlenince başka şehirdeki birine ulaşmak çoğu zaman daha kolaydır."
+4. **Kim kimi alacak:** "Okuldaki çocuklar, yaşlılar, bakım gerektiren biri, evcil hayvanlar."
+5. **Evde nerede ne var:** "Gaz vanası, su vanası, elektrik sigortası, deprem çantası."
+
+### 10.10 Cüzdan kartı (85×55 mm, iki yüz)
+- **Ön yüz:** Ad soyad · il · buluşma noktası 1 ve 2 · şehir dışı irtibat kişisi ve telefonu · iki yakının telefonu.
+- **Arka yüz:** `112 — acil çağrı` · radyo frekansın (Alert'e kaydettiğin) · `PMR446 Kanal 1` · isteğe bağlı: kan grubu, düzenli kullandığın ilaç, alerji · alt satır: "Hatlar yoğunsa arama yapma, mesaj at."
+- Boş alanlar yazdırmada el ile doldurulacak çizgi olarak çıkar. Sağlık alanları yalnızca cihazda durur ve yalnızca kullanıcı doldurursa basılır.
+
 ## 11. GİZLİLİK
 
 - Çerez, analitik, hata izleme servisi, üçüncü taraf script yok.
@@ -830,9 +846,13 @@ Bu bloğa başka frekans **ekleme**. İl bazlı frekans tablosu üretme.
 
 **Faz 6 — Bildirimler**: politika + testler 7–10 ve 17, Telegram, Web Push, abonelik uçları.
 
-**Faz 7 — Alert PWA**: Bölüm 9'un tamamı, manifest, service worker, çevrimdışı test.
+**Faz 7 — Alert PWA**: Bölüm 9'un tamamı (aile planı ve yazdırma dahil), manifest, service worker (eski koddan başlayarak), çevrimdışı test. Yazdırma çıktılarını mevcut `scripts/check-print.mjs` ile PDF'e dönüştürüp sayfa sayısını ve kartın 85×55 mm olduğunu doğrula.
 
-**Faz 8 — Kapanış**: EN çevirileri, erişilebilirlik geçişi, CSP başlıkları, `README.md`, `docs/SETUP.md` (Bölüm 14'ü adım adım, komutlarıyla yaz), `docs/DECISIONS.md` gözden geçirme.
+**Faz 8 — Kapanış**:
+- **Veri tazeliği tablosu** (`/about`): her kaynak için son başarılı çekim, en yeni olayın zamanı ve durum (`ok` / hata). Bekçinin `hb.sources` verisinden; yavaş hat için `slow` zaman damgaları.
+- **"Daha fazla oku" köprüsü:** triage kartının en altında, ilgili bir `/library` sayfası varsa tek bağlantı. Eşleşme listesini mevcut `/library` sayfa kimliklerinden seç (ör. Hürmüz → çatışma/enerji senaryosu); uygun sayfa yoksa bağlantı gösterme. Listeyi `core/content/` içinde tut ve `DECISIONS.md`'ye yaz.
+- **Tarayıcı kontrolleri:** mevcut `scripts/check-contrast.mjs`, `check-overflow.mjs`, `test-offline.mjs` ve `check-print.mjs`'i yeni `/`, `/alert` ve `/about` sayfalarını da kapsayacak şekilde güncelle ve çalıştır.
+- EN çevirileri, erişilebilirlik geçişi, CSP başlıkları, `README.md`, `docs/SETUP.md` (Bölüm 14'ü adım adım, komutlarıyla yaz), `docs/DECISIONS.md` gözden geçirme.
 
 ---
 
@@ -847,3 +867,10 @@ Bu bloğa başka frekans **ekleme**. İl bazlı frekans tablosu üretme.
 7. GitHub sırları: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` (site dağıtımı için).
 
 Bu adımların hiçbiri yapılmamışken de site derlenmeli ve yedek yol üzerinden çalışmalıdır.
+
+---
+
+## 15. SONRAKİ SÜRÜM (v2) ADAYLARI — v1'de YAPILMAZ
+
+- **Orman yangınları:** NASA FIRMS VIIRS (ücretsiz `FIRMS_MAP_KEY`). Eski kod: `worker/feeds/fires.ts`. Kural taslağı: seçili ilin merkezine yakın aktif yangın kümesi → Alert'te bilgilendirme ve yangın kontrol listesi. Kurallar ve metinler yazılmadan başlanmaz.
+- **Yanardağ izleme listesi:** eski `/supervolcanoes` verisi. Türkiye'ye etkisi düşük; kaskat katmanına ancak açık bir kuralla girer.

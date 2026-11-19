@@ -26,15 +26,28 @@ export function gdeltUrls(latestStamp: string, count = 96): string[] {
 /** Column positions of GDELT 2.0 Events used here (0-based). */
 const COL = { id: 0, base: 27, root: 28, sources: 32, geoType: 51, name: 52, lat: 56, lon: 57, added: 59, url: 60 } as const;
 const COLUMNS = 61;
+const COUNTRY = [7, 17] as const; // Actor1/Actor2 CountryCode
+const TYPES = [12, 13, 14, 22, 23, 24] as const; // Actor1/Actor2 Type1..3 Code
+const ARMED = new Set(["MIL", "REB", "SEP", "INS"]); // military, rebels, separatists, insurgents
+const CIVIL = new Set(["COP", "CRM"]); // police, criminals
+
+/** The actor rule (VIGIL.md 5.6): police or criminal actors drop the row; otherwise an armed actor or two different countries keep it. */
+export function armedConflict(cols: readonly string[]): boolean {
+  const types = TYPES.map((i) => cols[i]);
+  if (types.some((t) => CIVIL.has(t))) return false;
+  const [a1, a2] = COUNTRY.map((i) => cols[i]);
+  return types.some((t) => ARMED.has(t)) || (!!a1 && !!a2 && a1 !== a2);
+}
 
 /** Throws when a row does not look like GDELT 2.0 Events, so a changed format stops the run instead of feeding bad rows. */
 export function checkGdeltRow(cols: readonly string[]): void {
   const lat = Number(cols[COL.lat]), lon = Number(cols[COL.lon]);
   const ok = cols.length === COLUMNS && /^\d{2}$/.test(cols[COL.root]) && Number.isFinite(lat) && Math.abs(lat) <= 90 && Number.isFinite(lon) && Math.abs(lon) <= 180 && /^\d{14}$/.test(cols[COL.added]);
-  if (!ok) throw new Error(`GDELT layout changed: ${cols.length} columns, root=${cols[COL.root]}, lat=${cols[COL.lat]}, lon=${cols[COL.lon]}`);
+  const actorsOk = COUNTRY.every((i) => /^[A-Z]{0,3}$/.test(cols[i] ?? "")) && TYPES.every((i) => /^[A-Z]{0,3}$/.test(cols[i] ?? ""));
+  if (!ok || !actorsOk) throw new Error(`GDELT layout changed: ${cols.length} columns, root=${cols[COL.root]}, lat=${cols[COL.lat]}, lon=${cols[COL.lon]}`);
 }
 
-/** Rows that can matter for conflict clusters: the event codes and city-level places of CONFIG.conflict. Other rows are dropped early. */
+/** Rows that can matter for conflict clusters: the event codes and city-level places of CONFIG.conflict, and armed conflict by the actor rule. Other rows are dropped early. */
 export function parseGdeltTsv(text: string, check = false): GdeltRow[] {
   const C = CONFIG.conflict;
   const out: GdeltRow[] = [];
@@ -47,6 +60,7 @@ export function parseGdeltTsv(text: string, check = false): GdeltRow[] {
     const geoType = Number(c[COL.geoType]);
     const lat = Number(c[COL.lat]), lon = Number(c[COL.lon]);
     if (!(C.rootCodes as readonly string[]).includes(c[COL.root]) && !(C.extraBaseCodes as readonly string[]).includes(c[COL.base])) continue;
+    if (!armedConflict(c)) continue;
     if (!(C.geoTypes as readonly number[]).includes(geoType) || !c[COL.lat] || !c[COL.lon] || !Number.isFinite(lat) || !Number.isFinite(lon)) continue;
     out.push({ id: c[COL.id], rootCode: c[COL.root], baseCode: c[COL.base], geoType, lat, lon, fullName: c[COL.name], sourceUrl: c[COL.url], numSources: Number(c[COL.sources]) || 0, dateAddedMs: stampToMs(c[COL.added]) });
   }

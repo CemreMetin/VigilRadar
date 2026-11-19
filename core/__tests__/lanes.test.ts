@@ -20,11 +20,11 @@ describe("11. chronic link", () => {
     expect(links[0].chronic).toBe(true);
     expect(globalStatus({ nowMs: NOW, heartbeatMs: NOW, quakes: [], links, tsunami: [], chokepoints: [] }).level).toBe("NOMINAL");
   });
-  it("the same link at 2 days is live and CRITICAL", () => {
+  it("the same link at 2 days is live, but a conflict link is capped at ELEVATED", () => {
     const fresh = conflictLinks([cluster], PLANTS, [], NOW);
     const links = markChronic(fresh, fresh.map((l) => ({ ...l, startedMs: NOW - 2 * DAY })), NOW);
     expect(links[0].chronic).toBe(false);
-    expect(globalStatus({ nowMs: NOW, heartbeatMs: NOW, quakes: [], links, tsunami: [], chokepoints: [] }).level).toBe("CRITICAL");
+    expect(globalStatus({ nowMs: NOW, heartbeatMs: NOW, quakes: [], links, tsunami: [], chokepoints: [] }).level).toBe("ELEVATED");
   });
 });
 

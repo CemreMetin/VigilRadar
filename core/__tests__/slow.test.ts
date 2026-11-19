@@ -3,7 +3,7 @@ import { checkGdeltRow, chokepointFlow, gdeltUrls, latestGdeltStamp, parseGdeltT
 
 const row = (over: Record<number, string> = {}) => {
   const c = Array<string>(61).fill("");
-  Object.assign(c, { 0: "1", 27: "190", 28: "19", 32: "4", 51: "3", 52: "Dnipro, Ukraine", 56: "48.46", 57: "35.04", 59: "20261119001500", 60: "https://a.test/x" }, over);
+  Object.assign(c, { 0: "1", 12: "MIL", 27: "190", 28: "19", 32: "4", 51: "3", 52: "Dnipro, Ukraine", 56: "48.46", 57: "35.04", 59: "20261119001500", 60: "https://a.test/x" }, over);
   return c.join("\t");
 };
 
@@ -54,5 +54,45 @@ describe("conflict samples", () => {
     const r = (i: number, host: string, n: number) => ({ id: String(i), rootCode: "19", baseCode: "190", geoType: 3, lat: 30, lon: 50, fullName: "X", sourceUrl: `https://${host}/${i}`, numSources: n, dateAddedMs: now - 3_600_000 });
     const [c] = clusterConflicts([r(1, "a.test", 9), r(2, "a.test", 8), r(3, "b.test", 7), r(4, "c.test", 6), r(5, "d.test", 5)], now);
     expect(c.sampleUrls).toEqual(["https://a.test/1", "https://b.test/3", "https://c.test/4"]);
+  });
+});
+
+describe("actor rule (VIGIL.md 5.6)", () => {
+  // col 7/17 country, col 12/22 first actor type
+  const act = (o: { c1?: string; c2?: string; t1?: string; t2?: string }) => row({ 7: o.c1 ?? "", 17: o.c2 ?? "", 12: o.t1 ?? "", 22: o.t2 ?? "" });
+  const kept = (...lines: string[]) => parseGdeltTsv(lines.join("\n")).length;
+
+  it("drops police and crime rows, even with a military or foreign counterpart", () => {
+    expect(kept(act({ c1: "USA", c2: "USA", t1: "COP" }))).toBe(0); // Philadelphia style
+    expect(kept(act({ c1: "USA", c2: "USA", t1: "CRM" }))).toBe(0);
+    expect(kept(act({ c1: "USA", c2: "IRN", t1: "COP", t2: "MIL" }))).toBe(0);
+  });
+  it("drops same-country rows without an armed actor (Miami style) and rows with one side unknown (Beijing wire stories)", () => {
+    expect(kept(act({ c1: "USA", c2: "USA", t1: "JUD" }))).toBe(0);
+    expect(kept(act({ t1: "JUD" }))).toBe(0);
+    expect(kept(act({ c2: "SEA", t2: "IGO" }))).toBe(0);
+  });
+  it("keeps an armed actor, or two different countries", () => {
+    expect(kept(act({ c1: "UKR", c2: "UKR", t2: "MIL" }))).toBe(1);
+    expect(kept(act({ t1: "REB" }), act({ t1: "SEP" }), act({ t2: "INS" }))).toBe(3);
+    expect(kept(act({ c1: "UKR", c2: "RUS" }))).toBe(1);
+  });
+  it("the first file's actor columns are checked", () => {
+    expect(() => parseGdeltTsv(act({ c1: "usa-bad" }), true)).toThrow(/layout changed/);
+  });
+});
+
+describe("evidence cap", () => {
+  it("a conflict cluster at Zaporozhye links to the plant and lifts the status to ELEVATED, not CRITICAL", async () => {
+    const { conflictLinks } = await import("../cascade");
+    const { globalStatus } = await import("../status");
+    const plants = [{ id: "ua-zaporozhye", name: "Zaporozhye", lat: 47.508, lon: 34.627 }];
+    const now = Date.UTC(2026, 10, 19, 12);
+    const cluster = { id: "c", lat: 47.55, lon: 34.6, label: "Enerhodar", events: 5, domains: 4, lastSeenMs: now, sampleUrls: [] };
+    const links = conflictLinks([cluster], plants as never, [], now);
+    expect(links).toHaveLength(1);
+    const s = globalStatus({ nowMs: now, heartbeatMs: now, quakes: [], links, tsunami: [], chokepoints: [] });
+    expect(s.level).toBe("ELEVATED");
+    expect(s.reason).toMatchObject({ kind: "link" });
   });
 });

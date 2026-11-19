@@ -36,7 +36,8 @@ export function globalStatus(i: StatusInput): StatusResult {
   const red = pager(["orange", "red"]);
   if (red) return hit("CRITICAL", { kind: "pager", quakeId: red.id, alert: red.best.pagerAlert!, mag: red.best.mag, place: red.best.place, timeMs: red.best.timeMs });
   if (tsunami?.level === "warning") return hit("CRITICAL", { kind: "tsunami", level: tsunami.level, title: tsunami.title, timeMs: tsunami.timeMs });
-  const plant = live.find((l) => l.toKind === "plant");
+  // evidence cap: a conflict link is a media report (B), so it can raise the status only to ELEVATED
+  const plant = live.find((l) => l.toKind === "plant" && l.fromKind === "quake");
   if (plant) return hit("CRITICAL", { kind: "link", linkId: plant.id, rule: plant.rule });
   const severe = flow("severe");
   if (severe) return hit("CRITICAL", { kind: "chokepoint", id: severe.id, state: severe.state });
@@ -46,7 +47,7 @@ export function globalStatus(i: StatusInput): StatusResult {
   const yellow = pager(["yellow"]);
   if (yellow) return hit("ELEVATED", { kind: "pager", quakeId: yellow.id, alert: "yellow", mag: yellow.best.mag, place: yellow.best.place, timeMs: yellow.best.timeMs });
   if (tsunami) return hit("ELEVATED", { kind: "tsunami", level: tsunami.level, title: tsunami.title, timeMs: tsunami.timeMs });
-  const choke = live.find((l) => l.toKind === "chokepoint");
+  const choke = live.find((l) => l.toKind === "chokepoint" || l.fromKind === "conflict");
   if (choke) return hit("ELEVATED", { kind: "link", linkId: choke.id, rule: choke.rule });
   const dev = flow("deviation");
   if (dev) return hit("ELEVATED", { kind: "chokepoint", id: dev.id, state: dev.state });
