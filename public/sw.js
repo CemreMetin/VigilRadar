@@ -39,7 +39,7 @@ async function networkFirst(req, cacheName) {
     const hit = await cache.match(req, { ignoreSearch: false });
     if (hit) return hit;
     if (req.mode === "navigate") {
-      const fallback = (await cache.match("/survive")) || (await cache.match("/"));
+      const fallback = (await cache.match("/alert")) || (await cache.match("/survive")) || (await cache.match("/"));
       if (fallback) return fallback;
     }
     throw err;
@@ -110,6 +110,47 @@ self.addEventListener("message", (event) => {
         await fetchAndStore(page, isData(page) ? DATA : PAGES, seen, found);
       }
       if (port) port.postMessage({ ok: true, ...found });
+    })(),
+  );
+});
+
+// ---- Web Push (VIGIL.md 7.4 / 9.3) ----
+// The Worker sends {id, level, title, body, url}. The tag is the event id, so an update or a cancel replaces the earlier
+// notification of the same event. Only P0 stays on screen until the user acts.
+self.addEventListener("push", (event) => {
+  let d = null;
+  try { d = event.data ? event.data.json() : null; } catch { /* not JSON */ }
+  if (!d || typeof d.title !== "string") return;
+  event.waitUntil(
+    self.registration.showNotification(d.title, {
+      body: typeof d.body === "string" ? d.body : "",
+      tag: typeof d.id === "string" ? d.id : undefined,
+      requireInteraction: d.level === "P0",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: typeof d.url === "string" ? d.url : "/alert" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  // only this site's own address is opened, whatever the payload says
+  let target = "/alert";
+  try {
+    const u = new URL(event.notification.data && event.notification.data.url, self.location.origin);
+    if (u.origin === self.location.origin) target = u.pathname + u.search;
+  } catch { /* keep /alert */ }
+  event.waitUntil(
+    (async () => {
+      const all = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const open = all.find((c) => new URL(c.url).origin === self.location.origin);
+      if (open) {
+        await open.focus();
+        if ("navigate" in open) await open.navigate(target).catch(() => {});
+      } else {
+        await self.clients.openWindow(target);
+      }
     })(),
   );
 });

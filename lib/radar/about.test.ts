@@ -5,8 +5,8 @@ import { ABOUT, STORAGE_KEYS } from "@/core/content/about";
 describe("/about", () => {
   it("lists exactly the localStorage keys the code uses", () => {
     const used = new Set<string>();
-    for (const f of ["lib/lang.ts", "lib/radar/load.ts", "lib/radar/region.ts"])
-      for (const m of readFileSync(f, "utf8").matchAll(/"(vigil\.[A-Za-z]+)"/g)) used.add(m[1]);
+    for (const f of ["lib/lang.ts", "lib/radar/load.ts", "lib/radar/region.ts", "components/alert/AlertScreen.tsx", "components/PwaRegister.tsx"])
+      for (const m of readFileSync(f, "utf8").matchAll(/"(vigil\.[A-Za-z0-9.]+)"/g)) used.add(m[1]);
     expect([...used].sort()).toEqual([...STORAGE_KEYS].sort());
   });
   it("both languages have the same sections", () => {

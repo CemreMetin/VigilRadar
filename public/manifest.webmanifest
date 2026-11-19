@@ -2,7 +2,7 @@
   "name": "VigilRadar",
   "short_name": "Vigil",
   "description": "A calm analysis desk for large earthquakes and conflict events and what they could affect. Not an official warning system.",
-  "start_url": "/",
+  "start_url": "/alert",
   "scope": "/",
   "display": "standalone",
   "background_color": "#050505",
@@ -13,6 +13,7 @@
     { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "What can you do?", "url": "/survive" }
+    { "name": "Radar", "url": "/" },
+    { "name": "Alert", "url": "/alert" }
   ]
 }

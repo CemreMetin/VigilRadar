@@ -307,6 +307,12 @@ body {
   .wallet li { margin: 0 0 0.7mm; }
   .wallet-fill { font-size: 7pt; margin: 1.5mm 0 0; }
   .print-sheet .print-footer { position: fixed; left: 0; bottom: 0; }
+  .plan-row .write { white-space: pre-wrap; min-height: 9mm; height: auto; font-size: 10pt; }
+  .plan-row .sheet-sub { margin: 0 0 1mm; }
+  .wallet-pair { display: flex; flex-direction: column; gap: 6mm; }
+  .wallet li { font-size: 7pt; }
+  .wallet .fill { min-height: 1em; }
+  .wallet-tail { margin-top: 1mm; font-style: italic; }
 }
 /* Preparedness pack: each part starts on its own page */
 @media print {

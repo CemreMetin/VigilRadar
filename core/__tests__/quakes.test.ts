@@ -84,9 +84,4 @@ describe("6. one quake from four sources", () => {
   });
 });
 
-describe("7. to 10. notification policy", () => {
-  it.todo("7. revision 6.9 to 7.2 sends one UPDATE (Faz 6)");
-  it.todo("8. retracted event sends one CANCEL (Faz 6)");
-  it.todo("9. P0 single source waits 90 s, second source sends at once (Faz 6)");
-  it.todo("10. second P1 within 30 min is held, P0 goes (Faz 6)");
-});
+// Tests 7-10 (update, cancel, P0 wait, P1 cooldown) live in daemon/src/__tests__/policy.test.ts with the policy they test.
