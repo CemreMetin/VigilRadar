@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
+import { readMoreFor, type ReadMore } from "@/core/content/readmore";
 import type { ChokepointFlow, ConflictCluster, MergedQuake, Province, State } from "@/core/types";
 import { PLANTS } from "@/core/build-state";
 import { agoText } from "@/lib/radar/format";
@@ -65,6 +67,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
 
   let body: ReactNode = null;
   let title = "";
+  let more: ReadMore | null = null; // the one /library page that fits, if any
 
   if (sel.kind === "quake") {
     const q = state.quakes.find((x) => x.id === sel.id) as MergedQuake | undefined;
@@ -72,6 +75,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
     const b = q.best;
     const tri = triageQuake(state, q, province);
     title = `${t("quake")} M${b.mag}`;
+    more = readMoreFor(b.lat, b.lon);
     body = (
       <>
         <Block title={t("qWhat")}>
@@ -172,6 +176,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
         <button type="button" onClick={onClose} aria-label={t("closeCard")} className="mono px-2 text-dim hover:text-fg">×</button>
       </div>
       {body}
+      {more && <p className="border-t border-line p-3 text-body"><Link href={`/library/${more.id}`} className="text-accent hover:underline">{t("readMore")}: {more.title[lang]} →</Link></p>}
     </article>
   );
 }

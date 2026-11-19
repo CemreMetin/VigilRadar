@@ -79,8 +79,9 @@ jobs:
       - name: Build static site
         run: npm run build
         env:
-          # live browser alarms read the fast alerts feed (branch alerts-feed, written every 5 minutes)
-          NEXT_PUBLIC_ALERTS_URL: https://raw.githubusercontent.com/${{ github.repository }}/alerts-feed/alerts.json
+          # baked into the static site at build time (docs/SETUP.md step 6); empty means the site runs on its backup path
+          NEXT_PUBLIC_WORKER_URL: ${{ secrets.WORKER_URL }}
+          NEXT_PUBLIC_TELEGRAM_TR_URL: ${{ vars.TELEGRAM_TR_URL }}
 
       - name: Check deploy secrets
         id: secrets

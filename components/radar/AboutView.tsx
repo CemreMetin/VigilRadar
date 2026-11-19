@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ABOUT, SOURCES, STORAGE_KEYS } from "@/core/content/about";
 import { useT } from "@/lib/radar/useT";
 import LangSwitch from "@/components/LangSwitch";
+import SourceFreshness from "./SourceFreshness";
 
 export default function AboutView() {
   const { lang, c } = useT();
@@ -35,6 +36,8 @@ export default function AboutView() {
           </li>
         ))}
       </ul>
+
+      <SourceFreshness />
 
       <h2 className="label mt-6">{a.privacy.h}</h2>
       <ul className="mt-2 list-disc space-y-1 pl-5">{a.privacy.items.map((s) => <li key={s}>{s}</li>)}</ul>

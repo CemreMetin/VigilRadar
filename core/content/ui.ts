@@ -21,6 +21,8 @@ const tr = {
   flowOld: "Veri eski.", flowNormal: "normal", flowDeviation: "sapma var", flowSevere: "ağır sapma", noSeries: "Günlük seri henüz yok.",
   cpWatched: "{n} boğaz izleniyor", cpNoDev: "sapma yok", cpDev: "sapma", closeCard: "Kartı kapat",
   checklist: "Kontrol listesi", commsHead: "Haberleşme", pickRegionFirst: "Bölge seç",
+  readMore: "Daha fazla oku", freshHead: "Veri tazeliği", freshSource: "Kaynak", freshFetched: "Son başarılı çekim", freshNewest: "En yeni olay", freshStatus: "Durum",
+  freshOk: "tamam", freshError: "hata", freshStale: "eski", freshNone: "veri yok", freshLoading: "Veri yükleniyor…", freshNote: "Çekim zamanı Worker'ın kalp atışından gelir; IMF PortWatch verisi birkaç gün gecikmelidir.",
 } as const;
 const en: Record<keyof typeof tr, string> = {
   live: "LIVE", backup: "BACKUP SOURCE", stale: "STALE", noData: "NO DATA",
@@ -44,6 +46,8 @@ const en: Record<keyof typeof tr, string> = {
   flowOld: "Data is old.", flowNormal: "normal", flowDeviation: "deviating", flowSevere: "severe", noSeries: "No daily series yet.",
   cpWatched: "{n} chokepoints watched", cpNoDev: "no deviation", cpDev: "deviation", closeCard: "Close card",
   checklist: "Checklist", commsHead: "Communication", pickRegionFirst: "Pick a region",
+  readMore: "Read more", freshHead: "Data freshness", freshSource: "Source", freshFetched: "Last successful fetch", freshNewest: "Newest event", freshStatus: "Status",
+  freshOk: "ok", freshError: "error", freshStale: "stale", freshNone: "no data", freshLoading: "Loading data…", freshNote: "Fetch times come from the Worker's heartbeat; IMF PortWatch data runs a few days late.",
 };
 export type UiKey = keyof typeof tr;
 export const UI = { tr: tr as Record<UiKey, string>, en };

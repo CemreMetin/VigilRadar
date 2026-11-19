@@ -3,10 +3,11 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import PwaRegister from "@/components/PwaRegister";
 import "./globals.css";
 
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+// latin-ext carries the Turkish letters (İ, Ş, Ğ); without it they fall back to another font and look wrong in capitals
+const inter = Inter({ variable: "--font-inter", subsets: ["latin", "latin-ext"] });
 const mono = JetBrains_Mono({
   variable: "--font-mono-face",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 export const metadata: Metadata = {

@@ -89,6 +89,26 @@ const unknown = await page.locator("main[aria-label=DEPREM]").innerText({ timeou
 check(/Kendini ve yanındakileri kontrol et/.test(unknown), "?e=<unknown id> offline: crisis mode with the general list");
 await ctx.setOffline(false);
 
+// ---- accessibility basics (peace mode) ----
+await page.goto(`${BASE}/alert`, { waitUntil: "load" });
+await page.waitForTimeout(500);
+const a11y = await page.evaluate(() => {
+  const name = (el) => (el.getAttribute("aria-label") || el.labels?.[0]?.textContent || el.textContent || el.getAttribute("placeholder") || "").trim();
+  return {
+    lang: document.documentElement.lang,
+    unnamed: [...document.querySelectorAll("button, input, textarea, select, a[href]")].filter((e) => !name(e)).length,
+    main: document.querySelectorAll("h1").length,
+    small: [...document.querySelectorAll("button, a[href]")].filter((e) => { const r = e.getBoundingClientRect(); return r.height > 0 && r.height < 24; }).length,
+  };
+});
+check(a11y.lang === "tr", `html lang follows the page language (${a11y.lang})`);
+check(a11y.unnamed === 0, `every button, field and link has an accessible name (${a11y.unnamed} without)`);
+check(a11y.main === 1, `one h1 (${a11y.main})`);
+check(a11y.small === 0, `no tap target shorter than 24 px (${a11y.small})`);
+await page.keyboard.press("Tab");
+const focusRing = await page.evaluate(() => { const e = document.activeElement; if (!e || e === document.body) return false; const cs = getComputedStyle(e); return cs.outlineStyle !== "none" || cs.boxShadow !== "none"; });
+check(focusRing, "keyboard focus is visible on the first tab stop");
+
 // ---- English ----
 await page.goto(`${BASE}/alert`, { waitUntil: "load" });
 await page.getByRole("button", { name: "EN", exact: true }).click();

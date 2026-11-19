@@ -76,7 +76,8 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
-const ASSET_RE = /\/_next\/static\/[^"'\s\\)<>]+/g;
+// chunk names inside Next's JS (dynamic imports such as the map) are written without the /_next/ prefix
+const ASSET_RE = /(?:\/_next\/)?static\/(?:chunks|css|media)\/[^"'\s\\)<>]+/g;
 
 async function fetchAndStore(url, cacheName, seen, found) {
   if (seen.has(url)) return;
@@ -91,7 +92,7 @@ async function fetchAndStore(url, cacheName, seen, found) {
     if (type.includes("text/html") || type.includes("text/css") || type.includes("javascript")) {
       const text = await res.clone().text();
       const assets = new Set(text.match(ASSET_RE) || []);
-      for (const a of assets) await fetchAndStore(a.split("?")[0], RUNTIME, seen, found);
+      for (const a of assets) await fetchAndStore((a.startsWith("/") ? a : `/_next/${a}`).split("?")[0], RUNTIME, seen, found);
     }
   } catch {
     found.failed++;

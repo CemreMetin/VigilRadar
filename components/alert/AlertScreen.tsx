@@ -39,6 +39,7 @@ export default function AlertScreen() {
   // known only in the browser, so the static page and the first client render agree on "wait"
   const pushKind = useSyncExternalStore(noSubscribe, () => (!pushSupported() ? "no" : iosNeedsInstall() ? "ios" : "yes"), () => "wait");
   const state = loaded?.state ?? null;
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]); // screen readers pronounce the page in its language
 
   useEffect(() => {
     void currentSubscription().then((s) => setPush(s ? "on" : "off"));
@@ -75,8 +76,8 @@ export default function AlertScreen() {
     <div className="mx-auto min-h-dvh max-w-3xl px-4 pb-16 pt-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="mono text-[20px] font-bold">{a.title}</h1>
-        <nav className="mono flex gap-3 text-body"><Link href="/" className="hover:text-accent">{a.back}</Link>
-          <button type="button" onClick={() => setLang(lang === "tr" ? "en" : "tr")} className="hover:text-accent">{lang === "tr" ? "EN" : "TR"}</button>
+        <nav className="mono flex gap-4 text-body"><Link href="/" className="py-2 hover:text-accent">{a.back}</Link>
+          <button type="button" onClick={() => setLang(lang === "tr" ? "en" : "tr")} className="py-2 hover:text-accent">{lang === "tr" ? "EN" : "TR"}</button>
         </nav>
       </header>
 
@@ -114,7 +115,7 @@ export default function AlertScreen() {
             ))}
           </fieldset>
         ))}
-        <button type="button" className="mono mt-2 text-body text-dim hover:text-fg" onClick={() => setTicks([])}>{a.bagReset}</button>
+        <button type="button" className="mono mt-2 py-2 text-body text-dim hover:text-fg" onClick={() => setTicks([])}>{a.bagReset}</button>
       </section>
 
       <section className={`${box} mt-3`} aria-label={a.radio}>
