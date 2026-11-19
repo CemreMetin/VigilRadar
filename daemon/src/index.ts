@@ -4,6 +4,7 @@ import { handleRequest, type EdgeCache } from "./http";
 import { QUAKE_SOURCES, fetchTsunami } from "./sources";
 import { EMPTY_SLOW, buildState, stableOf, type Slow } from "../../core/build-state";
 import { Store, hashOf } from "./store";
+import { dispatch } from "./notify/dispatch";
 
 interface Hb { fastMs: number; sources: State["sources"] }
 const HB_EVERY_MIN = 5;
@@ -38,6 +39,7 @@ export async function runTurn(env: Env, nowMs: number): Promise<void> {
   const hash = hashOf(stableOf(state));
   if (hash !== prevHash) await store.put("state", state, { hash });
   if (alive && (minute % HB_EVERY_MIN === 0 || !hb)) await store.put("hb", { fastMs, sources: state.sources } satisfies Hb);
+  try { await dispatch(env, store, state, nowMs); } catch { /* notifications must never stop the state from being written */ }
 }
 
 const worker = {

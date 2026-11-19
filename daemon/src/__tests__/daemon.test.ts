@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Env, KV } from "../env";
+import type { Env } from "../env";
+import { MemKV } from "./memkv";
 import { handleRequest, type EdgeCache } from "../http";
 import { runTurn } from "../index";
 import { Store } from "../store";
@@ -8,14 +9,6 @@ import { Store } from "../store";
 const sample = (f: string) => readFileSync(`core/__fixtures__/samples/${f}`);
 const NOW = Date.parse("2026-11-18T13:00:00Z"); // minute 0: tsunami feeds are fetched and the heartbeat is written
 
-class MemKV implements KV {
-  data = new Map<string, { value: string; metadata: unknown }>();
-  puts: string[] = [];
-  gets = 0;
-  async get(key: string) { this.gets++; return this.data.get(key)?.value ?? null; }
-  async getWithMetadata<M>(key: string) { const e = this.data.get(key); return { value: e?.value ?? null, metadata: (e?.metadata ?? null) as M | null }; }
-  async put(key: string, value: string, opts?: { metadata?: unknown }) { this.puts.push(key); this.data.set(key, { value, metadata: opts?.metadata }); }
-}
 
 function stubSources(failing: string[] = []) {
   vi.stubGlobal("fetch", async (url: string) => {

@@ -9,9 +9,9 @@
 # Note: GitHub may delay scheduled runs by several minutes under load; this is a best-effort alert, not a siren.
 name: alerts
 
+# Disabled in Faz 6: the Cloudflare Worker (daemon/) now sends the alerts. Only a manual run remains.
+# The old schedule was:  schedule: - cron: "*/5 * * * *"
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:

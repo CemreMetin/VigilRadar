@@ -3,6 +3,7 @@ import type { State } from "../../core/types";
 import type { Env } from "./env";
 import { type Slow } from "../../core/build-state";
 import { Store } from "./store";
+import { subscribe, unsubscribe, vapid } from "./subs";
 
 interface Hb { fastMs: number; sources: State["sources"] }
 
@@ -62,8 +63,12 @@ export async function handleRequest(request: Request, env: Env, nowMs: number, c
   const c = cors(request, env);
   const url = new URL(request.url);
   if (request.method === "POST" && url.pathname === "/v1/ingest/slow") return ingestSlow(request, env);
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...c, "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Max-Age": "86400" } });
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...c, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Max-Age": "86400" } });
+  if (request.method === "POST" && url.pathname === "/v1/push/subscribe") return subscribe(request, env, c);
+  if (request.method === "POST" && url.pathname === "/v1/push/unsubscribe") return unsubscribe(request, env, c);
   if (request.method !== "GET") return json({ error: "not found" }, 404, c);
+
+  if (url.pathname === "/v1/vapid") return vapid(env, c);
 
   if (url.pathname === "/v1/health") {
     const { hb, fastAgeSec, stale } = await load(env, nowMs);
