@@ -31,12 +31,11 @@ const TYPES = [12, 13, 14, 22, 23, 24] as const; // Actor1/Actor2 Type1..3 Code
 const ARMED = new Set(["MIL", "REB", "SEP", "INS"]); // military, rebels, separatists, insurgents
 const CIVIL = new Set(["COP", "CRM"]); // police, criminals
 
-/** The actor rule (VIGIL.md 5.6): police or criminal actors drop the row; otherwise an armed actor or two different countries keep it. */
+/** The actor rule (VIGIL.md 5.6): police or criminal actors drop the row; otherwise an armed actor must be present. */
 export function armedConflict(cols: readonly string[]): boolean {
   const types = TYPES.map((i) => cols[i]);
   if (types.some((t) => CIVIL.has(t))) return false;
-  const [a1, a2] = COUNTRY.map((i) => cols[i]);
-  return types.some((t) => ARMED.has(t)) || (!!a1 && !!a2 && a1 !== a2);
+  return types.some((t) => ARMED.has(t));
 }
 
 /** Throws when a row does not look like GDELT 2.0 Events, so a changed format stops the run instead of feeding bad rows. */

@@ -72,10 +72,15 @@ describe("actor rule (VIGIL.md 5.6)", () => {
     expect(kept(act({ t1: "JUD" }))).toBe(0);
     expect(kept(act({ c2: "SEA", t2: "IGO" }))).toBe(0);
   });
-  it("keeps an armed actor, or two different countries", () => {
+  it("drops two different countries without an armed actor (Beijing CHN/USA diplomacy, Miami ISR/IRN)", () => {
+    expect(kept(act({ c1: "CHN", c2: "USA", t1: "GOV" }))).toBe(0);
+    expect(kept(act({ c1: "CHN", c2: "USA" }))).toBe(0);
+    expect(kept(act({ c1: "ISR", c2: "IRN" }))).toBe(0);
+  });
+  it("keeps an armed actor", () => {
     expect(kept(act({ c1: "UKR", c2: "UKR", t2: "MIL" }))).toBe(1);
     expect(kept(act({ t1: "REB" }), act({ t1: "SEP" }), act({ t2: "INS" }))).toBe(3);
-    expect(kept(act({ c1: "UKR", c2: "RUS" }))).toBe(1);
+    expect(kept(act({ c1: "UKR", c2: "RUS", t1: "MIL" }))).toBe(1);
   });
   it("the first file's actor columns are checked", () => {
     expect(() => parseGdeltTsv(act({ c1: "usa-bad" }), true)).toThrow(/layout changed/);
