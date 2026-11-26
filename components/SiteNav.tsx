@@ -1,18 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import LangSwitch from "@/components/LangSwitch";
 import { useLang } from "@/lib/lang";
 
 type PageLink = { href: string; label: string; blurb: string };
 
-/** The one list of pages: the pages menu, the wiki sidebar and the offline save list all read it. */
+/** Every content page: the wiki sidebar, the offline save list and the search index read it. */
 export const PAGE_GROUPS: { title: string; pages: PageLink[] }[] = [
-  { title: "Home", pages: [{ href: "/", label: "Home", blurb: "Start" }] },
-  { title: "Scenarios", pages: [{ href: "/library", label: "Library", blurb: "What could go wrong, and how well we know it" }] },
+  { title: "Map", pages: [{ href: "/", label: "Map", blurb: "Live radar and simulator" }] },
+  { title: "Scenarios", pages: [{ href: "/library", label: "Scenarios", blurb: "What could go wrong, and how well we know it" }] },
   { title: "Metrics", pages: [{ href: "/metrics", label: "Metrics", blurb: "The live counters" }] },
   { title: "Survive", pages: [{ href: "/survive", label: "Survive", blurb: "What you can do (works offline)" }] },
   {
-    title: "Library",
+    title: "Atlases",
     pages: [
       { href: "/nuclear", label: "Nuclear", blurb: "Arsenals, plants, tension pairs" },
       { href: "/health", label: "Health", blurb: "WHO outbreak reports" },
@@ -31,34 +33,6 @@ export const PAGE_GROUPS: { title: string; pages: PageLink[] }[] = [
     ],
   },
 ];
-
-/** Compact menu used in page headers. A <details> element: no JavaScript needed. */
-export function PagesMenu() {
-  return (
-    <details className="relative">
-      <summary className="mono cursor-pointer list-none text-body text-dim hover:text-accent [&::-webkit-details-marker]:hidden">
-        pages ▾
-      </summary>
-      <div className="panel absolute right-0 z-50 mt-2 w-72 border border-line-strong bg-panel-solid">
-        {PAGE_GROUPS.map((g) => (
-          <div key={g.title} className="border-b border-line last:border-0">
-            <p className="label px-3 pt-2">{g.title}</p>
-            <ul>
-              {g.pages.map((p) => (
-                <li key={p.href}>
-                  <Link href={p.href} className="block px-3 py-1.5 hover:bg-accent/10">
-                    <span className="mono text-body text-accent">{p.label}</span>
-                    <span className="block text-body text-dim">{p.blurb}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </details>
-  );
-}
 
 const MAIN = [
   { href: "/", en: "Map", tr: "Harita" },
@@ -82,24 +56,16 @@ export function MainNav({ current, onMap }: { current?: string; onMap?: () => vo
   );
 }
 
-/** Header for content pages. */
+/** Header for content pages: the brand, the three pages and the language. */
 export default function SiteNav() {
+  const path = usePathname() ?? "";
+  const current = path === "/about" ? "/about" : path.startsWith("/library") ? "/library" : undefined;
   return (
     <header className="no-print border-b border-line">
-      <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
-        <Link href="/" className="mono text-read font-bold tracking-[0.2em] text-accent">
-          MONITORING
-        </Link>
-        <nav aria-label="Primary" className="flex flex-wrap gap-x-4 gap-y-1 text-body">
-          {[...PAGE_GROUPS.slice(0, 3).flatMap((g) => g.pages), { href: PAGE_GROUPS[3].pages[0].href, label: PAGE_GROUPS[3].title }].map((p) => (
-            <Link key={p.href} href={p.href} className="mono text-dim hover:text-accent">
-              {p.label.toLowerCase()}
-            </Link>
-          ))}
-        </nav>
-        <div className="ml-auto">
-          <PagesMenu />
-        </div>
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-3 py-1 md:h-[51px] md:flex-nowrap">
+        <Link href="/" className="mono text-read font-bold tracking-[0.2em] text-accent">VIGILRADAR</Link>
+        <MainNav current={current} />
+        <div className="ml-auto"><LangSwitch /></div>
       </div>
     </header>
   );

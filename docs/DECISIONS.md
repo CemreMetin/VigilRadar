@@ -89,3 +89,7 @@
 2026-11-27 · Boğaz → şok: hormuz, suez, panama, bosporus→blacksea, mandeb→suez; Malacca'da düğme yok · karşılık gelen şok tanımlı değil
 2026-11-27 · Isı haritası dolgu renkleri metin rengi olarak kullanılmaz; kare örnek + yazı · koyu tonlar 4,5:1 kontrastı geçmez
 2026-11-27 · world.json preload'u şartnamedeki gibi `app/layout.tsx` içinde (tüm sayfalarda); `serve-out.mjs` artık `_headers` bloklarını yola göre uygular
+2026-11-27 · "Reference Atlases" 5 bağlantı (şartname 4 diyor ama 5 ad veriyor) · adlandırılanların hepsi eklendi
+2026-11-27 · İçerik sayfalarının wiki kenar sütunu (sayfa ağacı + arama) kaldı; üst menü 3 bağlantı · kaldırılırsa survive, sources, methodology, glossary, country sayfaları erişilemez olur · dil düğmesi yalnızca üst çubukta
+2026-11-27 · Eski harita bağlantıları: süper volkan → VEI 7 simülasyonu, ülke sayfası → o ülkeyle Hürmüz simülasyonu, nükleer → `/`, eski alerts hattı → `/?q=<olay>` · `scripts/check-layers.mjs` eski (yönlendirilmeyen) panoyu sınar, dokunulmadı
+2026-11-27 · Paket adı `vigilradar`; yazdırma altbilgileri `vigilradar.pages.dev` · `monitoring.*` localStorage anahtarları görünmez ve değiştirilmedi (kayıtlı işaretler kaybolmasın)

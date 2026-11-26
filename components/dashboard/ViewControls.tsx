@@ -31,7 +31,7 @@ export default function ViewControls({
       </div>
       <PrintMapButton
         getMap={() => controls.current?.getMap()}
-        title={() => `Monitoring map: ${document.querySelector<HTMLElement>("[data-map-title]")?.dataset.mapTitle ?? "World"}`}
+        title={() => `VigilRadar map: ${document.querySelector<HTMLElement>("[data-map-title]")?.dataset.mapTitle ?? "World"}`}
         getLegend={() => [
           ...[...document.querySelectorAll('[data-layer-list] button[aria-pressed="true"] .flex-1')].map((e) => `Layer: ${e.textContent}`),
           ...[...document.querySelectorAll("[data-legend] p")].map((e) => e.textContent ?? ""),

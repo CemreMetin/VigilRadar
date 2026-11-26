@@ -6,6 +6,7 @@ import { TierBadge, type Tier } from "@/components/ui";
 import { PAGE_META } from "@/data/pages";
 import WikiShell, { type WikiSection } from "@/components/WikiShell";
 import ScenarioTable from "@/components/ScenarioTable";
+import ScenarioHub from "@/components/ScenarioHub";
 
 export const metadata: Metadata = {
   title: "Scenarios · VigilRadar",
@@ -63,6 +64,7 @@ export default function ScenariosPage() {
       <SiteNav />
       <WikiShell
         title="Scenarios"
+        lead={<ScenarioHub />}
         intro="How things could go badly wrong, and how well we actually know it. Each scenario is rated on the quality of the evidence behind it (not on how likely it is), says what has already happened, what models and experts estimate, and what you can do. Seven have interactive explorers."
         {...PAGE_META.scenarios}
         translated

@@ -19,7 +19,7 @@ export default function SupervolcanoesPage() {
           What a supereruption could do:{" "}
           <Link href="/library/supervolcano" className="text-accent hover:underline">Supervolcano scenario →</Link>
           {" · "}
-          <Link href="/?sc=volcano" className="text-accent hover:underline">Show on the map →</Link>
+          <Link href="/?mode=sim&shock=volcano-vei7" className="text-accent hover:underline">Simulate on the map →</Link>
         </p>
     </>) },
     { id: "reading", label: "Reading the watchlist", group: "Context", content: (<>

@@ -3,7 +3,6 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { GROUPS, type GroupId, type Mode } from "@/lib/lenses";
 import type { WorldState } from "@/lib/types";
-import { PagesMenu } from "../SiteNav";
 
 /**
  * Top bar = macro context: which scenario am I looking at? Two rows. The first has the scenario groups
@@ -37,7 +36,7 @@ export default function TopBar({
   return (
     <div className="flex flex-wrap items-stretch gap-x-3 px-3 lg:contents">
       <div className="float-panel flex shrink-0 flex-col justify-center py-1.5 pr-2 lg:left-3 lg:top-3 lg:px-3">
-        <h1 className="mono text-body font-bold tracking-[0.22em] text-accent">MONITORING</h1>
+        <h1 className="mono text-body font-bold tracking-[0.22em] text-accent">VIGILRADAR</h1>
         <span className="label hidden sm:block">global risk board</span>
       </div>
 
@@ -90,10 +89,6 @@ export default function TopBar({
               );
             })}
         </div>
-      </div>
-
-      <div className="float-panel ml-auto flex shrink-0 items-center pl-1 lg:right-3 lg:top-3 lg:ml-0 lg:px-3 lg:py-2.5">
-        <PagesMenu />
       </div>
     </div>
   );

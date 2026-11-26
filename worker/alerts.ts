@@ -17,7 +17,7 @@ import { dashboardLink, formatMessage, sendTelegram } from "./alerts/telegram";
 
 const DRY = process.argv.includes("--dry");
 const NO_SEND = process.argv.includes("--no-send");
-const SITE = process.env.SITE_URL ?? "https://monitoring-9l7.pages.dev";
+const SITE = process.env.SITE_URL ?? "https://vigilradar.pages.dev";
 const SEND_WINDOW_H = 3;
 const STATE = path.join(process.cwd(), ".cache", "alerts", "state.json");
 const OUT = path.join(process.cwd(), "public", "data", "alerts.json");

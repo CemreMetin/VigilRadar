@@ -84,7 +84,7 @@ export default function PackView() {
           {mapImage && <img src={mapImage} alt={`Map of ${country ? country.name : "the world"}`} className="light-paper pack-map" />}
           <p className="sheet-sub">Basemap © CARTO, © OpenStreetMap contributors.</p>
         </section>
-        <p className="print-footer">VigilRadar · monitoring-9l7.pages.dev · printed {dates.on} · data as of {dates.asOf}</p>
+        <p className="print-footer">VigilRadar · vigilradar.pages.dev · printed {dates.on} · data as of {dates.asOf}</p>
       </div>
     </main>
   );

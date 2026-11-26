@@ -33,12 +33,12 @@ assert.equal(t[0].level, "critical");
 assert.equal(tsunamiAlerts([{ ...parsed[0], category: "Information" }], now).length, 0);
 assert.equal(tsunamiAlerts([{ ...parsed[0], category: "Watch" }], now)[0].level, "notice");
 
-// the Telegram message carries type, severity, coordinates and a link to the scenario tab; markup is escaped
+// the Telegram message carries type, severity, coordinates and a link to the event on the map; markup is escaped
 const msg = formatMessage({ ...quakeAlerts([q({ mag: 7.2, place: "5 km <N> of A&B" })], now)[0] }, "https://site.example");
 assert.match(msg, /CRITICAL/);
 assert.match(msg, /Event type: quake/);
 assert.match(msg, /Coordinates: 1\.000, 2\.000/);
-assert.match(msg, /https:\/\/site\.example\/\?sc=overview&amp;sel=usgs%3Ax/);
+assert.match(msg, /https:\/\/site\.example\/\?q=usgs%3Ax/);
 assert.ok(msg.includes("5 km &lt;N&gt; of A&amp;B"));
 
 // a quote cannot break out of href, and a non-http(s) source link is not made clickable

@@ -114,7 +114,7 @@ export default function CountryView() {
           </Card>
         ) : <p className="mt-4 text-read text-dim">No active signals for this country right now.</p>}
         <p className="mt-6 text-read">
-          <Link href={`/?sc=nuclear&sel=country%3A${p.iso3}&tab=links`} className="text-accent hover:underline">Show on the map with connections →</Link>
+          <Link href={`/?mode=sim&shock=hormuz&country=${p.iso3}`} className="text-accent hover:underline">Simulate this country on the map →</Link>
         </p>
       </>) },
       ...(arsenal ? [{ id: "nuclear", label: "Nuclear", group: "Profile", content: (<>

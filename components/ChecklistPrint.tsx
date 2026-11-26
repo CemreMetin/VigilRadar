@@ -48,7 +48,7 @@ export function usePrintSheet() {
           {job.kind === "plan" && <PlanSheet />}
           {job.kind === "card" && <WalletCard />}
           <p className="print-footer">
-            VigilRadar · monitoring-9l7.pages.dev · printed {dates.on} · data as of {dates.asOf}
+            VigilRadar · vigilradar.pages.dev · printed {dates.on} · data as of {dates.asOf}
           </p>
         </div>,
         document.body,

@@ -75,7 +75,7 @@ export default function NuclearModule() {
       </ul>
       <p className="mt-3 text-body">
         <Link href="/nuclear" className="text-accent hover:underline">Arsenals by country →</Link>{" · "}
-        <Link href="/?sc=nuclear" className="text-accent hover:underline">Show on the map →</Link>
+        <Link href="/" className="text-accent hover:underline">Plant sites on the map →</Link>
       </p>
     </section>
   );

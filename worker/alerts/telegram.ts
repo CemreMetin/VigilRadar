@@ -10,9 +10,8 @@ import type { Alert } from "../../lib/alerts";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export function dashboardLink(a: Alert, site: string): string {
-  const p = new URLSearchParams({ sc: a.scenario });
-  if (a.entityId) p.set("sel", a.entityId);
-  return `${site.replace(/\/$/, "")}/?${p}`;
+  const query = a.entityId ? `?${new URLSearchParams({ q: a.entityId })}` : "";
+  return `${site.replace(/\/$/, "")}/${query}`;
 }
 
 /** The message text (HTML parse mode). Pure, so it can be tested and printed in dry runs. */
@@ -31,7 +30,7 @@ export function formatMessage(a: Alert, site: string): string {
     `Coordinates: ${coords}`,
     `Time: ${when}`,
     `Source: ${/^https?:\/\//i.test(a.sourceUrl) ? `<a href="${esc(a.sourceUrl)}">${esc(a.sourceName)}</a>` : esc(a.sourceName)}`,
-    `Dashboard: <a href="${esc(dashboardLink(a, site))}">open the ${esc(a.scenario)} tab</a>`,
+    `Dashboard: <a href="${esc(dashboardLink(a, site))}">open the map</a>`,
     "",
     "Automatic message from published data; figures can be revised. Not an official warning: follow your national authority.",
   ].join("\n");

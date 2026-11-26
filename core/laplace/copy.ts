@@ -127,5 +127,16 @@ export const SIM_UI = {
   legend: t("Impact colours", "Etki renkleri"),
 } as const;
 
+export const HUB_UI = {
+  simulations: t("Interactive Laplace Simulations", "Etkileşimli Laplace Simülasyonları"),
+  open: t("Simulate on map", "Haritada simüle et"),
+  atlases: t("Reference Atlases", "Başvuru Atlasları"),
+  links: t("Causal Web", "Nedensellik Ağı"),
+  nuclear: t("Nuclear", "Nükleer"),
+  supervolcanoes: t("Supervolcanoes", "Süper volkanlar"),
+  trajectory: t("Climate Trajectory", "İklim Gidişatı"),
+  metrics: t("Live Counters", "Canlı Sayaçlar"),
+} as const;
+
 export const dayRange = (from: number, to: number): Bilingual =>
   from === to ? t(`Day ${from}`, `Gün ${from}`) : t(`Day ${from}–${to}`, `Gün ${from}–${to}`);

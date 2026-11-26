@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLang } from "@/lib/lang";
 import { useLazyJson } from "@/lib/useLazyJson";
-import LangSwitch from "./LangSwitch";
 import { PAGE_GROUPS } from "./SiteNav";
 
 type SearchEntry = { url: string; page: string; section: string; text: string };
@@ -66,6 +65,7 @@ const isActivePage = (path: string, href: string) => path === href || path.start
 
 export default function WikiShell({
   title,
+  lead,
   intro,
   updated,
   keyPoints,
@@ -77,6 +77,8 @@ export default function WikiShell({
   translated = false,
 }: {
   title: string;
+  /** shown directly under the title, above the introduction */
+  lead?: ReactNode;
   intro?: ReactNode;
   /** "Last updated": the data date or the content date, whichever the page shows */
   updated?: string;
@@ -341,6 +343,7 @@ export default function WikiShell({
           <h1 className="mono text-title font-bold tracking-wide" style={{ color: accent }}>
             {title}
           </h1>
+          {lead}
           {intro && <div className="mt-3 text-read leading-relaxed text-dim">{intro}</div>}
           {updated && <p className="mono mt-2 text-body text-dim">Last updated: {updated}</p>}
           {keyPoints && index <= 0 && (
@@ -362,7 +365,6 @@ export default function WikiShell({
             <button type="button" className="btn mono px-3 py-1 text-body font-bold" onClick={() => print("all")}>
               Print whole page
             </button>
-            <LangSwitch />
           </div>
           {lang === "tr" && !translated && <p className="no-print mt-2 text-body text-dim">Bu sayfa yalnızca İngilizce. Türkçe: Survive ve Scenarios sayfaları. (This page is English only.)</p>}
 
@@ -395,7 +397,7 @@ export default function WikiShell({
             </div>
           )}
           <p className="print-footer hidden print:block">
-            VigilRadar · monitoring-9l7.pages.dev · printed {printedOn} · data as of {dataAsOf}
+            VigilRadar · vigilradar.pages.dev · printed {printedOn} · data as of {dataAsOf}
           </p>
 
           <div className="no-print mt-10 flex justify-between gap-3 border-t border-line pt-3">
