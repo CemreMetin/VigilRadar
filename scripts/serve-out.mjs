@@ -7,15 +7,15 @@ import { extname, join, normalize } from "node:path";
 
 const PORT = Number(process.argv[2] ?? 8081);
 const ROOT = join(process.cwd(), "out");
-// the "/*" block of out/_headers (Cloudflare Pages format) is sent on every response, like the CDN does
-const HEADERS = existsSync(join(ROOT, "_headers"))
-  ? Object.fromEntries(
-      readFileSync(join(ROOT, "_headers"), "utf8")
-        .split(/\r?\n/)
-        .filter((l) => /^\s+\S+:/.test(l))
-        .map((l) => [l.slice(0, l.indexOf(":")).trim(), l.slice(l.indexOf(":") + 1).trim()]),
-    )
-  : {};
+// out/_headers (Cloudflare Pages format) is applied the way the CDN does: every block whose path matches the request
+const RULES = [];
+if (existsSync(join(ROOT, "_headers")))
+  for (const line of readFileSync(join(ROOT, "_headers"), "utf8").split(/\r?\n/)) {
+    if (line.startsWith("/")) RULES.push({ path: line.trim(), headers: {} });
+    else if (/^\s+\S+:/.test(line)) RULES.at(-1).headers[line.slice(0, line.indexOf(":")).trim()] = line.slice(line.indexOf(":") + 1).trim();
+  }
+const matches = (rule, path) => (rule.endsWith("*") ? path.startsWith(rule.slice(0, -1)) : path === rule);
+const headersFor = (path) => Object.assign({}, ...RULES.filter((r) => matches(r.path, path)).map((r) => r.headers));
 const TYPES = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css",
   ".json": "application/json", ".webmanifest": "application/manifest+json", ".png": "image/png", ".ico": "image/x-icon",
@@ -40,6 +40,6 @@ createServer((req, res) => {
     file = join(ROOT, "404.html");
     status = 404;
   }
-  res.writeHead(status, { "Content-Type": TYPES[extname(file)] ?? "application/octet-stream", "Cache-Control": "no-cache", ...HEADERS });
+  res.writeHead(status, { "Content-Type": TYPES[extname(file)] ?? "application/octet-stream", "Cache-Control": "no-cache", ...headersFor(url.pathname) });
   res.end(readFileSync(file));
 }).listen(PORT, () => console.log(`serving out/ on http://localhost:${PORT}`));

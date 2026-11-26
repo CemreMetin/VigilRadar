@@ -82,3 +82,10 @@
 2026-11-27 · Laplace: 132 profilsiz ülke için world.json adı → ISO tablosu `countries.ts` içinde; TR/EN adlar `Intl.DisplayNames`; profil verisi yoksa geometri merkezi · world.json yalnızca ad taşır
 2026-11-27 · Laplace yedek modeli: açlık >%10 gıdaya +0,25'e kadar, su stresi >%40 +0,05, 2500 km içinde 0,35'e kadar yakınlık; santral sayısı kullanılmadı · santral verisinin bu 8 şok için savunulabilir bir etkisi yok
 2026-11-27 · Laplace: güneş fırtınasında tüm ülkeler enlem formülünden; derece 1/2/3 eşiği en yüksek yapısal maruziyet ≥0,65 / ≥0,40; dünya endeksi 44 profilli ülkenin ortalaması
+2026-11-27 · Ana ekran durumu: `?mode=sim…` / `?q=` yalnızca adresten okunur (`lib/useSearch.ts`); sürgüler adresi yazmaz, `Paylaş` ve mod geçişi yazar · saniyede 13 `replaceState` Safari sınırına takılır, `useSearchParams` statik exportta Suspense ister
+2026-11-27 · SIMULATE'ta ülke belirtilmemişse TR arayüzde TUR, EN arayüzde USA seçili · boş panel yerine anlamlı ilk ekran
+2026-11-27 · Oynat her zaman 1. günden başlar (9 sn, ~13 güncelleme/sn, setInterval) · rAF yalnızca halka ve yayların bir kerelik açılışı için
+2026-11-27 · LIVE durum satırı (küresel + bölge düzeyi, il seçici, boğaz özeti) üst çubuktan alt satıra indi; yasal uyarı sağ sütunun altında · üst çubuk 52 px ve 3 link sınırı
+2026-11-27 · Boğaz → şok: hormuz, suez, panama, bosporus→blacksea, mandeb→suez; Malacca'da düğme yok · karşılık gelen şok tanımlı değil
+2026-11-27 · Isı haritası dolgu renkleri metin rengi olarak kullanılmaz; kare örnek + yazı · koyu tonlar 4,5:1 kontrastı geçmez
+2026-11-27 · world.json preload'u şartnamedeki gibi `app/layout.tsx` içinde (tüm sayfalarda); `serve-out.mjs` artık `_headers` bloklarını yola göre uygular

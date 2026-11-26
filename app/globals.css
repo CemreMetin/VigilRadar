@@ -122,6 +122,13 @@ body {
   cursor: not-allowed;
 }
 
+/* sliders of the simulator: the native control in the accent colour, tall enough for a finger */
+.range {
+  accent-color: var(--accent);
+  height: 28px;
+  cursor: pointer;
+}
+
 .label {
   font-family: var(--font-mono-face), ui-monospace, monospace;
   font-size: 10px;
@@ -331,16 +338,12 @@ body {
 .panel-scn,
 .float-panel {
   background: color-mix(in srgb, var(--panel-solid) var(--glass), transparent);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
   border: 1px solid color-mix(in srgb, var(--scn, var(--accent)) 50%, transparent);
   transition: border-color 400ms;
 }
 /* the floating brand, scenario menu and pages menu exist only on desktop (they are plain rows in the stacked bar below lg) */
 .float-panel {
   background: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
   border: 0;
 }
 @media (min-width: 1024px) {
@@ -348,18 +351,16 @@ body {
     position: absolute;
     z-index: 30;
     background: color-mix(in srgb, var(--panel-solid) var(--glass), transparent);
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
     border: 1px solid color-mix(in srgb, var(--scn, var(--accent)) 50%, transparent);
   }
 }
-/* stacked layout (panels sit under the map) and users who ask for less transparency: solid panels, no blur */
+/* stacked layout (panels sit under the map) and users who ask for less transparency: solid panels */
 @media (max-width: 1023px) {
-  .panel-scn { background: var(--panel-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .panel-scn { background: var(--panel-solid); }
 }
 @media (prefers-reduced-transparency: reduce) {
   .panel-scn,
-  .float-panel { background: var(--panel-solid) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  .float-panel { background: var(--panel-solid) !important; }
 }
 
 /* Scenario tab: flat, 1px border; hover tints the fill, selected is a solid matte fill */

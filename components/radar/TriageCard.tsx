@@ -8,12 +8,15 @@ import { PLANTS } from "@/core/build-state";
 import { agoText } from "@/lib/radar/format";
 import { chokepointKey, linkRadiusKm, namedLinks, triageQuake, type ChokepointKey, type NamedLink } from "@/lib/radar/triage";
 import { useT } from "@/lib/radar/useT";
+import { SIM_UI } from "@/core/laplace/copy";
+import type { ShockId } from "@/core/laplace/types";
+import { shockForStrait } from "@/lib/radar/laplaceGeo";
 import type { Selection } from "./RadarMap";
 
 const SRC = { usgs: "USGS", emsc: "EMSC", afad: "AFAD", kandilli: "B.Ü. KRDAE" } as const;
 const SEV = { P0: "sevP0", P1: "sevP1", P2: "sevP2" } as const;
 
-interface Props { state: State; sel: Selection; now: number; province: Province | null; onClose: () => void }
+interface Props { state: State; sel: Selection; now: number; province: Province | null; onClose: () => void; onSimulate: (shock: ShockId) => void }
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -31,7 +34,7 @@ export function MiniLine({ values }: { values: number[] }) {
   return <svg viewBox="0 0 240 48" className="h-12 w-full" role="img" aria-label={`${values.length}`}><polyline points={pts} fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent" /></svg>;
 }
 
-export default function TriageCard({ state, sel, now, province, onClose }: Props) {
+export default function TriageCard({ state, sel, now, province, onClose, onSimulate }: Props) {
   const { t, c, fill, lang } = useT();
   const locale = lang === "tr" ? "tr-TR" : "en-GB";
   const ago = (ms: number) => agoText(now - ms, t);
@@ -68,6 +71,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
   let body: ReactNode = null;
   let title = "";
   let more: ReadMore | null = null; // the one /library page that fits, if any
+  let straits: ChokepointKey[] = []; // the straits this card touches; the first one with a shock gets the simulate button
 
   if (sel.kind === "quake") {
     const q = state.quakes.find((x) => x.id === sel.id) as MergedQuake | undefined;
@@ -76,6 +80,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
     const tri = triageQuake(state, q, province);
     title = `${t("quake")} M${b.mag}`;
     more = readMoreFor(b.lat, b.lon);
+    straits = tri.chokepoints;
     body = (
       <>
         <Block title={t("qWhat")}>
@@ -117,6 +122,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
     const links = namedLinks(state, state.links.filter((l) => l.fromKind === "conflict" && l.fromId === k.id));
     const keys = [...new Set(links.filter((l) => l.link.toKind === "chokepoint").map((l) => chokepointKey(l.name)).filter((x): x is ChokepointKey => !!x))];
     title = t("conflict");
+    straits = keys;
     body = (
       <>
         <Block title={t("qWhat")}>
@@ -149,6 +155,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
     const key = chokepointKey(cp.name);
     const links = namedLinks(state, state.links.filter((l) => l.toId === cp.id));
     title = `${t("chokepoint")}: ${cp.name}`;
+    straits = key ? [key] : [];
     body = (
       <>
         <Block title={t("qWhat")}>
@@ -169,6 +176,8 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
     );
   }
 
+  const shock = straits.map(shockForStrait).find((s) => s !== null);
+
   return (
     <article aria-label={title} className="border-t border-line-strong">
       <div className="flex items-center justify-between px-3 py-2">
@@ -176,6 +185,7 @@ export default function TriageCard({ state, sel, now, province, onClose }: Props
         <button type="button" onClick={onClose} aria-label={t("closeCard")} className="mono px-2 text-dim hover:text-fg">×</button>
       </div>
       {body}
+      {shock && <p className="border-t border-line p-3"><button type="button" onClick={() => onSimulate(shock)} className="btn mono min-h-11 w-full px-3 py-2 text-body font-bold">{SIM_UI.simulateThis[lang]} →</button></p>}
       {more && <p className="border-t border-line p-3 text-body"><Link href={`/library/${more.id}`} className="text-accent hover:underline">{t("readMore")}: {more.title[lang]} →</Link></p>}
     </article>
   );

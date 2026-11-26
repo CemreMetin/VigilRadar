@@ -402,18 +402,33 @@ Eski `MONITORING` sitesi 15+ dış harita karosu, 1,5 MB eşzamanlı JSON (`orbi
    - `SiteNav` ekle (tüm sayfalarla tek üst çubuk).
 4. **Açık Kaynak Vitrin `README.md` (`CemreMetin` / Sunday Hunter Üçlemesi Stili):**
    - **Dil ve ton:** İngilizce ana gövde (+ sonda kısa Türkçe özet). Ton: Cemre'nin `tess-planet-hunter` / `subsurface-ghost-hunter` / `ztf-shadow-hunter` repolarındaki **hafif esprili, samimi, kendini tiye alan ama teknik olarak jilet gibi keskin ve eğitici** üslup (kurumsal pazarlama jargonu ve yapay AI süsleri yasak).
-   - **Zorunlu akış ve bölümler:**
-     1. `# VigilRadar` + Shields.io rozet satırı (`Next.js 16`, `Cloudflare Workers`, `GitHub Actions`, `Cost: $0/month`, `Open Data`).
-     2. **Kişisel çıkış hikâyesi (2–3 akıcı paragraf):** Deprem erken uyarı uygulaması yapmaya çalışıp fizik yasaları ve resmi API gecikmesiyle yüzleşme → piyasadaki 40 yanıp sönen noktalı "God's Eye" panolarının *"peki bu benim ülkemi 3 haftada nasıl vurur?"* sorusuna cevap vermemesi → erken uyarı hayalini arşive kaldırıp \$0/ay otomatik bir **cep boyu Laplace'ın Şeytanı** (canlı radar + deterministik domino simülatörü) kurma hikâyesi.
-     3. **Küçük bağlantı tablosu (isteğe bağlı, 4 satır):** Sunday Hunter Üçlemesi (`TESS Planet Hunter`, `Subsurface Ghost Hunter`, `ZTF Shadow & Blindspot Hunter`) + **VigilRadar** (sıfır maliyetli otomatik bulut + Pazar kahvesi kontrolü felsefesinin devamı).
-     4. **`### My Twist on Global Risk Monitoring` (4 madde):**
+   - **Onaylı açılış bloğu (kelimesi kelimesine kullan):**
+     ```markdown
+     # VigilRadar
+
+     ![Next.js](https://img.shields.io/badge/Next.js-16%20Static-000000?logo=nextdotjs&logoColor=white)
+     ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers%20%2B%20Pages-F38020?logo=cloudflare&logoColor=white)
+     ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-30m%20Autopilot-2088FF?logo=githubactions&logoColor=white)
+     ![Cost](https://img.shields.io/badge/Cost-%240%2Fmonth-2ea44f)
+
+     This started two months ago as a private side project called **Monitoring** that has been quietly running online ever since. The problem was that I got way too carried away: twenty map layers, satellites, military bases, eighteen live counters, twenty-three apocalypse essays... opening my own dashboard exhausted even me.
+
+     While dusting off old projects from my private archive to clean up my portfolio (and hopefully land a job), I decided to rescue it and open-source it — with a brutal haircut. I archived the earthquake early-warning experiment in a git tag after physics and government API latency politely defeated it, stripped out the blinking-pin chaos every "God's Eye" map already does, and rebuilt **VigilRadar** around the one thing I actually wanted to exist:
+
+     A calm, **$0/month** live global risk desk paired with a pocket-sized **Laplace's Demon** — a deterministic domino-effect simulator where you can clog a strait, cut a subsea cable corridor, or trigger a volcanic winter, drag time forward from Day 1 to Day 180, and see *which* countries get hit, *through which channels*, and *why*.
+
+     > **Yes, an EE student shipped a Next.js app:** I usually live in Python and signal/data pipelines, so turning this into a fast web app took some teamwork. The vision, architecture, data rules, and ruthless simplification are mine — **Antigravity** and **Claude Code** handled the TypeScript grind, map optimization, and Cloudflare wiring while I kept yelling at them to make the UI simpler.
+     ```
+   - **Devamındaki zorunlu bölümler:**
+     1. **Küçük bağlantı tablosu (4 satır):** Sunday Hunter Üçlemesi (`TESS Planet Hunter`, `Subsurface Ghost Hunter`, `ZTF Shadow & Blindspot Hunter`) + **VigilRadar** (sıfır maliyetli otomatik bulut + Pazar kahvesi kontrolü felsefesinin devamı).
+     2. **`### My Twist on Global Risk Monitoring` (4 madde):**
         - *Dominoes, not blinking pins* (nokta değil, 5 kanallı etki dalgası ve Gün 1→180 zaman oynatıcı).
         - *Transparent math, zero AI fortune-telling* (LLM falı yok; EIA/IMF/FAO/World Bank/TeleGeography kaynaklı, `A/B/C` kanıt etiketli saf TypeScript graf).
         - *Zero-cost autopilot (`$0/month`)* (Cloudflare Pages + 1 dk Worker + 30 dk GitHub Actions + Worker düşerse tarayıcıdan doğrudan USGS/EMSC yedek yolu).
         - *Brutally honest about what it is NOT* (erken uyarı değil, hasar raporu değil, kehanet değil).
-     5. **`## What It Tracks & Simulates`:** Canlı 4 veri akışı + 8 interaktif Laplace şoku ve 5 kanalın sade, eğitici açıklaması.
-     6. **`## How It Works`:** Mermaid `flowchart TD` mimari diyagramı (Hızlı Hat → Cloudflare Worker/KV → Statik Site + Yavaş Hat GitHub Actions + Tarayıcı Laplace Motoru).
-     7. **`## Run Locally / Deploy Your Own ($0/month)`** (`npm ci && npm run dev`, `docs/SETUP.md` bağlantısı) + **`## Contributing`** (yeni şok veya ülke profili PR rehberi) + **Kaynaklar & Lisans**.
+     3. **`## What It Tracks & Simulates`:** Canlı 4 veri akışı + 8 interaktif Laplace şoku ve 5 kanalın sade, eğitici açıklaması.
+     4. **`## How It Works`:** Mermaid `flowchart TD` mimari diyagramı (Hızlı Hat → Cloudflare Worker/KV → Statik Site + Yavaş Hat GitHub Actions + Tarayıcı Laplace Motoru).
+     5. **`## Run Locally / Deploy Your Own ($0/month)`** (`npm ci && npm run dev`, `docs/SETUP.md` bağlantısı) + **`## Contributing`** (yeni şok veya ülke profili PR rehberi) + **Kaynaklar & Lisans**.
 5. **`docs/SETUP.md` güncellemesi:**
    - VAPID / Web Push adımını kaldır (artık gerekmiyor!).
    - Kurulumu 4 temiz adıma indir: (1) Cloudflare KV & Worker deploy, (2) `INGEST_TOKEN` + GitHub Secrets, (3) `main`'e merge & Pages deploy, (4) İsteğe bağlı Telegram kanalı.

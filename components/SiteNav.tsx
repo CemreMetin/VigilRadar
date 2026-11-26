@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLang } from "@/lib/lang";
 
 type PageLink = { href: string; label: string; blurb: string };
 
@@ -54,6 +57,28 @@ export function PagesMenu() {
         ))}
       </div>
     </details>
+  );
+}
+
+const MAIN = [
+  { href: "/", en: "Map", tr: "Harita" },
+  { href: "/library", en: "Scenarios", tr: "Senaryolar" },
+  { href: "/about", en: "About", tr: "Hakkında" },
+] as const;
+
+/** The only primary navigation: three pages. On the map itself, "Map" switches back to LIVE instead of navigating. */
+export function MainNav({ current, onMap }: { current?: string; onMap?: () => void }) {
+  const [lang] = useLang();
+  return (
+    <nav aria-label="Primary" className="flex gap-x-4 text-body">
+      {MAIN.map((p) => (
+        <Link key={p.href} href={p.href} aria-current={current === p.href ? "page" : undefined}
+          onClick={onMap && p.href === "/" ? (e) => { e.preventDefault(); onMap(); } : undefined}
+          className={`mono py-2 hover:text-accent ${current === p.href ? "text-fg" : "text-dim"}`}>
+          {p[lang]}
+        </Link>
+      ))}
+    </nav>
   );
 }
 

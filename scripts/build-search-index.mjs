@@ -8,7 +8,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 const PORT = 8099;
 const CHARS_PER_SECTION = 1200; // enough for AND matches deep in a section; the file stays well under 300 KB
 // the page list lives in components/SiteNav.tsx; read the hrefs rather than import TSX
-const pages = [...readFileSync("components/SiteNav.tsx", "utf8").matchAll(/href: "(\/[a-z-]*)"/g)].map((m) => m[1]).filter((h) => h !== "/" && h !== "/metrics"); // the home shell and /metrics are not WikiShell pages: no sections to index
+const pages = [...readFileSync("components/SiteNav.tsx", "utf8").matchAll(/href: "(\/[a-z-]*)"/g)].map((m) => m[1]).filter((h) => !["/", "/metrics", "/about"].includes(h)); // not WikiShell pages: no sections to index
 
 const scenarios = readdirSync("out/library", { withFileTypes: true })
   .filter((d) => d.isDirectory() && !d.name.startsWith("_"))

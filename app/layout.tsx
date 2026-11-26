@@ -28,6 +28,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} ${mono.variable} h-full antialiased`}>
       <body className="h-full">
+        {/* React moves this into <head>: the map geometry downloads while the scripts are still parsing */}
+        <link rel="preload" href="/data/static/world.json" as="fetch" crossOrigin="anonymous" />
         {children}
         <PwaRegister />
       </body>

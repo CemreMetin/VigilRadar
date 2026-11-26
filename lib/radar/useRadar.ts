@@ -1,11 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { CONFIG } from "@/core/config";
-import { browserDeps, loadState, type Loaded } from "./load";
+import { browserDeps, loadState, readCache, type Loaded } from "./load";
 
-/** Polls the state every 60 s while the tab is visible; a hidden tab pauses and refreshes on return. */
+// read once, on the first client render after hydration; the server snapshot is empty
+let first: Loaded | null | undefined;
+const cachedState = () => (first === undefined ? (first = readCache(browserDeps())) : first);
+const never = () => () => {};
+
+/**
+ * Shows the last good state at once (stale-while-revalidate), then polls every 60 s while the tab is visible;
+ * a hidden tab pauses and refreshes on return.
+ */
 export function useRadar(): { loaded: Loaded | null; done: boolean } {
+  const cached = useSyncExternalStore(never, cachedState, () => null);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [done, setDone] = useState(false);
   useEffect(() => {
@@ -22,5 +31,5 @@ export function useRadar(): { loaded: Loaded | null; done: boolean } {
     document.addEventListener("visibilitychange", tick);
     return () => { alive = false; window.clearInterval(id); document.removeEventListener("visibilitychange", tick); };
   }, []);
-  return { loaded, done };
+  return { loaded: loaded ?? cached, done };
 }

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { State } from "@/core/types";
-import { loadState, type Deps } from "./load";
+import { loadState, readCache, type Deps } from "./load";
 
 const sample = (f: string) => JSON.parse(readFileSync(`core/__fixtures__/samples/${f}`, "utf8"));
 const NOW = Date.parse("2026-11-18T13:00:00Z");
@@ -54,6 +54,13 @@ describe("loadState", () => {
     const storage = mem();
     storage.setItem("vigil.lastState", "{not json");
     expect(await loadState(deps({}, { storage }))).toBeNull();
+  });
+  it("offers the cached state for the first paint: fresh keeps its source, old reads as stale", async () => {
+    const storage = mem();
+    expect(readCache(deps({}, { storage }))).toBeNull();
+    await loadState(deps(live, { storage }));
+    expect(readCache(deps({}, { storage, now: () => NOW + 60_000 }))?.source).toBe("backup");
+    expect(readCache(deps({}, { storage, now: () => NOW + 3_600_000 }))?.source).toBe("stale");
   });
   it("blocked storage does not break loading", async () => {
     const storage = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); } };

@@ -29,7 +29,7 @@ export default function RegionPicker({ region, label, open, setOpen, onPick }: P
         {t("regionLabel")}: {label} ▾
       </button>
       {open && (
-        <div className="absolute right-0 z-20 mt-1 w-64 border border-line-strong bg-panel-solid" onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}>
+        <div className="absolute bottom-full left-0 z-20 mb-1 w-64 max-w-[80vw] border border-line-strong bg-panel-solid" onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}>
           <input
             autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("filterProvinces")} aria-label={t("filterProvinces")}
             onKeyDown={(e) => { if (e.key === "Enter") { if (showGlobal && !q.trim()) pick("GLOBAL"); else if (list[0]) pick(list[0].code); } }}

@@ -26,8 +26,17 @@ const isState = (s: unknown): s is State => {
 };
 
 function save(d: Deps, loaded: Loaded): Loaded {
-  try { d.storage?.setItem(CACHE_KEY, JSON.stringify({ state: loaded.state, lastOkMs: loaded.lastOkMs })); } catch { /* storage full or blocked: the page works without it */ }
+  try { d.storage?.setItem(CACHE_KEY, JSON.stringify(loaded)); } catch { /* storage full or blocked: the page works without it */ }
   return loaded;
+}
+
+/** The last good state. It keeps its source label while it is fresh and reads as stale after that. */
+export function readCache(d: Deps): Loaded | null {
+  try {
+    const c = JSON.parse(d.storage?.getItem(CACHE_KEY) ?? "null") as Partial<Loaded> | null;
+    if (c && isState(c.state) && typeof c.lastOkMs === "number") return { state: c.state, lastOkMs: c.lastOkMs, source: d.now() - c.lastOkMs <= FRESH_MS ? c.source ?? "stale" : "stale" };
+  } catch { /* unreadable cache */ }
+  return null;
 }
 
 async function fromBackup(d: Deps): Promise<Loaded | null> {
@@ -51,11 +60,8 @@ export async function loadState(d: Deps): Promise<Loaded | null> {
     const b = await fromBackup(d);
     if (b) return b;
   } catch { /* fall through to the cache */ }
-  try {
-    const c = JSON.parse(d.storage?.getItem(CACHE_KEY) ?? "null") as { state: State; lastOkMs: number } | null;
-    if (c && isState(c.state)) return { state: c.state, source: "stale", lastOkMs: c.lastOkMs };
-  } catch { /* unreadable cache */ }
-  return null;
+  const c = readCache(d);
+  return c && { ...c, source: "stale" };
 }
 
 export function browserDeps(): Deps {

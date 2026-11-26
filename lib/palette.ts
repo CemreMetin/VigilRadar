@@ -13,6 +13,8 @@ export const COLOR = {
   accent: "#00e5ff",
   geo: "#ffb000",
   space: "#c9d1ff",
+  safe: "#00ff41",
+  land: "#0a0f14", // --panel-solid: a country without impact on the map
 } as const;
 
 export const LAYER = {
