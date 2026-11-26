@@ -12,7 +12,7 @@ const ATLASES = ["links", "nuclear", "supervolcanoes", "trajectory", "metrics"] 
 export default function ScenarioHub() {
   const [lang] = useLang();
   return (
-    <div className="no-print mt-5">
+    <div lang={lang} className="no-print mt-5">
       <h2 className="label">{HUB_UI.simulations[lang]} ({SHOCK_IDS.length})</h2>
       <ul className="mt-2 grid gap-2 sm:grid-cols-2">
         {SHOCK_IDS.map((id) => (

@@ -245,7 +245,7 @@ export default function RadarMap(props: Props) {
 
   // maplibre-gl.css makes its container position:relative, so the sizing wrapper is a separate element
   return (
-    <div className="absolute inset-0">
+    <div lang="en" className="absolute inset-0">
       <div ref={el} className="h-full w-full" role="img" aria-label={label} />
     </div>
   );

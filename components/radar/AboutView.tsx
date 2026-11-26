@@ -1,21 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { ABOUT, SOURCES, STORAGE_KEYS } from "@/core/content/about";
 import { useT } from "@/lib/radar/useT";
-import LangSwitch from "@/components/LangSwitch";
+import SiteNav from "@/components/SiteNav";
 import SourceFreshness from "./SourceFreshness";
 
 export default function AboutView() {
   const { lang, c } = useT();
   const a = ABOUT[lang];
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6 text-read">
-      <div className="flex items-center justify-between">
-        <Link href="/" className="mono text-body hover:text-accent">{a.back}</Link>
-        <LangSwitch />
-      </div>
-      <h1 className="mono mt-4 text-title">{a.title}</h1>
+    <>
+    <SiteNav />
+    <main lang={lang} className="mx-auto max-w-3xl px-4 py-6 text-read">
+      <h1 className="mono text-title">{a.title}</h1>
 
       <h2 className="label mt-6">{a.is.h}</h2>
       <p className="mt-2">{a.is.p}</p>
@@ -44,8 +41,10 @@ export default function AboutView() {
       <p className="mt-2">{a.privacy.hosts}</p>
       <p className="mt-2">{a.privacy.keys}</p>
       <ul className="mono mt-1 text-body">{STORAGE_KEYS.map((k) => <li key={k}>{k}</li>)}</ul>
+      <p className="mt-2">{a.privacy.olderKeys}</p>
 
       <p className="mt-8 border-t border-line pt-3 text-body text-dim">{c.disclaimer}</p>
     </main>
+    </>
   );
 }

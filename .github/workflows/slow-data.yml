@@ -7,6 +7,8 @@
 # Without them the job finishes green and does nothing. Scheduled workflows run only on the default branch (main).
 name: slow data
 
+# Cost: free and unlimited in a public repository. In a private repository every run counts against the monthly
+# Actions minutes (about 48 runs a day); change the cron to "0 * * * *" to halve that.
 on:
   schedule:
     - cron: "*/30 * * * *"

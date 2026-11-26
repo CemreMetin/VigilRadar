@@ -93,3 +93,6 @@
 2026-11-27 · İçerik sayfalarının wiki kenar sütunu (sayfa ağacı + arama) kaldı; üst menü 3 bağlantı · kaldırılırsa survive, sources, methodology, glossary, country sayfaları erişilemez olur · dil düğmesi yalnızca üst çubukta
 2026-11-27 · Eski harita bağlantıları: süper volkan → VEI 7 simülasyonu, ülke sayfası → o ülkeyle Hürmüz simülasyonu, nükleer → `/`, eski alerts hattı → `/?q=<olay>` · `scripts/check-layers.mjs` eski (yönlendirilmeyen) panoyu sınar, dokunulmadı
 2026-11-27 · Paket adı `vigilradar`; yazdırma altbilgileri `vigilradar.pages.dev` · `monitoring.*` localStorage anahtarları görünmez ve değiştirilmedi (kayıtlı işaretler kaybolmasın)
+2026-11-27 · README açılış bloğu şartnamenin (oturum sırasında güncellenen) 5.4 metniyle kelimesi kelimesine; lisans değiştirilmedi ve README'de PolyForm Noncommercial olarak yazıldı · metindeki "open-source" ifadesi OSI anlamında açık kaynak değil: karar sahibine bırakıldı
+2026-11-27 · `NEXT_PUBLIC_TELEGRAM_TR_URL` `data.yml` ve SETUP'tan çıkarıldı · tek kullanıcısı silinen /alert idi · elle `workflow_dispatch` yalnızca main'de deploy eder
+2026-11-27 · /about kaynak listesine modelin atıf yaptığı tüm kurumlar ve TeleGeography kablo lisansı (CC BY-NC-SA 3.0) eklendi; eski sayfaların `monitoring.*` anahtarları için tek cümlelik not · STORAGE_KEYS şartnamedeki 5 anahtar

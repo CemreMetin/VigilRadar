@@ -1,20 +1,19 @@
-# Refreshes the data, builds the static site and deploys it to Cloudflare Pages.
+# Tests, builds the static site and deploys it to Cloudflare Pages.
 #
-# Runs on every push to main, every 30 minutes, and on demand. Nothing is committed back to the repo:
-# fresh data only lives in the deployed site, so the git history stays clean.
+# Runs on a push to main and on demand. No data is fetched here: the live data comes from the Worker and the files
+# under public/data/ are committed snapshots, so a broken upstream feed can never break a deploy.
 #
 # Deploying needs two repository secrets (Settings > Secrets and variables > Actions):
 #   CLOUDFLARE_API_TOKEN    a token with "Cloudflare Pages: Edit" permission
 #   CLOUDFLARE_ACCOUNT_ID   your account id (Workers & Pages overview, right-hand side)
-# They are passed only to the three deploy steps, never to npm ci, the data feeds or the build.
+# They are passed only to the three deploy steps, never to npm ci or the build.
 # Without them the workflow still builds and tests the site; it just skips the deploy step.
-name: data and deploy
+name: build and deploy
 
-# The twice-an-hour schedule and the manual trigger are off (VIGIL.md Faz 0): deploys happen only on a push to main.
-# Faz 5 brings the new scheduled data job back as slow-data.yml.
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 # Only one run at a time; a newer run waits instead of cancelling a deploy half way
 concurrency:
@@ -30,7 +29,7 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -40,32 +39,6 @@ jobs:
           cache: npm
 
       - run: npm ci
-
-      # GDELT daily aggregates are cached, so a normal run downloads only the missing day (about 7 MB).
-      # The very first run downloads 30 days and takes a few minutes.
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-        with:
-          path: .cache/gdelt
-          key: gdelt-${{ github.run_id }}
-          restore-keys: gdelt-
-
-      # CelesTrak orbital elements are cached too: it allows one download per group every 2 hours.
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-        with:
-          path: .cache/celestrak
-          key: celestrak-${{ github.run_id }}
-          restore-keys: celestrak-
-
-      # Always the full refresh: with the cache above the slow feeds are cheap, and it avoids the
-      # fast mode carrying over stale values from the committed copy of the data.
-      - name: Refresh data
-        run: npm run data
-        env:
-          FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }} # optional: enables the active-fires layer
-
-      # Own copy of the alert list for the site (no Telegram here; the faster alerts workflow does the sending)
-      - name: Evaluate alerts
-        run: npm run alerts -- --no-send
 
       - name: Tests
         run: npm test
@@ -79,12 +52,12 @@ jobs:
       - name: Build static site
         run: npm run build
         env:
-          # baked into the static site at build time (docs/SETUP.md step 6); empty means the site runs on its backup path
+          # baked into the static site at build time (docs/SETUP.md); empty means the site runs on its backup path
           NEXT_PUBLIC_WORKER_URL: ${{ secrets.WORKER_URL }}
-          NEXT_PUBLIC_TELEGRAM_TR_URL: ${{ vars.TELEGRAM_TR_URL }}
 
       - name: Check deploy secrets
         id: secrets
+        if: github.ref == 'refs/heads/main'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -113,4 +86,4 @@ jobs:
 
       - name: Note when deploy was skipped
         if: steps.secrets.outputs.deploy != 'true'
-        run: echo "A Cloudflare secret is missing, so the site was built but not deployed."
+        run: echo "Not main, or a Cloudflare secret is missing, so the site was built but not deployed."
