@@ -61,9 +61,9 @@ export default function SiteNav() {
   const path = usePathname() ?? "";
   const current = path === "/about" ? "/about" : path.startsWith("/library") ? "/library" : undefined;
   return (
-    <header className="no-print border-b border-line">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-3 py-1 md:h-[51px] md:flex-nowrap">
-        <Link href="/" className="mono text-read font-bold tracking-[0.2em] text-accent">VIGILRADAR</Link>
+    <header className="no-print border-b border-line bg-panel-solid">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-1 px-3 py-1.5 md:h-[52px] md:flex-nowrap md:py-0">
+        <Link href="/" className="mono text-read font-bold tracking-[0.16em] text-fg">VIGILRADAR</Link>
         <MainNav current={current} />
         <div className="ml-auto"><LangSwitch /></div>
       </div>

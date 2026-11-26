@@ -8,9 +8,21 @@ import type { FC, Feature } from "./geojson";
 
 // Map data of the SIMULATE mode. Pure: the map component only hands these to MapLibre.
 
-/** Matte choropleth scale; the legend uses the same values. Fills only: several are too dark to be text colours. */
-export const TIER_FILL: Record<ImpactTier, string> = { none: COLOR.land, low: "#1d2b38", moderate: "#7a4a0b", high: "#b84309", severe: "#b51636" };
-export const CHANNEL_COLOR: Record<ChannelId, string> = { energy: COLOR.geo, trade: COLOR.accent, food: COLOR.safe, digital: COLOR.space, macro: COLOR.conflict };
+/** Warm Obsidian / Taktil Minimalizm choropleth ramp; the legend uses the same values. Fills only. */
+export const TIER_FILL: Record<ImpactTier, string> = {
+  none: COLOR.land,    // #1C1A17 espresso land
+  low: "#2E2821",      // warm bronze-stone shadow
+  moderate: "#734E18", // matte dark amber
+  high: "#B84C22",     // burnt terracotta
+  severe: "#A83434",   // deep matte crimson
+};
+export const CHANNEL_COLOR: Record<ChannelId, string> = {
+  energy: COLOR.geo,      // #D99B26 amber
+  trade: COLOR.stone,     // #D6C7B2 warm stone
+  food: COLOR.safe,       // #5B8C6A matte sage
+  digital: COLOR.space,   // #8AB2C2 observatory steel
+  macro: COLOR.accent,    // #E05A2B Braun terracotta
+};
 const ARC_STEPS = 48;
 const GRID_LAT = 50;
 
@@ -33,16 +45,37 @@ export function arcFeatures(result: SimulationResult, progress = 1): FC {
     return segments.flatMap((s): Feature[] => {
       const part = s.slice(0, Math.max(0, left));
       left -= s.length;
-      return part.length < 2 ? [] : [{ type: "Feature", geometry: { type: "LineString", coordinates: part }, properties: { color: CHANNEL_COLOR[a.channel], width: 1 + 1.5 * (a.score / 100) } }];
+      return part.length < 2 ? [] : [{
+        type: "Feature",
+        geometry: { type: "LineString", coordinates: part },
+        properties: { color: CHANNEL_COLOR[a.channel], width: 1.2 + 1.4 * (a.score / 100), order: a.order },
+      }];
     });
   }));
+}
+
+/** Destination telemetry pins at the landing point of every active domino arc. */
+export function landingFeatures(result: SimulationResult): FC {
+  return fc(result.arcs.map((a) => point(a.to[0], a.to[1], { iso3: a.iso3, order: a.order })));
+}
+
+/** Subtle 30-degree cartographic graticule behind the continents. */
+export function graticuleFeatures(): FC {
+  const lines: Feature[] = [];
+  for (let lat = -60; lat <= 60; lat += 30) {
+    lines.push({ type: "Feature", properties: { major: lat === 0 }, geometry: { type: "LineString", coordinates: [[-180, lat], [0, lat], [180, lat]] } });
+  }
+  for (let lon = -150; lon <= 180; lon += 30) {
+    lines.push({ type: "Feature", properties: { major: lon === 0 }, geometry: { type: "LineString", coordinates: [[lon, -80], [lon, 0], [lon, 80]] } });
+  }
+  return fc(lines);
 }
 
 export const shockPoint = (shock: ShockDef): FC => fc([point(shock.lon, shock.lat)]);
 
 /** The six straits; the one the shock closes is marked. */
 export function straitFeatures(shock: ShockDef): FC {
-  return fc(straits.chokepoints.map((c) => point(c.lon, c.lat, { active: c.key === shock.chokepointKey, name: c.name })));
+  return fc(straits.chokepoints.map((c) => point(c.lon, c.lat, { active: c.key === shock.chokepointKey, icon: c.key === shock.chokepointKey ? "strait-active" : "strait-idle", name: c.name })));
 }
 export const volcanoFeatures = (): FC => fc(volcanoes.volcanoes.map((v) => point(v.lon, v.lat, { name: v.name })));
 export const gridFeatures = (): FC =>

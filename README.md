@@ -18,7 +18,7 @@ A calm, **$0/month** live global risk desk paired with a pocket-sized **Laplace'
 | [TESS Planet Hunter](https://github.com/CemreMetin/tess-planet-hunter) | Part I of the Sunday Hunter trilogy: exoplanet candidates in NASA TESS light curves |
 | [Subsurface Ghost Hunter](https://github.com/CemreMetin/subsurface-ghost-hunter) | Part II: buried archaeology around Niğde in stacked Sentinel-2 imagery |
 | [ZTF Shadow & Blindspot Hunter](https://github.com/CemreMetin/ztf-shadow-hunter) | Part III: stars that suddenly go dark, and events two classifiers disagree on |
-| [VigilRadar](https://github.com/Radian-Collective/VigilRadar) | Same house rules: a free cloud that runs itself, and a two-minute check over Sunday coffee |
+| [VigilRadar](https://github.com/CemreMetin/VigilRadar) | Same house rules: a free cloud that runs itself, and a two-minute check over Sunday coffee |
 
 ### My Twist on Global Risk Monitoring
 
@@ -119,7 +119,7 @@ npm run build
 | Slow lane | `scripts/data/slow.mjs` |
 | Old data pipeline behind the older content pages (committed snapshots) | `worker/` |
 
-The specification is [VIGIL_V2_SPEC.md](VIGIL_V2_SPEC.md); decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md) (both in Turkish).
+Architecture notes and decisions are logged in [docs/DECISIONS.md](docs/DECISIONS.md) (in Turkish).
 
 ## Contributing
 
@@ -147,7 +147,7 @@ Static data: Natural Earth, GeoNames (CC BY 4.0), GeoNuclearData (ODbL 1.0), Tel
 
 Cited by the simulator: EIA, IEA, UNCTAD, UN Comtrade, FAO, World Bank, TeleGeography, ICPC, SIA, Panama Canal Authority, Robock (2000), Raible et al. (2016), NOAA SWPC, USGS Geomagnetism, Lloyd's / AER. The full list with links is on the `/about` page; the older content pages list theirs on `/sources`.
 
-Code: [PolyForm Noncommercial 1.0.0](LICENSE) — read it, run it, change it, share it for non-commercial purposes. Third-party data keeps its own licence.
+Code: [MIT License](LICENSE) — read it, run it, change it, share it. Third-party data keeps its own licence.
 
 ---
 

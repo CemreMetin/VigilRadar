@@ -46,6 +46,7 @@ export default function RadarScreen() {
   const { t, lang, c } = useT();
   const { province } = useRegion();
   const countries = useCountries(simulating);
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const state = loaded?.state ?? null;
   const recent = (state?.quakes ?? []).filter((q) => !q.retracted).slice(0, 10);
   const focus = useMemo(() => (province ? TURKEY : WORLD), [province]);
@@ -81,10 +82,23 @@ export default function RadarScreen() {
               label={simulating ? SIM_UI.mapLabel[lang] : "World map of recent earthquakes and the assets they may affect. The list of recent events is the keyboard alternative."} />
           </div>
         </div>
-        <aside className={`overflow-auto border-t border-line md:max-h-none md:w-[380px] md:shrink-0 md:border-l md:border-t-0 ${open ? "max-h-[60dvh]" : "max-h-[40dvh]"} ${simulating ? "h-[45dvh] md:h-auto" : ""}`}>
+        <aside className={`scroll-thin overflow-auto border-t border-line bg-panel-solid md:max-h-none md:w-[380px] md:shrink-0 md:border-l md:border-t-0 ${simulating ? (drawerOpen ? "h-[46dvh] md:h-auto" : "h-auto md:h-auto") : open ? "max-h-[58dvh]" : "max-h-[40dvh]"}`}>
           {simulating ? (
-            result && countries ? <LaplacePanel result={result} countries={countries} iso3={iso3} lang={lang} onCountry={(country) => change({ country })} />
-              : <p className="mono p-3 text-body text-dim" role="status">{SIM_UI.loading[lang]}</p>
+            <>
+              <button
+                type="button"
+                onClick={() => setDrawerOpen((o) => !o)}
+                aria-expanded={drawerOpen}
+                className="mono flex min-h-9 w-full items-center justify-between border-b border-line px-3 py-1.5 text-body text-fg md:hidden"
+              >
+                <span>{result ? `${result.byIso3[iso3]?.name[lang]} · ${result.byIso3[iso3]?.total}/100` : SIM_UI.loading[lang]}</span>
+                <span className="text-dim" aria-hidden>{drawerOpen ? "▾" : "▴"}</span>
+              </button>
+              <div className={drawerOpen ? "block" : "hidden md:block"}>
+                {result && countries ? <LaplacePanel result={result} countries={countries} iso3={iso3} lang={lang} onCountry={(country) => { change({ country }); setDrawerOpen(true); }} />
+                  : <p className="mono p-3 text-body text-dim" role="status">{SIM_UI.loading[lang]}</p>}
+              </div>
+            </>
           ) : (
             <>
               <details open={!selected} key={selected ? "card" : "list"}>

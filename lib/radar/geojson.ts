@@ -73,6 +73,24 @@ export function conflictBoxes(state: State): FC {
   }));
 }
 
+/** Point centroids for conflict viewfinder glyphs, sized in three tiers. */
+export function conflictPoints(state: State): FC {
+  return fc(state.conflicts.map((c) => ({
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [c.lon, c.lat] },
+    properties: { id: c.id, events: c.events, icon: c.events < 6 ? "conflict-sm" : c.events < 15 ? "conflict-md" : "conflict-lg" },
+  })));
+}
+
+/** Point centroids for maritime strait gate glyphs in LIVE mode. */
+export function chokepointPoints(state: State): FC {
+  const st = assetStates(state.links);
+  return fc(state.chokepoints.filter((c) => c.available).map((c) => {
+    const s = st.get(c.id) ?? "idle";
+    return { type: "Feature", geometry: { type: "Point", coordinates: [c.lon, c.lat] }, properties: { id: c.id, name: c.name, state: s, icon: `strait-${s}` } };
+  }));
+}
+
 /** Dashed frame around assets whose links are all chronic. */
 export function chronicRings(state: State): FC {
   const st = assetStates(state.links);

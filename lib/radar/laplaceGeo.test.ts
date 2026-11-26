@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildCountries } from "@/core/laplace/countries";
 import { simulate } from "@/core/laplace/engine";
 import { SHOCKS } from "@/core/laplace/shocks";
-import { TIER_FILL, arcFeatures, fillExpression, shockForStrait, straitFeatures } from "./laplaceGeo";
+import { TIER_FILL, arcFeatures, fillExpression, graticuleFeatures, landingFeatures, shockForStrait, straitFeatures } from "./laplaceGeo";
 
 const countries = buildCountries(JSON.parse(readFileSync("public/data/static/world.json", "utf8")), null);
 const result = simulate({ shock: "hormuz", severity: 0.8, day: 30 }, countries);
@@ -28,5 +28,11 @@ describe("simulation map data", () => {
   it("marks the closed strait and maps straits to shocks", () => {
     expect(straitFeatures(SHOCKS[0]).features.filter((f) => f.properties.active)).toHaveLength(1);
     expect(["hormuz", "suez", "mandeb", "bosporus", "panama", "malacca"].map(shockForStrait)).toEqual(["hormuz", "suez", "suez", "blacksea", "panama", null]);
+  });
+  it("produces arc landing pins and a 30-degree cartographic graticule", () => {
+    expect(landingFeatures(result).features).toHaveLength(result.arcs.length);
+    const g = graticuleFeatures().features;
+    expect(g.length).toBe(17); // 5 parallels (-60..60) + 12 meridians (-150..180)
+    expect(g.filter((f) => f.properties.major)).toHaveLength(2); // equator + prime meridian
   });
 });

@@ -1,28 +1,33 @@
 @import "tailwindcss";
 
-/* Hacker analysis room palette (SPEC §8). Green is reserved for "safe / action". */
+/* Taktil Minimalizm — Warm Obsidian & Espresso Cream (Braun / Teenage Engineering × A24). */
 :root {
-  --bg: #050505;
-  --panel: rgba(10, 15, 20, 0.82);
-  --panel-solid: #0a0f14;
-  --line: rgba(0, 229, 255, 0.16);
-  --line-strong: rgba(0, 229, 255, 0.4);
-  --fg: #d7e2ea;
-  --fg-dim: #9aa8b3;
+  --bg: #121110;
+  --panel: rgba(28, 26, 23, 0.94);
+  --panel-solid: #1c1a17;
+  --elevated: #26231f;
+  --line: rgba(244, 239, 230, 0.08);
+  --line-strong: rgba(244, 239, 230, 0.16);
+  --fg: #f4efe6;
+  --fg-dim: #9c9488;
+  --fg-muted: #6e685f;
+  --stone: #d6c7b2;
 
-  --threat: #ff003c;
-  --conflict: #ff6a00;
-  --bio: #b026ff;
-  --accent: #00e5ff;
-  --safe: #00ff41;
-  --geo: #ffb000;
-  --space: #c9d1ff;
+  /* Text-safe accessible hues (>= 4.5:1 on #1c1a17); raw accent #e05a2b drives fills/borders/controls. */
+  --accent-raw: #e05a2b;
+  --accent: #ee6e3e;
+  --threat: #e86b6b;
+  --conflict: #ee6e3e;
+  --bio: #c992ba;
+  --safe: #6ca37c;
+  --geo: #d99b26;
+  --space: #8ab2c2;
 
-  /* Scenario group colours (top bar tabs, panel borders, map frame). Matte; each is at least 4.5:1 on the panel. */
-  --grp-overview: #e6edf3; /* near white */
-  --grp-human: #ff4b3e; /* signal red */
-  --grp-earth: #ffb000; /* amber */
-  --grp-space: #3ec7ff; /* sky blue */
+  /* Scenario group colours (kept warm & editorial, >= 4.5:1 on surface). */
+  --grp-overview: #f4efe6;
+  --grp-human: #e86b6b;
+  --grp-earth: #d99b26;
+  --grp-space: #8ab2c2;
 
   /* Map view grid: 4px steps, fixed column widths, defined once. Every panel offset is built from these. */
   --glass: 80%; /* panel opacity over the map: raised from 55% so text stays at 4.5:1 over desert and ice (scripts/check-contrast.mjs) */
@@ -83,48 +88,50 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Flat, sharp surfaces: solid fill and a 1px border. No blur, no shadow, no glow. */
+/* Taktil surfaces: warm espresso fill, 1px hairline border, top-edge inset specular highlight. */
 .panel {
   background: var(--panel-solid);
   border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 0 rgba(244, 239, 230, 0.06);
 }
 
-/* Interactive things (buttons, toggles, cards) share one look: a solid 1px border that is clearly
-   brighter than the static dividers, and a visible fill + brighter border on hover.
-   Static text stays muted (text-dim). Set --c on the element to tint a button with its own colour. */
+/* Interactive controls: rounded-lg (8px), warm surface, mechanical 180ms transition, zero bloom. */
 .btn,
 .card-btn {
-  --c: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--c) 55%, var(--panel-solid));
+  --c: var(--accent-raw);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
   background-color: var(--panel-solid);
   color: var(--fg);
   cursor: pointer;
-  transition: none;
+  box-shadow: inset 0 1px 0 0 rgba(244, 239, 230, 0.05);
+  transition: background-color 180ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 180ms cubic-bezier(0.2, 0.8, 0.2, 1), color 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .btn:hover,
 .card-btn:hover {
-  background-color: color-mix(in srgb, var(--c) 16%, var(--panel-solid));
-  border-color: var(--c);
+  background-color: var(--elevated);
+  border-color: color-mix(in srgb, var(--c) 70%, var(--fg));
 }
-/* Active state: a solid matte fill, no bloom */
+/* Active state: warm terracotta tint with >= 10:1 cream text contrast */
 .btn[aria-pressed="true"],
 .btn[aria-selected="true"],
 .card-btn[aria-pressed="true"] {
-  background-color: color-mix(in srgb, var(--c) 30%, var(--panel-solid));
+  background-color: color-mix(in srgb, var(--c) 28%, var(--panel-solid));
   border-color: var(--c);
 }
 .btn[aria-pressed="true"],
 .btn[aria-selected="true"] {
-  color: #fff;
+  color: var(--fg);
 }
 .btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* sliders of the simulator: the native control in the accent colour, tall enough for a finger */
+/* Sliders of the simulator: Braun terracotta accent, comfortable finger height */
 .range {
-  accent-color: var(--accent);
+  accent-color: var(--accent-raw);
   height: 28px;
   cursor: pointer;
 }
@@ -143,9 +150,9 @@ body {
   scrollbar-color: var(--line-strong) transparent;
 }
 
-/* Focus ring: visible for keyboard users on every interactive element */
+/* Focus ring: crisp Braun terracotta outline */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-raw);
   outline-offset: 2px;
 }
 

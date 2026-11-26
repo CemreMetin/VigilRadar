@@ -1,31 +1,36 @@
 /**
- * Hex twins of the colour tokens in app/globals.css, for code that cannot read CSS variables (MapLibre paint, SVG attributes).
- * COLOR follows the tokens; LAYER holds the few map-layer colours that carry their own meaning. Keep both in step with the CSS.
+ * Hex twins of the Taktil Minimalizm colour tokens in app/globals.css, for code that cannot read CSS variables
+ * (MapLibre paint, Canvas cartographic glyphs, SVG attributes). Keep in step with app/globals.css.
  */
 export const COLOR = {
-  bg: "#050505",
-  fg: "#d7e2ea",
-  dim: "#9aa8b3",
-  mid: "#9aa8b3",
-  threat: "#ff003c",
-  conflict: "#ff6a00",
-  bio: "#b026ff",
-  accent: "#00e5ff",
-  geo: "#ffb000",
-  space: "#c9d1ff",
-  safe: "#00ff41",
-  land: "#0a0f14", // --panel-solid: a country without impact on the map
+  bg: "#121110",       // Warm Obsidian base / ocean
+  surface: "#1C1A17",  // Espresso surface / land
+  elevated: "#26231F", // Elevated surface
+  fg: "#F4EFE6",       // Espresso cream primary text & selected outline
+  dim: "#9C9488",      // Secondary warm grey
+  mid: "#9C9488",
+  stone: "#D6C7B2",    // Warm neutral accent
+  accent: "#E05A2B",   // Primary Braun terracotta accent
+  accentText: "#EE6E3E",
+  threat: "#C84B4B",   // Matte crimson (map fills & strokes)
+  conflict: "#E05A2B", // Terracotta
+  bio: "#B47EA6",      // Muted plum
+  geo: "#D99B26",      // Matte amber
+  space: "#8AB2C2",    // Muted observatory steel (subsea cables & digital)
+  safe: "#5B8C6A",     // Matte sage green
+  land: "#1C1A17",     // --panel-solid: a country without impact on the map
+  border: "#2E2A25",   // Subtle warm coastline/country border
 } as const;
 
 export const LAYER = {
-  sun: "#ffd24a",
-  labs: "#ff6ad5",
-  cold: "#4a90ff",
-  windLow: "#7fd3ff",
-  stormMid: "#2fd4b0",
-  satellites: "#6fa8ff",
-  cableDim: "#4a6a78",
-  pandemicMid: "#d58cff",
-  pandemicLate: "#f0d4ff",
-  pale: "#ffd6de",
+  sun: "#E5B95C",
+  labs: "#C985A8",
+  cold: "#769FB6",
+  windLow: "#8AB2C2",
+  stormMid: "#5B8C6A",
+  satellites: "#8AB2C2",
+  cableDim: "#5D7885",
+  pandemicMid: "#B47EA6",
+  pandemicLate: "#D6BDD0",
+  pale: "#E5C4BD",
 } as const;

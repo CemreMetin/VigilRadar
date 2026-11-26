@@ -50,7 +50,8 @@ async function ingestSlow(request: Request, env: Env): Promise<Response> {
   let body: Partial<Slow>;
   try { body = JSON.parse(text); } catch { return json({ error: "bad json" }, 400, none); }
   const okMs = body.conflictsMs === null || Number.isFinite(body.conflictsMs);
-  const okConflicts = Array.isArray(body.conflicts) && body.conflicts.length <= 500 && body.conflicts.every((x) => Number.isFinite(x?.lat) && Number.isFinite(x?.lon) && typeof x?.id === "string");
+  const okUrl = (u: unknown) => typeof u === "string" && /^https?:\/\//i.test(u);
+  const okConflicts = Array.isArray(body.conflicts) && body.conflicts.length <= 500 && body.conflicts.every((x) => Number.isFinite(x?.lat) && Number.isFinite(x?.lon) && typeof x?.id === "string" && (x.sampleUrls === undefined || (Array.isArray(x.sampleUrls) && x.sampleUrls.length <= 10 && x.sampleUrls.every(okUrl))));
   const okFlows = Array.isArray(body.chokepoints) && body.chokepoints.length <= 40 && body.chokepoints.every((x) => typeof x?.id === "string" && typeof x?.available === "boolean");
   if (!okMs || !okConflicts || !okFlows) return json({ error: "bad shape" }, 400, none);
   const slow: Slow = { conflicts: body.conflicts!, conflictsMs: body.conflictsMs ?? null, chokepoints: body.chokepoints! };

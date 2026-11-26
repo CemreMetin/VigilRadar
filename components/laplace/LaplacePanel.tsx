@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { CHANNEL_NAMES, ORDER_NAMES, SHOCK_COPY, SIM_UI, TIER_NAMES, dayRange } from "@/core/laplace/copy";
 import { dominoChain } from "@/core/laplace/engine";
 import { CHANNEL_IDS } from "@/core/laplace/shocks";
@@ -14,7 +15,7 @@ const TIERS: ImpactTier[] = ["low", "moderate", "high", "severe"];
 
 /** A square of the map colour next to its name: the fills themselves are too dark to be used as text colours. */
 function Swatch({ tier }: { tier: ImpactTier }) {
-  return <span aria-hidden className="inline-block h-3 w-3 shrink-0 border border-line-strong" style={{ background: TIER_FILL[tier] }} />;
+  return <span aria-hidden className="inline-block h-3 w-3 shrink-0 rounded-[3px] border border-line-strong" style={{ background: TIER_FILL[tier] }} />;
 }
 
 interface Props { result: SimulationResult; countries: Country[]; iso3: string; lang: Lang; onCountry: (iso3: string) => void }
@@ -25,6 +26,7 @@ export default function LaplacePanel({ result, countries, iso3, lang, onCountry 
   const impact = result.byIso3[iso3];
   const { shock } = result;
   const copy = SHOCK_COPY[shock.id];
+  const chain = useMemo(() => dominoChain(shock.id, country), [shock.id, country]);
 
   return (
     <div className="divide-y divide-line">
@@ -64,7 +66,7 @@ export default function LaplacePanel({ result, countries, iso3, lang, onCountry 
       <section className="p-3">
         <h3 className="label">{s("chain")}</h3>
         <ol className="mt-2 space-y-3">
-          {dominoChain(shock.id, country).map((step) => (
+          {chain.map((step) => (
             <li key={step.step}>
               <p className="mono text-label uppercase text-dim">
                 {step.step}. {step.timing[lang]} · <span className="border border-line-strong px-1 text-fg">{step.evidence}</span> · {CHANNEL_NAMES[step.channel][lang]}

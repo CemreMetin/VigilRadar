@@ -48,22 +48,22 @@ export default function SimControls({ query, lang, onChange }: Props) {
   const percent = Math.round(query.severity * 100);
 
   return (
-    <div className="mono flex h-[51px] items-center gap-2 px-2 text-body md:gap-4 md:px-3">
-      <label className="flex w-28 shrink-0 items-center gap-1 md:w-auto md:max-w-xs md:flex-1 md:shrink md:gap-2">
-        <span className="whitespace-nowrap"><span className="sr-only md:not-sr-only">{s("severity")} </span>{percent}%</span>
-        <input type="range" min={10} max={100} value={percent} onChange={(e) => onChange({ severity: Number(e.target.value) / 100 })} className="range min-w-0 flex-1" />
-      </label>
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        <button type="button" onClick={() => setPlaying((p) => !p)} className="btn h-9 min-w-9 shrink-0 px-2 md:w-24">
+    <div className="mono flex flex-wrap items-center gap-x-3 gap-y-1.5 bg-panel-solid px-3 py-2 text-body md:h-[52px] md:flex-nowrap md:gap-4 md:py-0">
+      <div className="flex min-w-0 flex-1 basis-full items-center gap-2 md:order-2 md:basis-auto">
+        <button type="button" onClick={() => setPlaying((p) => !p)} className="btn h-9 min-w-9 shrink-0 px-2.5 md:w-24">
           <span aria-hidden>{playing ? "❚❚" : "▶"}</span><span className="sr-only md:not-sr-only"> {playing ? s("pause") : s("play")}</span>
         </button>
-        <label className="flex min-w-0 flex-1 items-center gap-1 md:gap-2">
-          <span className="min-w-6 whitespace-nowrap md:w-16"><span className="sr-only md:not-sr-only">{s("day")} </span>{query.day}</span>
+        <label className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="min-w-12 whitespace-nowrap md:w-16">{s("day")} {query.day}</span>
           <input type="range" min={1} max={MAX_DAY} value={query.day} aria-label={s("time")} onChange={(e) => { setPlaying(false); onChange({ day: Number(e.target.value) }); }} className="range min-w-0 flex-1" />
         </label>
       </div>
-      <button type="button" onClick={share} className="btn h-9 min-w-9 shrink-0 px-2 md:px-3">
-        <span aria-hidden>{shared === "copied" ? "✓" : "↗"}</span><span role="status" className="sr-only md:not-sr-only"> {s(shared ?? "share")}</span>
+      <label className="flex min-w-0 flex-1 items-center gap-2 md:order-1 md:max-w-xs">
+        <span className="whitespace-nowrap">{s("severity")} {percent}%</span>
+        <input type="range" min={10} max={100} value={percent} onChange={(e) => onChange({ severity: Number(e.target.value) / 100 })} className="range min-w-0 flex-1" />
+      </label>
+      <button type="button" onClick={share} className="btn h-9 shrink-0 px-3 md:order-3">
+        <span aria-hidden>{shared === "copied" ? "✓" : "↗"}</span><span role="status"> {s(shared ?? "share")}</span>
       </button>
     </div>
   );

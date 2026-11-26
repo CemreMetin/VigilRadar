@@ -44,7 +44,7 @@ export default function StatusLine({ loaded, done, now }: { loaded: Loaded | nul
   );
 
   return (
-    <div className="mono flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-1 text-body md:h-[51px] md:flex-nowrap">
+    <div className="mono flex flex-wrap items-center gap-x-4 gap-y-1 bg-panel-solid px-3 py-1.5 text-body md:h-[52px] md:flex-nowrap md:py-0">
       {flag && <span className="shrink-0 font-bold text-space">{flag}</span>}
       {level(t("global"), global)}
       {province && level(t("region"), mine)}
