@@ -77,3 +77,8 @@
 2026-11-27 · retracted: `missedTurns` 2'de sabitlenir ve 0 iken alan yazılmaz · aksi halde kayıp deprem her turda KV yazması üretir
 2026-11-27 · Telegram: saat dilimi kanala göre (TR → TRT, GLOBAL → UTC), dile göre değil · tsunami bildirimi GLOBAL kanala gider
 2026-11-27 · Push kalkınca `Store.delete/list/get`, KV `delete/list`, `CONFIG.notify.pushBatch/pushTtlSec` ve `compose` seçenekleri silindi · tek kullanıcıları push idi
+2026-11-27 · Laplace: güneş fırtınası kütüphane bağlantısı `solar-superstorm` (şartnamedeki `solar-storm` sayfası yok) · kırık link olurdu
+2026-11-27 · Laplace: kanıt A yalnızca belgelenmiş yapısal notu olan ilk domino adımında; profilli ülkelerin diğer adımları B, profilsizler C · model katsayıları ölçüm değil
+2026-11-27 · Laplace: 132 profilsiz ülke için world.json adı → ISO tablosu `countries.ts` içinde; TR/EN adlar `Intl.DisplayNames`; profil verisi yoksa geometri merkezi · world.json yalnızca ad taşır
+2026-11-27 · Laplace yedek modeli: açlık >%10 gıdaya +0,25'e kadar, su stresi >%40 +0,05, 2500 km içinde 0,35'e kadar yakınlık; santral sayısı kullanılmadı · santral verisinin bu 8 şok için savunulabilir bir etkisi yok
+2026-11-27 · Laplace: güneş fırtınasında tüm ülkeler enlem formülünden; derece 1/2/3 eşiği en yüksek yapısal maruziyet ≥0,65 / ≥0,40; dünya endeksi 44 profilli ülkenin ortalaması
