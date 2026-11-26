@@ -1,5 +1,5 @@
 import { quakeLinks, conflictLinks, markChronic } from "./cascade";
-import { mergeQuakes } from "./quakes/merge";
+import { RETRACT_WINDOW_MS, mergeQuakes } from "./quakes/merge";
 import { severityByProvince } from "./severity";
 import { globalStatus } from "./status";
 import type { ChokepointFlow, ConflictCluster, Province, QuakeEvent, QuakeSource, Severity, Site, SourceKey, State, StatusReason, TsunamiBulletin } from "./types";
@@ -49,8 +49,9 @@ export function buildState(i: TurnInput): State {
     sources[k] = ok === null ? was : { ok, ms: ok ? nowMs : was.ms };
   }
   const tsunami = (i.tsunami ?? prev?.tsunami ?? []).filter((b) => nowMs - b.timeMs <= 24 * HOUR);
-  // an empty answer is not proof that a quake is gone (a parser returns [] for a page it cannot read)
-  const okSources = new Set(i.events.map((e) => e.source).filter((s) => i.ok[s]));
+  // A source vouches for a disappearance only when its answer reaches back past the whole window. Some feeds are capped
+  // by count (EMSC, Kandilli), so after a large quake they cover less than that; an empty answer covers nothing.
+  const okSources = new Set(i.events.filter((e) => i.ok[e.source] && e.timeMs <= nowMs - RETRACT_WINDOW_MS).map((e) => e.source));
   const quakes = mergeQuakes(prev?.quakes ?? [], i.events, nowMs, okSources);
   const cps: Site[] = slow.chokepoints.filter((c) => c.available);
   const links = markChronic([...quakeLinks(quakes, PLANTS, cps, nowMs), ...conflictLinks(slow.conflicts, PLANTS, cps, nowMs)], prev?.links ?? [], nowMs);

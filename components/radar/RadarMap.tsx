@@ -207,7 +207,8 @@ export default function RadarMap(props: Props) {
           show("sim-cables", infra === "cables");
           if (!view) {
             map.setPaintProperty("world-fill", "fill-color", TIER_FILL.none);
-            if (shownShock) { shownShock = null; growFrom = null; halo(EMPTY, false); }
+            shownShock = null; // the halo now belongs to drawLive, which ran first on this switch
+            growFrom = null;
             return;
           }
           const { result, selected } = view;

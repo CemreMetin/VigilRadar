@@ -4,7 +4,7 @@ import type { MergedQuake, QuakeEvent, QuakeSource } from "../types";
 import { accept, inTrBox } from "./normalize";
 
 const DAY = 86_400_000;
-const RETRACT_WINDOW_MS = 6 * 3_600_000; // every source feed reaches back further than this
+export const RETRACT_WINDOW_MS = 6 * 3_600_000;
 const RETRACT_AFTER = 2;
 const key = (e: QuakeEvent) => `${e.source}:${e.sourceId}`;
 const sameEvent = (a: QuakeEvent, b: QuakeEvent) =>

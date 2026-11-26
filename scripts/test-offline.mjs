@@ -21,6 +21,8 @@ page.on("pageerror", (e) => errors.push(String(e)));
 // the Radar is opened online once so that its last good state is kept (vigil.lastState) for the offline visit below
 await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
 await page.waitForTimeout(6000);
+// and the simulator once, so its country data is in the cache
+await page.goto(`${BASE}/?mode=sim&shock=hormuz`, { waitUntil: "networkidle" });
 await page.goto(`${BASE}/survive`, { waitUntil: "networkidle" });
 await page.evaluate(() => navigator.serviceWorker.ready);
 check(true, "service worker registered");
@@ -70,6 +72,13 @@ await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
 await page.getByText(/YEDEK KAYNAK|BACKUP SOURCE|STALE|NO DATA|VERİ YOK/).first().waitFor({ timeout: 15_000 }).then(
   () => check(true, "offline: the Radar opens and shows its status band with the last data"),
   () => check(false, "offline: the Radar opens and shows its status band with the last data"),
+);
+
+// the simulator computes in the browser: a score and a domino chain with no connection
+await page.goto(`${BASE}/?mode=sim&shock=suez&sev=80&day=25&country=EGY`, { waitUntil: "domcontentloaded" });
+await page.getByTestId("sim-total").waitFor({ timeout: 15_000 }).then(
+  async () => check(Number(await page.getByTestId("sim-total").innerText()) > 0, `offline: the simulator scores Egypt ${await page.getByTestId("sim-total").innerText()} on Suez`),
+  () => check(false, "offline: the simulator shows a country score"),
 );
 
 await browser.close();

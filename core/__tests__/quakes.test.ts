@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mergeQuakes } from "../quakes/merge";
+import { buildState } from "../build-state";
 import { severityFor } from "../severity";
 import { quakeLinks } from "../cascade";
 import { globalStatus } from "../status";
@@ -113,6 +114,18 @@ describe("retraction", () => {
     const back = turn(turn(turn(first, 2), 3), 4, [e, other]);
     expect(target(back).retracted).toBeUndefined();
     expect(target(back).missedTurns).toBeUndefined();
+  });
+  it("trusts a source only when its answer reaches back past six hours, so a count-capped feed retracts nothing", () => {
+    const now = t + 3 * HOUR;
+    const turnWith = (prev: ReturnType<typeof buildState> | null, minute: number, events: typeof a[]) =>
+      buildState({ prev, nowMs: now + minute * 60_000, events, ok: { usgs: false, emsc: false, afad: true, kandilli: false }, tsunami: null, tsunamiOk: null, slow: null, fastMs: now });
+    const recent = ev({ source: "afad", sourceId: "new", mag: 5.2, timeMs: now - 10 * 60_000, lat: -5, lon: 120, depthKm: 10 });
+    const old = ev({ source: "afad", sourceId: "old", mag: 5.2, timeMs: now - 7 * HOUR, lat: 40, lon: 140, depthKm: 10 });
+    const start = turnWith(null, 0, [a, recent]);
+    const capped = turnWith(turnWith(start, 1, [recent]), 2, [recent]);
+    expect(capped.quakes.find((q) => q.id === "afad:a")!.retracted).toBeUndefined();
+    const full = turnWith(turnWith(start, 1, [recent, old]), 2, [recent, old]);
+    expect(full.quakes.find((q) => q.id === "afad:a")!.retracted).toBe(true);
   });
   it("leaves quakes older than six hours and calls without okSources alone", () => {
     expect(target(turn(turn(first, 361), 362)).retracted).toBeUndefined();

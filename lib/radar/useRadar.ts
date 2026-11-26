@@ -4,7 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { CONFIG } from "@/core/config";
 import { browserDeps, loadState, readCache, type Loaded } from "./load";
 
-// read once, on the first client render after hydration; the server snapshot is empty
+// read once per visit of a page, on its first client render after hydration; the server snapshot is empty
 let first: Loaded | null | undefined;
 const cachedState = () => (first === undefined ? (first = readCache(browserDeps())) : first);
 const never = () => () => {};
@@ -29,7 +29,7 @@ export function useRadar(): { loaded: Loaded | null; done: boolean } {
     void run();
     const id = window.setInterval(tick, CONFIG.poll.clientSec * 1000);
     document.addEventListener("visibilitychange", tick);
-    return () => { alive = false; window.clearInterval(id); document.removeEventListener("visibilitychange", tick); };
+    return () => { first = undefined; alive = false; window.clearInterval(id); document.removeEventListener("visibilitychange", tick); };
   }, []);
   return { loaded: loaded ?? cached, done };
 }

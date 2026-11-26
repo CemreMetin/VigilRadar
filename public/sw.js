@@ -8,10 +8,11 @@
  * "Save for offline" on /survive/ sends a CACHE_PAGES message; we then download those pages and every
  * script/style/font they reference, so they work even if you never opened them online.
  */
-const VERSION = "v2";
-const PAGES = `vigil-pages-${VERSION}`;
-const RUNTIME = `vigil-runtime-${VERSION}`;
-const DATA = `vigil-data-${VERSION}`;
+// The cache names keep their first spelling on purpose: renaming them would delete the copies people saved for offline use.
+const VERSION = "v1";
+const PAGES = `monitoring-pages-${VERSION}`;
+const RUNTIME = `monitoring-runtime-${VERSION}`;
+const DATA = `monitoring-data-${VERSION}`;
 // the search index is data too: network first, cached copy when offline
 const isData = (path) => path.startsWith("/data") || path === "/search-index.json";
 
@@ -22,7 +23,7 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter((k) => ![PAGES, RUNTIME, DATA].includes(k)).map((k) => caches.delete(k)),
+        keys.filter((k) => k.startsWith("monitoring-") && !k.endsWith(VERSION)).map((k) => caches.delete(k)),
       );
       await self.clients.claim();
     })(),
