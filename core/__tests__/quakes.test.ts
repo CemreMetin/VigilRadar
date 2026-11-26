@@ -84,4 +84,40 @@ describe("6. one quake from four sources", () => {
   });
 });
 
+describe("retraction", () => {
+  const t = Date.UTC(2024, 0, 1, 12);
+  const a = ev({ source: "afad", sourceId: "a", mag: 5.5, timeMs: t, lat: 38, lon: 38, depthKm: 10 });
+  const e = ev({ source: "emsc", sourceId: "e", mag: 5.4, timeMs: t + 5000, lat: 38.05, lon: 38, depthKm: 10 });
+  const other = ev({ source: "afad", sourceId: "z", mag: 5.0, timeMs: t, lat: 10, lon: 100, depthKm: 10 });
+  const both = new Set(["afad", "emsc"] as const);
+  const first = mergeQuakes([], [a, e, other], t + 60_000, both);
+  const target = (list: MergedQuake[]) => list.find((q) => q.id === "afad:a" || q.id === "emsc:e")!;
+  const turn = (prev: MergedQuake[], min: number, events = [other], ok: ReadonlySet<"afad" | "emsc"> = both) => mergeQuakes(prev, events, t + min * 60_000, ok);
+
+  it("is retracted after two turns without any of its sources listing it, and the count stops there", () => {
+    const one = turn(first, 2);
+    expect(target(one).missedTurns).toBe(1);
+    expect(target(one).retracted).toBeUndefined();
+    const two = turn(one, 3);
+    expect(target(two).retracted).toBe(true);
+    expect(turn(two, 4)).toEqual(two);
+    expect(two.find((q) => q.id === "afad:z")!.retracted).toBeUndefined();
+  });
+  it("is not retracted when one of its sources failed", () => {
+    const afadOnly = new Set(["afad"] as const);
+    const two = turn(turn(first, 2, [other], afadOnly), 3, [other], afadOnly);
+    expect(target(two).retracted).toBeUndefined();
+    expect(target(two).missedTurns).toBeUndefined();
+  });
+  it("starts over when any source lists it again", () => {
+    const back = turn(turn(turn(first, 2), 3), 4, [e, other]);
+    expect(target(back).retracted).toBeUndefined();
+    expect(target(back).missedTurns).toBeUndefined();
+  });
+  it("leaves quakes older than six hours and calls without okSources alone", () => {
+    expect(target(turn(turn(first, 361), 362)).retracted).toBeUndefined();
+    expect(target(mergeQuakes(mergeQuakes(first, [], t + 120_000), [], t + 180_000)).retracted).toBeUndefined();
+  });
+});
+
 // Tests 7-10 (update, cancel, P0 wait, P1 cooldown) live in daemon/src/__tests__/policy.test.ts with the policy they test.

@@ -1,10 +1,10 @@
-// WCAG contrast (4.5:1) of the text on the new pages: /, /alert (peace and crisis mode), /about. The background of each text
+// WCAG contrast (4.5:1) of the text on the main pages: / (live and simulate), /library, /about. The background of each text
 // element is the first non-transparent background of its ancestors; the Radar map and the pages' fixed bars are solid colours.
 //   node scripts/serve-out.mjs 8098   then   node scripts/check-contrast.mjs [http://localhost:8098]
 import { chromium } from "playwright-core";
 
 const BASE = process.argv[2] ?? "http://localhost:8098";
-const PAGES = [["/", "radar"], ["/alert", "alert peace"], ["/alert?e=zzz", "alert crisis"], ["/about", "about"]];
+const PAGES = [["/", "radar"], ["/?mode=sim&shock=hormuz&sev=80&day=30&country=TUR", "simulate"], ["/library", "scenarios"], ["/about", "about"]];
 
 const browser = await chromium.launch({ channel: "msedge", headless: true }).catch(() => chromium.launch({ channel: "chrome", headless: true }));
 const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "tr-TR" })).newPage();

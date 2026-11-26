@@ -27,7 +27,7 @@ export default function RadarMap({ state, nowMs, onSelect, focus }: Props) {
 
   useEffect(() => {
     let disposed = false;
-    let raf = 0;
+    let raf = 0; // 0: no animation frame is pending
     import("maplibre-gl").then((ml) => {
       if (disposed || !el.current) return;
       ml.setWorkerUrl("/vendor/maplibre-gl-worker.mjs");
@@ -94,16 +94,18 @@ export default function RadarMap({ state, nowMs, onSelect, focus }: Props) {
         });
 
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        // the loop runs only while there is a halo to animate; an idle map schedules no frames at all
         const pulse = (t: number) => {
-          const active = (map.getSource("halo") as GeoJSONSource | undefined) && hasHalo;
-          if (active) {
-            const f = (t % 1600) / 1600;
-            map.setPaintProperty("halo", "circle-radius", 6 + 10 * f);
-            map.setPaintProperty("halo", "circle-stroke-opacity", 0.6 * (1 - f));
-          }
+          const f = (t % 1600) / 1600;
+          map.setPaintProperty("halo", "circle-radius", 6 + 10 * f);
+          map.setPaintProperty("halo", "circle-stroke-opacity", 0.6 * (1 - f));
           raf = requestAnimationFrame(pulse);
         };
-        let hasHalo = false;
+        const animate = (on: boolean) => {
+          if (on && !reduced) { raf ||= requestAnimationFrame(pulse); return; }
+          cancelAnimationFrame(raf);
+          raf = 0;
+        };
 
         draw.current = () => {
           const { state: s, nowMs: now } = latest.current;
@@ -118,8 +120,8 @@ export default function RadarMap({ state, nowMs, onSelect, focus }: Props) {
           set("rings", empty ? EMPTY : chronicRings(s));
           const live = (assets?.marked ?? []).filter((f) => f.properties.state === "active" && f.geometry.type === "Point");
           set("halo", { type: "FeatureCollection", features: live });
-          hasHalo = live.length > 0;
-          if (reduced && hasHalo) { map.setPaintProperty("halo", "circle-radius", 9); map.setPaintProperty("halo", "circle-stroke-opacity", 0.6); }
+          if (reduced && live.length) { map.setPaintProperty("halo", "circle-radius", 9); map.setPaintProperty("halo", "circle-stroke-opacity", 0.6); }
+          animate(live.length > 0);
           // text labels only for active or chronic assets, as HTML markers (no glyph server)
           markers.current.forEach((m) => m.remove());
           markers.current = (assets?.marked ?? []).filter((f) => f.geometry.type === "Point").map((f) => {
@@ -131,7 +133,6 @@ export default function RadarMap({ state, nowMs, onSelect, focus }: Props) {
         };
         readyRef.current = true;
         draw.current();
-        if (!reduced) raf = requestAnimationFrame(pulse);
       });
     });
     return () => { disposed = true; cancelAnimationFrame(raf); markers.current.forEach((m) => m.remove()); mapRef.current?.remove(); mapRef.current = null; readyRef.current = false; };

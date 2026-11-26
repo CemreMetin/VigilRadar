@@ -49,7 +49,9 @@ export function buildState(i: TurnInput): State {
     sources[k] = ok === null ? was : { ok, ms: ok ? nowMs : was.ms };
   }
   const tsunami = (i.tsunami ?? prev?.tsunami ?? []).filter((b) => nowMs - b.timeMs <= 24 * HOUR);
-  const quakes = mergeQuakes(prev?.quakes ?? [], i.events, nowMs);
+  // an empty answer is not proof that a quake is gone (a parser returns [] for a page it cannot read)
+  const okSources = new Set(i.events.map((e) => e.source).filter((s) => i.ok[s]));
+  const quakes = mergeQuakes(prev?.quakes ?? [], i.events, nowMs, okSources);
   const cps: Site[] = slow.chokepoints.filter((c) => c.available);
   const links = markChronic([...quakeLinks(quakes, PLANTS, cps, nowMs), ...conflictLinks(slow.conflicts, PLANTS, cps, nowMs)], prev?.links ?? [], nowMs);
   const g = globalStatus({ nowMs, heartbeatMs: i.fastMs, quakes, links, tsunami, chokepoints: cps.length ? slow.chokepoints.filter((c) => c.available).map((c) => ({ id: c.id, state: c.level })) : [] });

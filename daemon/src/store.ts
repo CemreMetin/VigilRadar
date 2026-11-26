@@ -19,23 +19,12 @@ export class Store {
     try { return { value: value === null ? null : (JSON.parse(value) as T), hash: metadata?.hash ?? null }; } catch { return { value: null, hash: null }; }
   }
 
-  async put(key: string, value: unknown, opts: { hash?: string; expirationTtl?: number } = {}): Promise<boolean> {
+  async put(key: string, value: unknown, opts: { hash?: string } = {}): Promise<boolean> {
     if (this.writes >= this.max) return false;
     this.writes++;
-    await this.kv.put(key, JSON.stringify(value), { expirationTtl: opts.expirationTtl, metadata: opts.hash ? { hash: opts.hash } : undefined });
+    await this.kv.put(key, JSON.stringify(value), { metadata: opts.hash ? { hash: opts.hash } : undefined });
     return true;
   }
-
-  /** A delete counts as a write against the budget. */
-  async delete(key: string): Promise<boolean> {
-    if (this.writes >= this.max) return false;
-    this.writes++;
-    await this.kv.delete(key);
-    return true;
-  }
-
-  list(prefix: string, limit: number, cursor?: string) { return this.kv.list({ prefix, limit, cursor }); }
-  get(key: string) { return this.kv.get(key); }
 }
 
 /** Short content hash (FNV-1a, 32 bit). Collisions only cost one skipped write, the next change fixes it. */

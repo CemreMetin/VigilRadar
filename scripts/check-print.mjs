@@ -1,7 +1,6 @@
 // Prints pages to PDF with the browser's own print engine and reports page counts and anything that leaks onto paper.
 // Run on a served build (node scripts/serve-out.mjs 8081):  node scripts/check-print.mjs [http://localhost:8081]
 import { chromium } from "playwright-core";
-import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 const BASE = process.argv[2] ?? "http://localhost:8081";
@@ -149,9 +148,6 @@ const packBuf = await page.pdf({ preferCSSPageSize: true });
 writeFileSync("out-print/survive-pack.pdf", packBuf);
 check(packInfo.img && packInfo.other === 0, `survive-pack: ${pdfPages(packBuf)} pages, map image ${packInfo.img}, chrome ${packInfo.other}`);
 await page.emulateMedia({ media: "screen" });
-
-// the /alert sheets (bag list, family plan, 85x55 mm wallet card) have their own script
-try { execFileSync(process.execPath, ["scripts/check-print-alert.mjs", BASE], { stdio: "inherit" }); } catch { failed++; }
 
 await browser.close();
 process.exit(failed ? 1 : 0);

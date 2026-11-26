@@ -12,7 +12,7 @@ const KEEP_MS = 7 * 86_400_000;
 export type NoticeKind = "new" | "update" | "cancel" | "tsunami";
 export interface ProvinceHit { code: string; sev: "P0" | "P1" }
 
-/** Everything needed to write and deliver one message, so a retry or a later push batch does not need the state. */
+/** Everything needed to write and deliver one message, so a retry does not need the state. */
 export interface Notice {
   key: string; // eventId:scope:kind, unique per message
   eventId: string;
@@ -26,6 +26,7 @@ export interface Notice {
   lon: number;
   place: string;
   source: QuakeSource | "tsunami";
+  usgsTsunami?: boolean;
   provinces: ProvinceHit[]; // TR scope: P0 first, then P1
 }
 
@@ -53,7 +54,7 @@ const isGlobal = (q: MergedQuake) => (q.best.mag >= N.globalChannel.minMag && q.
 
 function notice(q: MergedQuake, scope: Notice["scope"], kind: NoticeKind, nowMs: number, provinces: ProvinceHit[]): Notice {
   const b = q.best;
-  return { key: `${q.id}:${scope}:${kind}`, eventId: q.id, scope, kind, ms: nowMs, mag: b.mag, depthKm: b.depthKm, timeMs: b.timeMs, lat: b.lat, lon: b.lon, place: b.place, source: b.source, provinces };
+  return { key: `${q.id}:${scope}:${kind}`, eventId: q.id, scope, kind, ms: nowMs, mag: b.mag, depthKm: b.depthKm, timeMs: b.timeMs, lat: b.lat, lon: b.lon, place: b.place, source: b.source, usgsTsunami: b.usgsTsunami, provinces };
 }
 
 const hits = (levels: Record<string, Severity> | undefined, only?: (code: string, sev: Severity) => boolean): ProvinceHit[] => {

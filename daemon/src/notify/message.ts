@@ -1,6 +1,6 @@
 import { PROVINCES } from "../../../core/build-state";
-import { CONFIG } from "../../../core/config";
 import { haversineKm } from "../../../core/geo";
+import { provinceTsunamiAdvice } from "../../../core/tsunami";
 import type { Notice } from "./policy";
 
 // Message texts (VIGIL.md 7.2), Turkish and English with the same structure. Pure: no network, no storage.
@@ -33,34 +33,35 @@ const T = {
 } as const;
 
 const byCode = new Map(PROVINCES.map((p) => [p.code, p]));
-const hhmm = (ms: number) => new Date(ms + 3 * 3_600_000).toISOString().slice(11, 16); // Turkey time, UTC+3 all year
+/** Turkey messages carry Turkey time (UTC+3 all year), global ones UTC. */
+const clock = (ms: number, scope: Notice["scope"]) =>
+  scope === "TR" ? `${new Date(ms + 3 * 3_600_000).toISOString().slice(11, 16)} TRT` : `${new Date(ms).toISOString().slice(11, 16)} UTC`;
 const MAX_LISTED = 8;
 
-/** The message for one notice. `province` is the one a push goes to; Telegram lists all of the notice's provinces. */
-export function compose(n: Notice, lang: Lang, siteUrl: string, opts: { province?: string; telegram?: boolean } = {}): Message {
+/** The Telegram message for one notice; it lists all of the notice's provinces. */
+export function compose(n: Notice, lang: Lang, siteUrl: string): Message {
   const t = T[lang];
-  const url = `${siteUrl.replace(/\/$/, "")}/alert?e=${encodeURIComponent(n.eventId)}`;
-  const tail = opts.telegram ? [t.disclaimer] : [];
+  const url = `${siteUrl.replace(/\/$/, "")}/?q=${encodeURIComponent(n.eventId)}`;
+  const tail = [t.disclaimer];
   const head = n.kind === "update" ? `${t.update} · ` : n.kind === "cancel" ? `${t.cancel} · ` : "";
 
-  if (n.kind === "tsunami") return { title: `${t.tsunami} — ${n.place}`, body: [`${hhmm(n.timeMs)}`, `${t.todo} ${url}`, ...tail].join("\n"), url };
+  if (n.kind === "tsunami") return { title: `${t.tsunami} — ${n.place}`, body: [clock(n.timeMs, n.scope), `${t.todo} ${url}`, ...tail].join("\n"), url };
 
   const mag = n.mag.toFixed(1);
-  const hits = opts.telegram ? n.provinces : n.provinces.filter((h) => h.code === opts.province);
+  const hits = n.provinces;
   const first = byCode.get(hits[0]?.code ?? "");
   const where = first ? t.near(first.name, Math.round(haversineKm(first, n))) : n.place;
   const title = `${head}M${mag} ${t.quake} — ${where}`;
   if (n.kind === "cancel") return { title, body: [t.cancelled(mag), ...tail].join("\n"), url };
 
-  const lines = [t.meta(hhmm(n.timeMs), Math.round(n.depthKm), SRC[n.source])];
+  const lines = [t.meta(clock(n.timeMs, n.scope), Math.round(n.depthKm), SRC[n.source])];
   if (hits.length) {
     const sev = hits[0].sev === "P0" ? t.p0 : t.p1;
-    if (opts.telegram && hits.length > 1) {
+    if (hits.length > 1) {
       const names = hits.slice(0, MAX_LISTED).map((h) => `${byCode.get(h.code)?.name ?? h.code} (${h.sev})`).join(", ");
       lines.push(`${t.provinces} ${names}${hits.length > MAX_LISTED ? ` ${t.more(hits.length - MAX_LISTED)}` : ""}`);
     } else lines.push(sev);
-    const ts = CONFIG.tsunamiRuleTR;
-    if (hits.some((h) => byCode.get(h.code)?.coastal) && n.mag >= ts.minMag && n.depthKm <= ts.maxDepthKm) lines.push(t.coast);
+    if (hits.some((h) => { const p = byCode.get(h.code); return !!p && provinceTsunamiAdvice(p, n); })) lines.push(t.coast);
   }
   lines.push(`${t.todo} ${url}`, ...tail);
   return { title, body: lines.join("\n"), url };

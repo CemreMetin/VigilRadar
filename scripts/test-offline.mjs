@@ -40,7 +40,7 @@ console.log("      caches:", JSON.stringify(cacheCounts));
 // ---- go offline and reload
 await context.setOffline(true);
 const EXPECT = {
-  "/alert": "VigilAlert",
+  "/library": "Scenarios",
   "/about": "About|Hakkında",
   "/survive": "What can you do|Ne yapabilirsiniz",
   "/library/supervolcano": "Supervolcanic eruption",
@@ -57,18 +57,6 @@ for (const [path, heading] of Object.entries(EXPECT)) {
     check(false, `offline ${path}: ${String(e).split("\n")[0]}`);
   }
 }
-
-// the /alert kit still works offline: tick an item, reload, it stays ticked (key vigil.bag)
-await page.goto(`${BASE}/alert`, { waitUntil: "domcontentloaded" });
-await page.getByRole("checkbox", { name: /drinking water|içme suyu/ }).check();
-const stored = await page.evaluate(() => window.localStorage.getItem("vigil.bag"));
-check(!!stored && stored.includes("water"), `offline: tick saved to localStorage (${stored})`);
-await page.reload({ waitUntil: "domcontentloaded" });
-const persisted = await page
-  .getByRole("checkbox", { name: /drinking water|içme suyu/ })
-  .waitFor({ timeout: 5000 })
-  .then(async () => page.getByRole("checkbox", { name: /drinking water|içme suyu/ }).isChecked(), () => false);
-check(persisted, "offline: checklist tick persists across reload");
 
 // full-text search works on a saved page with the network off
 await page.goto(`${BASE}/methodology`, { waitUntil: "domcontentloaded" });

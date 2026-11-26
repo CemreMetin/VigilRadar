@@ -5,14 +5,14 @@ import { readdirSync } from "node:fs";
 
 const BASE = process.argv[2] ?? "http://localhost:8081";
 const scenarios = readdirSync("out/library", { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => `/library/${d.name}`);
-const paths = ["/", "/alert", "/alert?e=zzz", "/about", "/library", "/survive", "/trajectory", "/nuclear", "/health", "/supervolcanoes", "/country?c=TUR", "/country?c=USA", "/links", "/methodology", "/sources", ...scenarios];
+const paths = ["/", "/?mode=sim&shock=hormuz", "/about", "/library", "/survive", "/trajectory", "/nuclear", "/health", "/supervolcanoes", "/country?c=TUR", "/country?c=USA", "/links", "/methodology", "/sources", ...scenarios];
 
 const browser = await chromium.launch({ channel: "msedge", headless: true }).catch(() => chromium.launch({ channel: "chrome", headless: true }));
 const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true })).newPage();
 let bad = 0;
 for (const p of paths) {
   await page.goto(BASE + p, { waitUntil: "load" });
-  await page.waitForTimeout(p === "/" ? 1500 : 900);
+  await page.waitForTimeout(p === "/" || p.startsWith("/?") ? 2500 : 900);
   const r = await page.evaluate(() => {
     const vw = window.innerWidth;
     const wide = [...document.querySelectorAll("body *")]

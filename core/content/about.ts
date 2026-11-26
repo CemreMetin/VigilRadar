@@ -42,7 +42,7 @@ export const ABOUT = {
     sources: { h: "Kaynaklar ve atıflar", intro: "Her veri kaynağı, lisansı ve kullanıldığı yer aşağıda. Santral koordinatları yaklaşıktır." },
     privacy: { h: "Gizlilik", items: [
       "Çerez, analitik, hata izleme servisi ve üçüncü taraf script yoktur.",
-      "Hesap yok, konum yok. Bildirim açarsan yalnızca anonim bildirim adresin ve seçtiğin il saklanır; abonelikten çıkınca silinir.",
+      "Hesap yok, konum yok. Sunucuda hiçbir kişisel veri saklanmaz.",
       "Bölge seçimin yalnızca tarayıcında durur; sunucuya gitmez.",
     ], hosts: "Tarayıcının bağlandığı adresler: bu site (Cloudflare Pages) ve Vigil Worker'ı. Worker'a ulaşılamazsa yedek yolda yalnızca earthquake.usgs.gov ve www.seismicportal.eu.", keys: "Tarayıcıda saklanan anahtarlar (hiçbiri sunucuya gitmez):" },
     back: "← Radar",
@@ -64,7 +64,7 @@ export const ABOUT = {
     sources: { h: "Sources and credits", intro: "Every data source, its licence and where it is used. Plant coordinates are approximate." },
     privacy: { h: "Privacy", items: [
       "No cookies, analytics, error-tracking service or third-party script.",
-      "No account, no location. If you turn on notifications, only an anonymous notification address and the province you chose are stored; they are deleted when you unsubscribe.",
+      "No account, no location. No personal data is stored on any server.",
       "Your region choice stays in your browser; it is not sent to a server.",
     ], hosts: "Addresses your browser connects to: this site (Cloudflare Pages) and the Vigil Worker. If the Worker cannot be reached, the backup path connects only to earthquake.usgs.gov and www.seismicportal.eu.", keys: "Keys kept in your browser (none of them is sent to a server):" },
     back: "← Radar",
@@ -72,4 +72,4 @@ export const ABOUT = {
 } satisfies Record<"tr" | "en", About>;
 
 /** The localStorage keys the site really uses (VIGIL.md 11); the test in lib/radar keeps this list true. */
-export const STORAGE_KEYS = ["vigil.region", "vigil.lang", "vigil.lastState", "vigil.hintDismissed", "vigil.bag", "vigil.radio", "vigil.plan", "vigil.precached.v1"] as const;
+export const STORAGE_KEYS = ["vigil.region", "vigil.lang", "vigil.lastState", "vigil.hintDismissed", "vigil.precached.v2"] as const;

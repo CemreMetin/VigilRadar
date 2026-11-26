@@ -2,7 +2,7 @@
   "name": "VigilRadar",
   "short_name": "Vigil",
   "description": "A calm analysis desk for large earthquakes and conflict events and what they could affect. Not an official warning system.",
-  "start_url": "/alert",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#050505",
@@ -14,6 +14,7 @@
   ],
   "shortcuts": [
     { "name": "Radar", "url": "/" },
-    { "name": "Alert", "url": "/alert" }
+    { "name": "Laplace", "url": "/?mode=sim" },
+    { "name": "Scenarios", "url": "/library" }
   ]
 }

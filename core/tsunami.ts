@@ -29,7 +29,7 @@ export function parseTsunami(xml: string): TsunamiBulletin[] {
  * Turkey coastal rule (VIGIL.md 5.5), rule based and not an official warning: a shallow M6.5+ quake whose
  * epicentre is within 100 km of a coastal province centre. USGS tsunami=1 stands in for the magnitude/depth test.
  */
-export function provinceTsunamiAdvice(p: Province, q: QuakeEvent): boolean {
+export function provinceTsunamiAdvice(p: Province, q: Pick<QuakeEvent, "lat" | "lon" | "mag" | "depthKm" | "usgsTsunami">): boolean {
   const r = CONFIG.tsunamiRuleTR;
   const strong = q.mag >= r.minMag && q.depthKm <= r.maxDepthKm;
   return p.coastal && (strong || q.usgsTsunami === true) && haversineKm(p, q) <= r.coastRadiusKm;

@@ -2,9 +2,7 @@
 export interface KV {
   get(key: string, type?: "text"): Promise<string | null>;
   getWithMetadata<M>(key: string, type?: "text"): Promise<{ value: string | null; metadata: M | null }>;
-  put(key: string, value: string, opts?: { expirationTtl?: number; metadata?: unknown }): Promise<void>;
-  delete(key: string): Promise<void>;
-  list(opts: { prefix: string; limit?: number; cursor?: string }): Promise<{ keys: { name: string }[]; list_complete: boolean; cursor?: string }>;
+  put(key: string, value: string, opts?: { metadata?: unknown }): Promise<void>;
 }
 
 export interface Env {
@@ -15,7 +13,4 @@ export interface Env {
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_TR?: string;
   TELEGRAM_CHAT_GLOBAL?: string;
-  VAPID_PUBLIC_KEY?: string;
-  VAPID_PRIVATE_KEY?: string;
-  VAPID_SUBJECT?: string;
 }

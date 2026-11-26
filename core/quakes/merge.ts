@@ -4,6 +4,8 @@ import type { MergedQuake, QuakeEvent, QuakeSource } from "../types";
 import { accept, inTrBox } from "./normalize";
 
 const DAY = 86_400_000;
+const RETRACT_WINDOW_MS = 6 * 3_600_000; // every source feed reaches back further than this
+const RETRACT_AFTER = 2;
 const key = (e: QuakeEvent) => `${e.source}:${e.sourceId}`;
 const sameEvent = (a: QuakeEvent, b: QuakeEvent) =>
   Math.abs(a.timeMs - b.timeMs) <= CONFIG.quake.merge.maxDtSec * 1000 && haversineKm(a, b) <= CONFIG.quake.merge.maxDistKm;
@@ -22,8 +24,11 @@ function pickBest(members: QuakeEvent[]): QuakeEvent {
 /**
  * Folds new records into the known quakes. Two records are one event when they are within 60 s and 150 km.
  * Ids and firstSeenMs of known quakes never change. Records older than keepDays are dropped.
+ * With `okSources` (the sources that answered this turn), a recent quake that all of its sources stopped listing for
+ * two turns in a row is marked retracted. A source that failed is not in the set, so an outage retracts nothing.
  */
-export function mergeQuakes(prev: readonly MergedQuake[], incoming: readonly QuakeEvent[], nowMs: number): MergedQuake[] {
+export function mergeQuakes(prev: readonly MergedQuake[], incoming: readonly QuakeEvent[], nowMs: number, okSources?: ReadonlySet<QuakeSource>): MergedQuake[] {
+  const listed = new Set(incoming.map(key));
   const byKey = new Map<string, QuakeEvent>();
   const prevOf = new Map<string, MergedQuake>();
   for (const g of prev) for (const e of g.sources) { byKey.set(key(e), e); prevOf.set(key(e), g); }
@@ -58,7 +63,15 @@ export function mergeQuakes(prev: readonly MergedQuake[], incoming: readonly Qua
     );
     const best = pickBest(members);
     if (best.timeMs < nowMs - CONFIG.quake.keepDays * DAY) continue;
-    out.push({ id: known[0]?.id ?? key(members[0]), sources: members, best, firstSeenMs: known[0]?.firstSeenMs ?? nowMs });
+    let missed = known[0]?.missedTurns ?? 0;
+    if (members.some((m) => listed.has(key(m)))) missed = 0;
+    else if (okSources && best.timeMs >= nowMs - RETRACT_WINDOW_MS && members.every((m) => okSources.has(m.source)))
+      missed = Math.min(missed + 1, RETRACT_AFTER); // capped, so a retracted quake does not change the state every turn
+    out.push({
+      id: known[0]?.id ?? key(members[0]), sources: members, best, firstSeenMs: known[0]?.firstSeenMs ?? nowMs,
+      ...(missed ? { missedTurns: missed } : {}),
+      ...(missed >= RETRACT_AFTER ? { retracted: true } : {}),
+    });
   }
   return out.sort((a, b) => b.best.timeMs - a.best.timeMs);
 }

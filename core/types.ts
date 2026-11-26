@@ -21,6 +21,7 @@ export interface MergedQuake {
   sources: QuakeEvent[]; // latest record per source
   best: QuakeEvent; // fields taken by source priority
   firstSeenMs: number;
+  missedTurns?: number; // turns in a row in which no healthy source of this event listed it any more
   retracted?: boolean;
 }
 

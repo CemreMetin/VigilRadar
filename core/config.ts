@@ -44,7 +44,6 @@ export const CONFIG = {
     p0ConfirmSources: 2, p0SingleSourceWaitSec: 90,
     p1CooldownMin: 30, updateMagDelta: 0.3,
     globalChannel: { minMag: 7.0, maxDepthKm: 100 },
-    pushBatch: 20, pushTtlSec: 3600,
   },
   poll: { clientSec: 60, heartbeatMin: 5 },
 } as const;

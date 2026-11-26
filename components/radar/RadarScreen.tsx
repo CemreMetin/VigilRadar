@@ -63,7 +63,6 @@ export default function RadarScreen() {
           <span>
             {cps.length === 0 ? t("noChokepoints") : `${t("cpWatched").replace("{n}", String(cps.length))} · ${off.length ? `${t("cpDev")}: ${off.map((x) => x.name).join(", ")}` : t("cpNoDev")}${lastData ? ` · ${t("dataThrough")}: ${new Date(lastData).toLocaleDateString(lang === "tr" ? "tr-TR" : "en-GB", { day: "numeric", month: "short" })}` : ""}`}
           </span>
-          <Link href="/alert" className="hover:text-accent">Alert</Link>
           <Link href="/library" className="hover:text-accent">Library</Link>
           <Link href="/metrics" className="hover:text-accent">Metrics</Link>
           <span><Link href="/about#sources" className="hover:text-accent">{t("sources")}</Link> · <Link href="/about" className="hover:text-accent">{t("about")}</Link></span>
