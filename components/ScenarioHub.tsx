@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { HUB_UI, SHOCK_COPY } from "@/core/laplace/copy";
 import { encodeSimQuery } from "@/core/laplace/engine";
-import { SHOCK_IDS } from "@/core/laplace/shocks";
+import { shockById, SHOCK_IDS } from "@/core/laplace/shocks";
 import { useLang } from "@/lib/lang";
 
 const ATLASES = ["links", "nuclear", "supervolcanoes", "trajectory", "metrics"] as const;
@@ -17,7 +17,7 @@ export default function ScenarioHub() {
       <ul className="mt-2 grid gap-2 sm:grid-cols-2">
         {SHOCK_IDS.map((id) => (
           <li key={id}>
-            <Link href={`/${encodeSimQuery({ shock: id, severity: 0.75, day: 30, country: null })}`} className="card-btn block h-full p-3">
+            <Link href={`/${encodeSimQuery({ shock: id, severity: 0.75, day: shockById(id).defaultDay, country: null })}`} className="card-btn block h-full p-3">
               <span className="mono block text-body font-bold">{SHOCK_COPY[id].name[lang]}</span>
               <span className="mt-1 block text-body text-dim">{SHOCK_COPY[id].summary[lang]}</span>
               <span className="mono mt-2 block text-body text-accent">{HUB_UI.open[lang]} →</span>

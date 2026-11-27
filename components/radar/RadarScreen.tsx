@@ -1,14 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LaplacePanel from "@/components/laplace/LaplacePanel";
 import ShockChips from "@/components/laplace/ShockChips";
 import SimControls from "@/components/laplace/SimControls";
 import { SIM_UI } from "@/core/laplace/copy";
 import { decodeSimQuery, encodeSimQuery, simulate } from "@/core/laplace/engine";
+import { shockById } from "@/core/laplace/shocks";
 import type { ShockId, SimQuery } from "@/core/laplace/types";
 import { agoText } from "@/lib/radar/format";
-import { useRegion } from "@/lib/radar/region";
 import { useCountries } from "@/lib/radar/useCountries";
 import { useNow } from "@/lib/radar/useNow";
 import { useRadar } from "@/lib/radar/useRadar";
@@ -20,9 +20,6 @@ import TopBar, { type Mode } from "./TopBar";
 import TriageCard from "./TriageCard";
 
 // One map, two modes that never overlap: LIVE (recent events and the triage card) and SIMULATE (the Laplace cascade).
-const TURKEY = { center: [35.2, 39.1] as [number, number], zoom: 4.3 };
-const WORLD = { center: [15, 25] as [number, number], zoom: 1.3 };
-
 interface Screen { search: string | null; mode: Mode; sim: SimQuery; selected: Selection | null }
 const INITIAL: Screen = { search: null, mode: "live", sim: decodeSimQuery(""), selected: null };
 
@@ -44,17 +41,17 @@ export default function RadarScreen() {
   const { loaded, done } = useRadar();
   const now = useNow();
   const { t, lang, c } = useT();
-  const { province } = useRegion();
   const countries = useCountries(simulating);
   const [drawerOpen, setDrawerOpen] = useState(true);
   const state = loaded?.state ?? null;
   const recent = (state?.quakes ?? []).filter((q) => !q.retracted).slice(0, 10);
-  const focus = useMemo(() => (province ? TURKEY : WORLD), [province]);
+  const asideRef = useRef<HTMLElement>(null);
 
   const change = useCallback((patch: Partial<SimQuery>) => setScreen((s) => ({ ...s, sim: { ...s.sim, ...patch } })), []);
   const select = useCallback((sel: Selection | null) => setScreen((s) => ({ ...s, selected: sel })), []);
   const setMode = (m: Mode) => writeSearch(m === "sim" ? encodeSimQuery(query) : "");
-  const openShock = (shock: ShockId) => writeSearch(encodeSimQuery({ ...query, shock }));
+  const openShock = (shock: ShockId) => writeSearch(encodeSimQuery({ ...query, shock, day: shockById(shock).defaultDay }));
+  const pickShock = (shock: ShockId) => { if (shock !== query.shock) change({ shock, day: shockById(shock).defaultDay }); };
 
   const result = useMemo(() => (simulating && countries ? simulate({ shock: query.shock, severity: query.severity, day: query.day }, countries) : null), [simulating, countries, query.shock, query.severity, query.day]);
   const iso3 = result && query.country && result.byIso3[query.country] ? query.country : lang === "tr" ? "TUR" : "USA";
@@ -69,6 +66,13 @@ export default function RadarScreen() {
     return () => window.removeEventListener("keydown", esc);
   }, [selected, select]);
 
+  // the card sits at the top of the panel; bring it into view on every new selection
+  useEffect(() => {
+    if (!selected) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    asideRef.current?.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  }, [selected]);
+
   const open = simulating || !!selected;
 
   return (
@@ -76,13 +80,13 @@ export default function RadarScreen() {
       <TopBar mode={mode} lang={lang} onMode={setMode} />
       <main className="flex min-h-0 flex-1 flex-col md:flex-row">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          {simulating && <ShockChips shock={query.shock} lang={lang} onPick={(shock) => change({ shock })} />}
+          {simulating && <ShockChips shock={query.shock} lang={lang} onPick={pickShock} />}
           <div className="relative min-h-0 flex-1">
-            <RadarMap state={state} nowMs={loaded?.lastOkMs ?? 0} sim={view} focus={focus} onSelect={select} onCountry={pickByName}
+            <RadarMap state={state} nowMs={loaded?.lastOkMs ?? 0} sim={view} selected={selected} onSelect={select} onCountry={pickByName}
               label={simulating ? SIM_UI.mapLabel[lang] : "World map of recent earthquakes and the assets they may affect. The list of recent events is the keyboard alternative."} />
           </div>
         </div>
-        <aside className={`scroll-thin overflow-auto border-t border-line bg-panel-solid md:max-h-none md:w-[380px] md:shrink-0 md:border-l md:border-t-0 ${simulating ? (drawerOpen ? "h-[46dvh] md:h-auto" : "h-auto md:h-auto") : open ? "max-h-[58dvh]" : "max-h-[40dvh]"}`}>
+        <aside ref={asideRef} className={`scroll-thin overflow-auto border-t border-line bg-panel-solid md:max-h-none md:w-[380px] md:shrink-0 md:border-l md:border-t-0 ${simulating ? (drawerOpen ? "h-[46dvh] md:h-auto" : "h-auto md:h-auto") : open ? "max-h-[58dvh]" : "max-h-[40dvh]"}`}>
           {simulating ? (
             <>
               <button
@@ -101,6 +105,7 @@ export default function RadarScreen() {
             </>
           ) : (
             <>
+              {selected && state && <TriageCard state={state} sel={selected} now={now || loaded?.lastOkMs || 0} onClose={() => select(null)} onSimulate={openShock} />}
               <details open={!selected} key={selected ? "card" : "list"}>
                 <summary className="label cursor-pointer p-3">{t("recentEvents")}</summary>
                 <ul className="divide-y divide-line" aria-label={t("recentEvents")}>
@@ -115,7 +120,6 @@ export default function RadarScreen() {
                   {state && recent.length === 0 && <li className="p-3 text-body text-dim">{t("noEvents")}</li>}
                 </ul>
               </details>
-              {selected && state && <TriageCard state={state} sel={selected} now={now || loaded?.lastOkMs || 0} province={province} onClose={() => select(null)} onSimulate={openShock} />}
               <p className="border-t border-line p-3 text-label text-dim">{c.disclaimer}</p>
             </>
           )}

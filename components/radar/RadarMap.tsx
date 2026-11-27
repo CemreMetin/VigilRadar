@@ -5,11 +5,11 @@ import type { GeoJSONSource, Map as MlMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { SimulationResult } from "@/core/laplace/types";
 import type { State } from "@/core/types";
-import { assetFeatures, chokepointPoints, chronicRings, conflictPoints, linkArcs, quakeFeatures } from "@/lib/radar/geojson";
+import { assetFeatures, chokepointPoints, chronicRings, conflictPoints, linkArcs, quakeFeatures, selectionPoint } from "@/lib/radar/geojson";
 import { registerMapGlyphs } from "@/lib/radar/glyphs";
 import { TIER_FILL, arcFeatures, fillExpression, graticuleFeatures, gridFeatures, landingFeatures, shockPoint, straitFeatures, volcanoFeatures } from "@/lib/radar/laplaceGeo";
 import { loadWorld } from "@/lib/radar/world";
-import { COLOR } from "@/lib/palette";
+import { COLOR, MAP } from "@/lib/palette";
 
 export type Selection = { kind: "quake" | "plant" | "chokepoint" | "conflict"; id: string };
 /** What the SIMULATE mode draws: the result and the map name of the selected country. */
@@ -21,20 +21,25 @@ interface Props {
   label: string;
   onSelect: (s: Selection) => void;
   onCountry: (mapName: string) => void;
-  focus?: { center: [number, number]; zoom: number };
+  selected: Selection | null; // LIVE: ringed on the map, and the camera moves to it once
 }
 
 const INTERACTIVE_LIVE = ["quakes", "plants", "chokepoints", "conflicts"];
 const KIND: Record<string, Selection["kind"]> = { quakes: "quake", plants: "plant", chokepoints: "chokepoint", conflicts: "conflict" };
-const LIVE_LAYERS = ["arcs-shadow", "arcs", "rings", "conflicts", "chokepoints", "plants", "quake-aura", "quake-ring", "quakes"];
+const LIVE_LAYERS = ["arcs-shadow", "arcs", "rings", "conflicts", "chokepoints", "plants", "quake-aura", "quake-ring", "quakes", "live-selected"];
 const SIM_ALWAYS = ["world-selected-line", "sim-arcs-shadow", "sim-arcs-solid", "sim-arcs-dashed", "sim-landings", "sim-center"];
 const EMPTY = { type: "FeatureCollection", features: [] } as const;
 const GROW_MS = 900; // the arcs spread from the shock once when a shock is chosen
 const PULSE_MS = 1800;
+const FOCUS_ZOOM = 4.2;
+// 20 % above the base instrument sizes, so the points read at world zoom
+const quakeRadius = (mag: number) => 4.8 + (21.6 * (2 ** Math.min(3, Math.max(0, mag - 5)) - 1)) / 7; // the curve below, in JS
+const quakeCircle = (extra: number) => ["+", ["interpolate", ["exponential", 2], ["get", "mag"], 5, 4.8, 8, 26.4], extra] as never;
+const QUAKE_COLOR = ["step", ["get", "mag"], MAP.stone, 5.5, MAP.gold, 6.5, MAP.hot] as never;
 
 /** MapLibre without a tile or glyph server: Taktil Minimalizm palette, 30° graticule, and @2x procedural instrument glyphs. */
 export default function RadarMap(props: Props) {
-  const { state, nowMs, sim, label, focus } = props;
+  const { state, nowMs, sim, label, selected } = props;
   const el = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const readyRef = useRef(false);
@@ -67,11 +72,11 @@ export default function RadarMap(props: Props) {
               paint: { "line-color": COLOR.fg, "line-width": ["case", ["get", "major"], 0.9, 0.5], "line-opacity": ["case", ["get", "major"], 0.08, 0.04] },
             },
             { id: "world-fill", type: "fill", source: "world", paint: { "fill-color": TIER_FILL.none } },
-            { id: "world-line", type: "line", source: "world", paint: { "line-color": COLOR.border, "line-width": 1 } },
+            { id: "world-line", type: "line", source: "world", paint: { "line-color": MAP.coast, "line-width": 1 } },
           ],
         },
-        center: latest.current.focus?.center ?? [15, 25],
-        zoom: latest.current.focus?.zoom ?? (narrow ? 0.4 : 1.3),
+        center: [15, 25],
+        zoom: narrow ? 0.4 : 1.3,
         minZoom: 0.3,
         maxZoom: 9,
         attributionControl: false,
@@ -87,7 +92,7 @@ export default function RadarMap(props: Props) {
         const show = (id: string, on: boolean) => { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none"); };
         world.then((w) => { if (!disposed) set("world", w); }, () => { /* no outlines; the lists beside the map still work */ });
 
-        for (const id of ["quakes", "plants", "chokepoints", "conflicts", "arcs", "rings", "halo", "sim-arcs", "sim-landings", "sim-straits", "sim-volcanoes", "sim-grid", "sim-center"])
+        for (const id of ["quakes", "plants", "chokepoints", "conflicts", "arcs", "rings", "halo", "live-selected", "sim-arcs", "sim-landings", "sim-straits", "sim-volcanoes", "sim-grid", "sim-center"])
           map.addSource(id, { type: "geojson", data: EMPTY as never });
 
         // ---- LIVE layers: tactile precision cartography ----
@@ -96,25 +101,25 @@ export default function RadarMap(props: Props) {
         map.addLayer({ id: "rings", type: "line", source: "rings", paint: { "line-color": COLOR.stone, "line-width": 1, "line-dasharray": [2, 2], "line-opacity": 0.55 } });
         map.addLayer({
           id: "conflicts", type: "symbol", source: "conflicts",
-          layout: { "icon-image": ["get", "icon"], "icon-allow-overlap": true, "icon-ignore-placement": true },
+          layout: { "icon-image": ["get", "icon"], "icon-allow-overlap": true, "icon-ignore-placement": true, "icon-size": 1.2 },
         });
         map.addLayer({
           id: "chokepoints", type: "symbol", source: "chokepoints",
-          layout: { "icon-image": ["get", "icon"], "icon-allow-overlap": true, "icon-ignore-placement": true },
-          paint: { "icon-opacity": ["match", ["get", "state"], "idle", 0.72, 1] },
+          layout: { "icon-image": ["get", "icon"], "icon-allow-overlap": true, "icon-ignore-placement": true, "icon-size": 1.2 },
+          paint: { "icon-opacity": ["match", ["get", "state"], "idle", 0.78, 1] },
         });
         map.addLayer({
           id: "plants", type: "symbol", source: "plants",
           layout: {
             "icon-image": ["match", ["get", "state"], "active", "plant-active", "chronic", "plant-chronic", "plant-idle"],
             "icon-allow-overlap": true, "icon-ignore-placement": true,
-            "icon-size": ["match", ["get", "state"], "idle", 0.72, 1.05],
+            "icon-size": ["match", ["get", "state"], "idle", 0.86, 1.26],
           },
-          paint: { "icon-opacity": ["match", ["get", "state"], "idle", 0.55, 1] },
+          paint: { "icon-opacity": ["match", ["get", "state"], "idle", 0.78, 1] },
         });
 
         // ---- SIMULATE layers: warm choropleth, context infra, dual-pass domino arcs, Braun reticle ----
-        map.addLayer({ id: "world-selected-line", type: "line", source: "world", filter: ["==", ["get", "name"], ""], paint: { "line-color": COLOR.fg, "line-width": 2 } });
+        map.addLayer({ id: "world-selected-line", type: "line", source: "world", filter: ["==", ["get", "name"], ""], paint: { "line-color": MAP.cream, "line-width": 2.2 } });
         map.addLayer({ id: "sim-grid", type: "line", source: "sim-grid", paint: { "line-color": COLOR.space, "line-width": 1.2, "line-dasharray": [4, 4], "line-opacity": 0.65 } });
         map.addLayer({ id: "sim-arcs-shadow", type: "line", source: "sim-arcs", layout: { "line-cap": "round" }, paint: { "line-color": COLOR.bg, "line-width": ["+", ["get", "width"], 3.5], "line-opacity": 0.32 } });
         map.addLayer({ id: "sim-arcs-solid", type: "line", source: "sim-arcs", filter: ["==", ["get", "order"], 1], layout: { "line-cap": "round" }, paint: { "line-color": ["get", "color"], "line-width": ["get", "width"], "line-opacity": 0.94 } });
@@ -141,31 +146,37 @@ export default function RadarMap(props: Props) {
         map.addLayer({
           id: "quake-aura", type: "circle", source: "quakes",
           paint: {
-            "circle-radius": ["+", ["interpolate", ["exponential", 2], ["get", "mag"], 5, 4, 8, 22], 5],
-            "circle-color": ["step", ["get", "mag"], COLOR.stone, 5.5, COLOR.geo, 6.5, COLOR.accent],
+            "circle-radius": quakeCircle(5),
+            "circle-color": QUAKE_COLOR,
             "circle-opacity": ["*", ["get", "op"], 0.16],
           },
         });
         map.addLayer({
-          id: "quake-ring", type: "circle", source: "quakes", filter: ["get", "recent"],
+          // the last 24 hours, and every M6.5+
+          id: "quake-ring", type: "circle", source: "quakes", filter: ["any", ["get", "recent"], [">=", ["get", "mag"], 6.5]],
           paint: {
-            "circle-radius": ["+", ["interpolate", ["exponential", 2], ["get", "mag"], 5, 4, 8, 22], 4],
+            "circle-radius": quakeCircle(4),
             "circle-color": "rgba(0,0,0,0)",
-            "circle-stroke-color": COLOR.fg,
-            "circle-stroke-width": 1,
-            "circle-stroke-opacity": 0.55,
+            "circle-stroke-color": MAP.cream,
+            "circle-stroke-width": 1.4,
+            "circle-stroke-opacity": 0.85,
           },
         });
         map.addLayer({
           id: "quakes", type: "circle", source: "quakes",
           paint: {
-            "circle-radius": ["interpolate", ["exponential", 2], ["get", "mag"], 5, 4, 8, 22],
-            "circle-color": ["step", ["get", "mag"], COLOR.stone, 5.5, COLOR.geo, 6.5, COLOR.accent],
+            "circle-radius": quakeCircle(0),
+            "circle-color": QUAKE_COLOR,
             "circle-opacity": ["get", "op"],
             "circle-stroke-color": COLOR.bg,
             "circle-stroke-width": 1.2,
             "circle-stroke-opacity": ["get", "op"],
           },
+        });
+
+        map.addLayer({
+          id: "live-selected", type: "circle", source: "live-selected",
+          paint: { "circle-radius": ["get", "radius"], "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": MAP.cream, "circle-stroke-width": 2.2 },
         });
 
         for (const id of [...INTERACTIVE_LIVE, "world-fill"]) {
@@ -215,12 +226,22 @@ export default function RadarMap(props: Props) {
           animate();
         };
 
+        let flownTo: string | null = null; // the 30 s redraws must not pull the camera back
         drawLive.current = () => {
-          const { state: s, nowMs: now, sim: view } = latest.current;
+          const { state: s, nowMs: now, sim: view, selected: sel } = latest.current;
           for (const id of LIVE_LAYERS) show(id, !view);
           markers.current.forEach((m) => m.remove());
           markers.current = [];
-          if (view) return; // the two modes never overlap
+          if (view) { flownTo = null; return; } // the two modes never overlap
+          const at = s && sel ? selectionPoint(s, sel) : null;
+          const mag = sel?.kind === "quake" ? s?.quakes.find((q) => q.id === sel.id)?.best.mag : undefined;
+          const radius = mag === undefined ? 16 : quakeRadius(mag) + 8;
+          set("live-selected", at ? { type: "FeatureCollection", features: [{ type: "Feature", properties: { radius }, geometry: { type: "Point", coordinates: at } }] } : EMPTY);
+          if (!sel) flownTo = null;
+          else if (at && flownTo !== sel.id) {
+            flownTo = sel.id;
+            map.flyTo({ center: at, zoom: Math.max(map.getZoom(), FOCUS_ZOOM), duration: reduced ? 0 : 900 });
+          }
           const assets = s === null ? null : assetFeatures(s);
           set("quakes", s ? quakeFeatures(s, now) : EMPTY);
           set("plants", assets?.plants ?? EMPTY);
@@ -247,7 +268,7 @@ export default function RadarMap(props: Props) {
           fetch("/data/cables.json").then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status))))).then((data) => {
             if (disposed) return;
             map.addSource("sim-cables", { type: "geojson", data });
-            map.addLayer({ id: "sim-cables", type: "line", source: "sim-cables", paint: { "line-color": COLOR.space, "line-width": 1, "line-opacity": 0.42 } }, "sim-arcs-shadow");
+            map.addLayer({ id: "sim-cables", type: "line", source: "sim-cables", paint: { "line-color": MAP.steel, "line-width": 1, "line-opacity": 0.48 } }, "sim-arcs-shadow");
             show("sim-cables", latest.current.sim?.result.shock.infra === "cables");
           }, () => { cables = false; });
         };
@@ -260,6 +281,7 @@ export default function RadarMap(props: Props) {
           show("sim-volcanoes", infra === "volcano");
           show("sim-grid", infra === "grid");
           show("sim-cables", infra === "cables");
+          map.setPaintProperty("world-line", "line-color", view ? MAP.coastSim : MAP.coast);
           if (!view) {
             map.setPaintProperty("world-fill", "fill-color", TIER_FILL.none);
             shownShock = null; // the halo now belongs to drawLive, which ran first on this switch
@@ -296,9 +318,8 @@ export default function RadarMap(props: Props) {
   useEffect(() => { latest.current = props; });
   const live = sim === null;
   // each effect redraws only when its own data changes: the 30 s clock and the sliders never rebuild the other mode
-  useEffect(() => { if (readyRef.current) drawLive.current(); }, [state, nowMs, live]);
+  useEffect(() => { if (readyRef.current) drawLive.current(); }, [state, nowMs, live, selected]);
   useEffect(() => { if (readyRef.current) drawSim.current(); }, [sim]);
-  useEffect(() => { if (focus && mapRef.current) mapRef.current.flyTo({ center: focus.center, zoom: focus.zoom, duration: 900 }); }, [focus]);
 
   // maplibre-gl.css makes its container position:relative, so the sizing wrapper is a separate element
   return (

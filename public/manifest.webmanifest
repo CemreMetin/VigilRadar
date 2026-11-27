@@ -14,7 +14,7 @@
   ],
   "shortcuts": [
     { "name": "Radar", "url": "/" },
-    { "name": "Laplace", "url": "/?mode=sim" },
+    { "name": "Simulation", "url": "/?mode=sim" },
     { "name": "Scenarios", "url": "/library" }
   ]
 }

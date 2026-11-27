@@ -2,26 +2,26 @@ import { SHOCKS } from "@/core/laplace/shocks";
 import type { ChannelId, ImpactTier, ShockDef, SimulationResult } from "@/core/laplace/types";
 import volcanoes from "@/data/supervolcanoes.json";
 import { greatCircle } from "@/lib/arcs";
-import { COLOR } from "@/lib/palette";
+import { MAP } from "@/lib/palette";
 import straits from "@/public/data/static/chokepoints.json";
 import type { FC, Feature } from "./geojson";
 
 // Map data of the SIMULATE mode. Pure: the map component only hands these to MapLibre.
 
-/** Warm Obsidian / Taktil Minimalizm choropleth ramp; the legend uses the same values. Fills only. */
+/** One warm ramp, dark to terracotta; the legend uses the same values. Fills only. */
 export const TIER_FILL: Record<ImpactTier, string> = {
-  none: COLOR.land,    // #1C1A17 espresso land
-  low: "#2E2821",      // warm bronze-stone shadow
-  moderate: "#734E18", // matte dark amber
-  high: "#B84C22",     // burnt terracotta
-  severe: "#A83434",   // deep matte crimson
+  none: "#1D1B18",
+  low: "#2B2722",
+  moderate: "#523B29",
+  high: "#964628",
+  severe: "#CC4B2A",
 };
 export const CHANNEL_COLOR: Record<ChannelId, string> = {
-  energy: COLOR.geo,      // #D99B26 amber
-  trade: COLOR.stone,     // #D6C7B2 warm stone
-  food: COLOR.safe,       // #5B8C6A matte sage
-  digital: COLOR.space,   // #8AB2C2 observatory steel
-  macro: COLOR.accent,    // #E05A2B Braun terracotta
+  energy: MAP.gold,
+  trade: MAP.cream,
+  food: "#78C996",
+  digital: MAP.steel,
+  macro: "#F28A63",
 };
 const ARC_STEPS = 48;
 const GRID_LAT = 50;
@@ -81,5 +81,5 @@ export const volcanoFeatures = (): FC => fc(volcanoes.volcanoes.map((v) => point
 export const gridFeatures = (): FC =>
   fc([GRID_LAT, -GRID_LAT].map((lat): Feature => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[-180, lat], [0, lat], [180, lat]] } })));
 
-/** The shock a chokepoint leads to ("Simulate in Laplace"); Bab el-Mandeb belongs to the Suez corridor, Malacca has none. */
+/** The shock a chokepoint leads to ("Run impact simulation"); Bab el-Mandeb belongs to the Suez corridor, Malacca has none. */
 export const shockForStrait = (key: string) => SHOCKS.find((s) => s.chokepointKey === (key === "mandeb" ? "suez" : key))?.id ?? null;

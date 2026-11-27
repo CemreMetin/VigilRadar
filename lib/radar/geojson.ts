@@ -91,6 +91,13 @@ export function chokepointPoints(state: State): FC {
   }));
 }
 
+/** Where the selected event or asset is, for the selection ring and the camera. */
+export function selectionPoint(state: State, sel: { kind: "quake" | "plant" | "chokepoint" | "conflict"; id: string }): [number, number] | null {
+  const at = sel.kind === "quake" ? state.quakes.find((q) => q.id === sel.id)?.best
+    : (sel.kind === "plant" ? PLANTS : sel.kind === "conflict" ? state.conflicts : state.chokepoints).find((x) => x.id === sel.id);
+  return at ? [at.lon, at.lat] : null;
+}
+
 /** Dashed frame around assets whose links are all chronic. */
 export function chronicRings(state: State): FC {
   const st = assetStates(state.links);

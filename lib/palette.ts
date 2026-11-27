@@ -22,6 +22,18 @@ export const COLOR = {
   border: "#2E2A25",   // Subtle warm coastline/country border
 } as const;
 
+/** Map-only contrast colours: points and lines over the warm choropleth. Menus keep COLOR. */
+export const MAP = {
+  coast: "#3E3831",                       // country borders in LIVE
+  coastSim: "rgba(244, 239, 230, 0.22)",  // country borders over the coloured countries
+  cream: "#F4EFE6",
+  stone: "#D6C7B2",
+  gold: "#F2B84B",
+  hot: "#FF6A45",
+  coral: "#F25F5C",
+  steel: "#79C7DC",
+} as const;
+
 export const LAYER = {
   sun: "#E5B95C",
   labs: "#C985A8",

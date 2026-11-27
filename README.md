@@ -9,7 +9,7 @@ This started two months ago as a private side project called **Monitoring** that
 
 While dusting off old projects from my private archive to clean up my portfolio (and hopefully land a job), I decided to rescue it and open-source it — with a brutal haircut. I archived the earthquake early-warning experiment in a git tag after physics and government API latency politely defeated it, stripped out the blinking-pin chaos every "God's Eye" map already does, and rebuilt **VigilRadar** around the one thing I actually wanted to exist:
 
-A calm, **$0/month** live global risk desk paired with a pocket-sized **Laplace's Demon** — a deterministic domino-effect simulator where you can clog a strait, cut a subsea cable corridor, or trigger a volcanic winter, drag time forward from Day 1 to Day 180, and see *which* countries get hit, *through which channels*, and *why*.
+A calm, **$0/month** live global risk desk paired with a **Global Impact Simulator** — a deterministic domino-effect model where you can clog a strait, cut a subsea cable corridor, or trigger a volcanic winter, drag time forward from Day 1 to Day 180, and see *which* countries get hit, *through which channels*, and *why*.
 
 > **Yes, an EE student shipped a Next.js app:** I usually live in Python and signal/data pipelines, so turning this into a fast web app took some teamwork. The vision, architecture, data rules, and ruthless simplification are mine — **Antigravity** and **Claude Code** handled the TypeScript grind, map optimization, and Cloudflare wiring while I kept yelling at them to make the UI simpler.
 
@@ -88,10 +88,10 @@ wave(day)  before onset:  0.08 × day / onset                         (early mar
            onset → peak:  smooth S-curve from 0.08 to 1
            after peak:    persistence + (1 − persistence) × e^(−(day − peak) / 90)
 
-total      = 0.55 × strongest channel + 0.45 × mean of the three strongest
+total      = 0.70 × strongest channel + 0.20 × second + 0.10 × third
 ```
 
-`exposure` is the country's structural dependency (0 to 1), never below the shock's global spillover floor. 44 key economies have hand-set profiles (evidence B). The other 132 countries get a fallback built from the spillover floor, hunger and water stress, distance to the shock and, for the solar storm, latitude (evidence C). A documented fact opens some chains (evidence A).
+`exposure` is the country's structural dependency (0 to 1), never below the shock's global spillover floor. 49 key economies have hand-set profiles (evidence B). The other 127 countries get a fallback built from the spillover floor, hunger and water stress, distance to the shock and, for the solar storm, latitude (evidence C). A documented fact opens some chains (evidence A).
 
 The numbers are judgement calls informed by public statistics, not measurements and not a forecast. If you think one is wrong, you are probably able to prove it, which is the point of keeping them in plain files.
 
@@ -136,7 +136,7 @@ Pull requests with a source attached are the best kind.
 
 1. Add its id to `ShockId` in `types.ts` and its definition (position, channel weights and timing, spillover floor, sources) to `shocks.ts`.
 2. Add its texts in English and Turkish to `copy.ts` (`SHOCK_COPY` and `STEP_COPY`).
-3. Give the 44 profiles their exposure (the `ORDER` list in `countries.ts`).
+3. Give the 49 profiles their exposure (the `ORDER` list in `countries.ts`).
 4. Add one test that states what should be true in the real world.
 
 ## Sources & License
@@ -153,8 +153,8 @@ Code: [MIT License](LICENSE) — read it, run it, change it, share it. Third-par
 
 ## Türkçe özet
 
-**VigilRadar resmi bir uyarı sistemi değildir ve erken uyarı vermez.** Acil durumda 112'yi ara, AFAD'ın açıklamalarını izle.
+**VigilRadar resmi bir uyarı sistemi değildir ve erken uyarı vermez.** Resmi deprem verisi sarsıntıdan dakikalar sonra gelir; her zaman yerel acil durum yetkililerine uy.
 
-Tek harita, iki mod: **CANLI** modunda büyük depremler, tsunami bültenleri, çatışma kümeleri ve altı boğazın gemi trafiği; **SİMÜLE** modunda "Hürmüz kapanırsa ülkemi hangi kanallardan, hangi sırayla, kaç haftada etkiler?" sorusunu deterministik bir bağımlılık modeliyle oynatan Laplace Kaskat Simülatörü. Yapay zekâ tahmini yok; her adımın kanıt etiketi ve kaynağı yazar.
+Tek harita, iki mod: **CANLI** modunda büyük depremler, tsunami bültenleri, çatışma kümeleri ve altı boğazın gemi trafiği; **SİMÜLE** modunda "Hürmüz kapanırsa ülkemi hangi kanallardan, hangi sırayla, kaç haftada etkiler?" sorusunu deterministik bir bağımlılık modeliyle oynatan Küresel Etki Simülatörü. Yapay zekâ tahmini yok; her adımın kanıt etiketi ve kaynağı yazar.
 
 Yerelde çalıştırmak için `npm ci && npm run dev`; kendi kopyanı yayınlamak için [docs/SETUP.md](docs/SETUP.md).

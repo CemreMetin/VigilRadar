@@ -18,6 +18,8 @@ export interface ShockDef {
   id: ShockId;
   lat: number;
   lon: number;
+  /** The day the simulator opens this shock on, near its physical peak */
+  defaultDay: number;
   /** Which contextual infrastructure layer lights up on the map during this shock */
   infra: "chokepoint" | "cables" | "volcano" | "plants" | "grid";
   /** Optional link to existing /library/[id] deep-dive page */
@@ -64,7 +66,7 @@ export interface CountryImpact {
   tier: ImpactTier;
   order: 1 | 2 | 3; // 1 = direct physical/corridor, 2 = regional/supply, 3 = global price spillover
   peakWindowDays: [number, number];
-  profiled: boolean; // true = explicit 44-country profile (Evidence B), false = universal fallback (Evidence C)
+  profiled: boolean; // true = explicit country profile (Evidence B), false = universal fallback (Evidence C)
 }
 
 export interface DominoStep {

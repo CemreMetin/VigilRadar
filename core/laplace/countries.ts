@@ -16,7 +16,7 @@ function profile(iso3: string, mapName: string, tr: string, region: Region, lat:
   return { iso3, mapName, name: { en, tr }, region, lat, lon, shocks };
 }
 
-// Structural dependency vectors of 44 key economies. They are calibrated judgements from public trade and energy
+// Structural dependency vectors of 49 key economies. They are calibrated judgements from public trade and energy
 // statistics (EIA, UN Comtrade, FAO, TeleGeography), shown in the interface as evidence B, never as measurements.
 //                                                               hormuz            suez              taiwan            redsea cables     blacksea          panama            volcano VEI7
 const TABLE: CountryExposure[] = [
@@ -41,8 +41,8 @@ const TABLE: CountryExposure[] = [
   profile("BRA", "Brazil", "Brezilya", "latam", -10.8, -53.0,                   ["20 15 40 5 25",  "5 15 20 5 12",   "5 40 5 45 35",   "1 5 0 10 6",     "25 15 8 2 20",   "5 15 10 0 8",    "15 20 30 10 25"]),
   profile("ARG", "Argentina", "Arjantin", "latam", -35.4, -65.2,                ["10 10 25 5 18",  "5 12 10 5 10",   "5 35 5 35 28",   "1 4 0 8 5",      "10 8 8 2 12",    "3 12 8 0 8",     "20 18 30 10 25"]),
   profile("RUS", "Russia", "Rusya", "eurasia", 61.5, 96.0,                      ["5 15 10 5 18",   "30 35 10 5 25",  "5 40 5 45 30",   "3 10 0 18 10",   "55 65 20 5 50",  "2 5 3 0 3",      "45 25 55 12 35"]),
-  profile("UKR", "Ukraine", "Ukrayna", "europe", 49.0, 31.4,                    ["30 20 20 5 35",  "15 35 10 5 22",  "5 30 5 30 25",   "2 10 0 15 10",   "60 95 40 5 80",  "2 5 3 0 3",      "45 25 50 12 40"]),
-  profile("EGY", "Egypt", "Mısır", "mena", 26.8, 30.0,                          ["25 35 45 5 45",  "35 95 55 5 90",  "5 35 5 40 28",   "10 45 5 85 45",  "35 55 95 5 75",  "3 5 8 0 5",      "20 25 70 10 50"]),
+  profile("UKR", "Ukraine", "Ukrayna", "europe", 49.0, 31.4,                    ["30 20 20 5 35",  "15 35 10 5 22",  "5 30 5 30 25",   "2 10 0 15 10",   "60 95 65 5 88",  "2 5 3 0 3",      "45 25 50 12 40"]),
+  profile("EGY", "Egypt", "Mısır", "mena", 26.8, 30.0,                          ["25 35 45 5 45",  "85 100 65 5 100",  "5 35 5 40 28",   "10 45 5 85 45",  "35 55 95 5 75",  "3 5 8 0 5",      "20 25 70 10 50"]),
   profile("SAU", "Saudi Arabia", "Suudi Arabistan", "mena", 24.0, 45.0,         ["55 75 50 10 65", "20 45 35 5 28",  "5 35 5 40 25",   "10 30 5 60 28",  "5 20 40 2 18",   "2 5 5 0 3",      "10 20 45 10 25"]),
   profile("IRN", "Iran", "İran", "mena", 32.4, 54.3,                            ["80 90 60 15 85", "10 20 15 5 18",  "5 30 5 35 25",   "3 12 0 20 10",   "10 25 45 2 30",  "1 2 2 0 2",      "30 20 60 8 40"]),
   profile("ARE", "United Arab Emirates", "Birleşik Arap Emirlikleri", "mena", 24.0, 54.0, ["60 88 55 15 70", "20 55 35 5 30", "10 50 5 55 38", "10 35 5 65 32", "5 20 35 2 18", "2 8 5 0 5", "15 35 45 20 35"]),
@@ -60,10 +60,15 @@ const TABLE: CountryExposure[] = [
   profile("MYS", "Malaysia", "Malezya", "se-asia", 4.2, 102.0,                  ["30 35 30 5 35",  "10 40 15 5 22",  "15 75 5 65 60",  "5 15 0 28 14",   "8 10 25 2 15",   "3 10 8 0 6",     "35 65 65 40 55"]),
   profile("THA", "Thailand", "Tayland", "se-asia", 15.1, 101.0,                 ["70 40 30 5 60",  "10 38 15 5 22",  "10 65 5 60 52",  "3 12 0 22 12",   "10 10 25 2 15",  "3 8 8 0 5",      "35 50 70 30 50"]),
   profile("VNM", "Vietnam", "Vietnam", "se-asia", 16.2, 107.8,                  ["35 30 25 5 40",  "15 45 15 5 28",  "10 80 5 70 65",  "3 12 0 22 12",   "8 10 20 2 15",   "8 20 15 0 12",   "35 45 70 25 50"]),
-  profile("TWN", "Taiwan", "Tayvan", "east-asia", 23.7, 121.0,                  ["75 50 30 8 65",  "15 40 10 5 28",  "90 98 55 98 96", "2 10 0 20 10",   "10 12 20 0 14",  "20 30 25 0 18",  "40 50 60 20 50"]),
+  profile("TWN", "Taiwan", "Tayvan", "east-asia", 23.7, 121.0,                  ["75 50 30 8 65",  "15 40 10 5 28",  "95 100 60 100 100", "2 10 0 20 10",   "10 12 20 0 14",  "20 30 25 0 18",  "40 50 60 20 50"]),
   profile("AUS", "Australia", "Avustralya", "oceania", -25.7, 134.5,            ["35 25 15 5 28",  "8 22 5 5 15",    "10 55 5 60 45",  "3 10 0 20 10",   "5 5 5 2 10",     "3 8 5 0 5",      "30 65 55 35 45"]),
   profile("NZL", "New Zealand", "Yeni Zelanda", "oceania", -41.8, 172.8,        ["30 22 12 5 25",  "6 20 5 5 12",    "8 50 5 50 38",   "1 5 0 10 5",     "5 5 8 2 10",     "5 12 8 0 8",     "25 45 40 25 35"]),
   profile("CHL", "Chile", "Şili", "latam", -35.7, -71.5,                        ["20 15 15 5 25",  "5 12 5 5 10",    "5 45 5 40 35",   "1 4 0 8 5",      "8 8 10 2 12",    "20 45 25 0 22",  "18 18 28 8 22"]),
+  profile("PAN", "Panama", "Panama", "latam", 8.5, -80.1,                       ["30 15 15 5 25",  "5 20 5 5 12",    "5 35 5 35 28",   "1 4 0 8 5",      "10 8 10 2 12",   "35 98 30 2 92",  "20 25 35 10 28"]),
+  profile("KWT", "Kuwait", "Kuveyt", "mena", 29.3, 47.6,                        ["98 92 75 15 95", "15 35 30 5 25",  "5 35 5 40 25",   "10 25 5 50 25",  "5 15 35 2 15",   "2 5 5 0 3",      "10 20 45 10 25"]),
+  profile("OMN", "Oman", "Umman", "mena", 21.0, 57.0,                           ["80 82 60 15 80", "15 35 30 5 22",  "5 30 5 35 22",   "10 25 5 55 25",  "5 15 35 2 15",   "2 5 5 0 3",      "10 20 45 8 22"]),
+  profile("YEM", "Yemen", "Yemen", "mena", 15.6, 47.6,                          ["35 20 45 5 35",  "30 55 65 5 55",  "3 20 3 20 15",   "5 35 0 70 35",   "20 20 75 2 45",  "1 2 3 0 2",      "12 18 70 8 40"]),
+  profile("DJI", "Djibouti", "Cibuti", "africa", 11.8, 42.6,                    ["45 25 35 5 38",  "35 90 50 5 80",  "3 25 3 25 18",   "10 45 0 90 55",  "15 20 60 2 35",  "1 3 3 0 3",      "12 20 55 8 35"]),
 ];
 
 type Note = [string, ShockId, string, string, string]; // iso3, shock, English, Turkish, source
@@ -92,8 +97,8 @@ for (const [iso3, shock, en, tr, source] of NOTES) {
 
 export const PROFILES: readonly CountryExposure[] = TABLE;
 
-// The other 132 features of world.json: map name | ISO alpha-3 | ISO alpha-2 | region. world.json carries names only.
-const OTHERS = `Afghanistan|AFG|AF|south-asia;Albania|ALB|AL|europe;Algeria|DZA|DZ|africa;Angola|AGO|AO|africa;Armenia|ARM|AM|eurasia;Austria|AUT|AT|europe;Azerbaijan|AZE|AZ|eurasia;Bahamas|BHS|BS|latam;Bangladesh|BGD|BD|south-asia;Belarus|BLR|BY|europe;Belgium|BEL|BE|europe;Belize|BLZ|BZ|latam;Benin|BEN|BJ|africa;Bhutan|BTN|BT|south-asia;Bolivia|BOL|BO|latam;Bosnia and Herz.|BIH|BA|europe;Botswana|BWA|BW|africa;Brunei|BRN|BN|se-asia;Bulgaria|BGR|BG|europe;Burkina Faso|BFA|BF|africa;Burundi|BDI|BI|africa;Cambodia|KHM|KH|se-asia;Cameroon|CMR|CM|africa;Central African Rep.|CAF|CF|africa;Chad|TCD|TD|africa;Colombia|COL|CO|latam;Congo|COG|CG|africa;Costa Rica|CRI|CR|latam;Croatia|HRV|HR|europe;Cuba|CUB|CU|latam;Cyprus|CYP|CY|europe;Czechia|CZE|CZ|europe;Côte d'Ivoire|CIV|CI|africa;Dem. Rep. Congo|COD|CD|africa;Denmark|DNK|DK|europe;Djibouti|DJI|DJ|africa;Dominican Rep.|DOM|DO|latam;Ecuador|ECU|EC|latam;El Salvador|SLV|SV|latam;Eq. Guinea|GNQ|GQ|africa;Eritrea|ERI|ER|africa;Estonia|EST|EE|europe;Ethiopia|ETH|ET|africa;Falkland Is.|FLK|FK|latam;Fiji|FJI|FJ|oceania;Fr. S. Antarctic Lands|ATF|TF|oceania;Gabon|GAB|GA|africa;Gambia|GMB|GM|africa;Georgia|GEO|GE|eurasia;Ghana|GHA|GH|africa;Greece|GRC|GR|europe;Greenland|GRL|GL|north-america;Guatemala|GTM|GT|latam;Guinea|GIN|GN|africa;Guinea-Bissau|GNB|GW|africa;Guyana|GUY|GY|latam;Haiti|HTI|HT|latam;Honduras|HND|HN|latam;Hungary|HUN|HU|europe;Iceland|ISL|IS|europe;Ireland|IRL|IE|europe;Jamaica|JAM|JM|latam;Jordan|JOR|JO|mena;Kazakhstan|KAZ|KZ|eurasia;Kosovo|XKX|XK|europe;Kuwait|KWT|KW|mena;Kyrgyzstan|KGZ|KG|eurasia;Laos|LAO|LA|se-asia;Latvia|LVA|LV|europe;Lesotho|LSO|LS|africa;Liberia|LBR|LR|africa;Libya|LBY|LY|mena;Lithuania|LTU|LT|europe;Luxembourg|LUX|LU|europe;Macedonia|MKD|MK|europe;Madagascar|MDG|MG|africa;Malawi|MWI|MW|africa;Mali|MLI|ML|africa;Mauritania|MRT|MR|africa;Moldova|MDA|MD|europe;Mongolia|MNG|MN|east-asia;Montenegro|MNE|ME|europe;Mozambique|MOZ|MZ|africa;Myanmar|MMR|MM|se-asia;N. Cyprus|XNC||mena;Namibia|NAM|NA|africa;Nepal|NPL|NP|south-asia;New Caledonia|NCL|NC|oceania;Nicaragua|NIC|NI|latam;Niger|NER|NE|africa;North Korea|PRK|KP|east-asia;Oman|OMN|OM|mena;Palestine|PSE|PS|mena;Panama|PAN|PA|latam;Papua New Guinea|PNG|PG|oceania;Paraguay|PRY|PY|latam;Peru|PER|PE|latam;Philippines|PHL|PH|se-asia;Portugal|PRT|PT|europe;Puerto Rico|PRI|PR|latam;Romania|ROU|RO|europe;Rwanda|RWA|RW|africa;S. Sudan|SSD|SS|africa;Senegal|SEN|SN|africa;Serbia|SRB|RS|europe;Sierra Leone|SLE|SL|africa;Slovakia|SVK|SK|europe;Slovenia|SVN|SI|europe;Solomon Is.|SLB|SB|oceania;Somalia|SOM|SO|africa;Somaliland|XSL||africa;Sri Lanka|LKA|LK|south-asia;Sudan|SDN|SD|africa;Suriname|SUR|SR|latam;Switzerland|CHE|CH|europe;Syria|SYR|SY|mena;Tajikistan|TJK|TJ|eurasia;Tanzania|TZA|TZ|africa;Timor-Leste|TLS|TL|se-asia;Togo|TGO|TG|africa;Trinidad and Tobago|TTO|TT|latam;Turkmenistan|TKM|TM|eurasia;Uganda|UGA|UG|africa;Uruguay|URY|UY|latam;Uzbekistan|UZB|UZ|eurasia;Vanuatu|VUT|VU|oceania;Venezuela|VEN|VE|latam;W. Sahara|ESH|EH|africa;Yemen|YEM|YE|mena;Zambia|ZMB|ZM|africa;Zimbabwe|ZWE|ZW|africa;eSwatini|SWZ|SZ|africa`;
+// The other 127 features of world.json: map name | ISO alpha-3 | ISO alpha-2 | region. world.json carries names only.
+const OTHERS = `Afghanistan|AFG|AF|south-asia;Albania|ALB|AL|europe;Algeria|DZA|DZ|africa;Angola|AGO|AO|africa;Armenia|ARM|AM|eurasia;Austria|AUT|AT|europe;Azerbaijan|AZE|AZ|eurasia;Bahamas|BHS|BS|latam;Bangladesh|BGD|BD|south-asia;Belarus|BLR|BY|europe;Belgium|BEL|BE|europe;Belize|BLZ|BZ|latam;Benin|BEN|BJ|africa;Bhutan|BTN|BT|south-asia;Bolivia|BOL|BO|latam;Bosnia and Herz.|BIH|BA|europe;Botswana|BWA|BW|africa;Brunei|BRN|BN|se-asia;Bulgaria|BGR|BG|europe;Burkina Faso|BFA|BF|africa;Burundi|BDI|BI|africa;Cambodia|KHM|KH|se-asia;Cameroon|CMR|CM|africa;Central African Rep.|CAF|CF|africa;Chad|TCD|TD|africa;Colombia|COL|CO|latam;Congo|COG|CG|africa;Costa Rica|CRI|CR|latam;Croatia|HRV|HR|europe;Cuba|CUB|CU|latam;Cyprus|CYP|CY|europe;Czechia|CZE|CZ|europe;Côte d'Ivoire|CIV|CI|africa;Dem. Rep. Congo|COD|CD|africa;Denmark|DNK|DK|europe;Dominican Rep.|DOM|DO|latam;Ecuador|ECU|EC|latam;El Salvador|SLV|SV|latam;Eq. Guinea|GNQ|GQ|africa;Eritrea|ERI|ER|africa;Estonia|EST|EE|europe;Ethiopia|ETH|ET|africa;Falkland Is.|FLK|FK|latam;Fiji|FJI|FJ|oceania;Fr. S. Antarctic Lands|ATF|TF|oceania;Gabon|GAB|GA|africa;Gambia|GMB|GM|africa;Georgia|GEO|GE|eurasia;Ghana|GHA|GH|africa;Greece|GRC|GR|europe;Greenland|GRL|GL|north-america;Guatemala|GTM|GT|latam;Guinea|GIN|GN|africa;Guinea-Bissau|GNB|GW|africa;Guyana|GUY|GY|latam;Haiti|HTI|HT|latam;Honduras|HND|HN|latam;Hungary|HUN|HU|europe;Iceland|ISL|IS|europe;Ireland|IRL|IE|europe;Jamaica|JAM|JM|latam;Jordan|JOR|JO|mena;Kazakhstan|KAZ|KZ|eurasia;Kosovo|XKX|XK|europe;Kyrgyzstan|KGZ|KG|eurasia;Laos|LAO|LA|se-asia;Latvia|LVA|LV|europe;Lesotho|LSO|LS|africa;Liberia|LBR|LR|africa;Libya|LBY|LY|mena;Lithuania|LTU|LT|europe;Luxembourg|LUX|LU|europe;Macedonia|MKD|MK|europe;Madagascar|MDG|MG|africa;Malawi|MWI|MW|africa;Mali|MLI|ML|africa;Mauritania|MRT|MR|africa;Moldova|MDA|MD|europe;Mongolia|MNG|MN|east-asia;Montenegro|MNE|ME|europe;Mozambique|MOZ|MZ|africa;Myanmar|MMR|MM|se-asia;N. Cyprus|XNC||mena;Namibia|NAM|NA|africa;Nepal|NPL|NP|south-asia;New Caledonia|NCL|NC|oceania;Nicaragua|NIC|NI|latam;Niger|NER|NE|africa;North Korea|PRK|KP|east-asia;Palestine|PSE|PS|mena;Papua New Guinea|PNG|PG|oceania;Paraguay|PRY|PY|latam;Peru|PER|PE|latam;Philippines|PHL|PH|se-asia;Portugal|PRT|PT|europe;Puerto Rico|PRI|PR|latam;Romania|ROU|RO|europe;Rwanda|RWA|RW|africa;S. Sudan|SSD|SS|africa;Senegal|SEN|SN|africa;Serbia|SRB|RS|europe;Sierra Leone|SLE|SL|africa;Slovakia|SVK|SK|europe;Slovenia|SVN|SI|europe;Solomon Is.|SLB|SB|oceania;Somalia|SOM|SO|africa;Somaliland|XSL||africa;Sri Lanka|LKA|LK|south-asia;Sudan|SDN|SD|africa;Suriname|SUR|SR|latam;Switzerland|CHE|CH|europe;Syria|SYR|SY|mena;Tajikistan|TJK|TJ|eurasia;Tanzania|TZA|TZ|africa;Timor-Leste|TLS|TL|se-asia;Togo|TGO|TG|africa;Trinidad and Tobago|TTO|TT|latam;Turkmenistan|TKM|TM|eurasia;Uganda|UGA|UG|africa;Uruguay|URY|UY|latam;Uzbekistan|UZB|UZ|eurasia;Vanuatu|VUT|VU|oceania;Venezuela|VEN|VE|latam;W. Sahara|ESH|EH|africa;Zambia|ZMB|ZM|africa;Zimbabwe|ZWE|ZW|africa;eSwatini|SWZ|SZ|africa`;
 // Names Intl has no region code for
 const OWN_NAMES: Record<string, Bilingual> = { XNC: { en: "N. Cyprus", tr: "Kuzey Kıbrıs" }, XSL: { en: "Somaliland", tr: "Somaliland" } };
 
@@ -123,21 +128,26 @@ export function centroid(geometry: WorldFeature["geometry"]): { lat: number; lon
   return { lat: best.lat, lon: best.lon };
 }
 
+// Continental grids reach well north of the country's centre point; ice and islands with barely any grid scale down.
+const GRID_LATITUDE: Partial<Record<string, number>> = { USA: 54, CAN: 58 };
+const SPARSE_GRID: Partial<Record<string, number>> = { GRL: 0.25, ATF: 0.25, FLK: 0.25 };
+
 /** Geomagnetically induced currents grow towards the poles (|latitude| 35 to 65 degrees). */
-export function solarExposure(lat: number): Record<ChannelId, number> {
-  const f = clamp((Math.abs(lat) - 35) / 30, 0.1, 1);
-  return { energy: f, trade: 0.2 + 0.5 * f, food: 0.05 + 0.15 * f, digital: 0.35 + 0.55 * f, macro: 0.2 + 0.5 * f };
+export function solarExposure(lat: number, iso3 = ""): Record<ChannelId, number> {
+  const f = clamp((Math.abs(GRID_LATITUDE[iso3] ?? lat) - 35) / 30, 0.1, 1);
+  const k = SPARSE_GRID[iso3] ?? 1;
+  return { energy: k * f, trade: k * (0.2 + 0.5 * f), food: k * (0.05 + 0.15 * f), digital: k * (0.35 + 0.55 * f), macro: k * (0.2 + 0.5 * f) };
 }
 
 const NEAR_KM = 2500;
 const NEAR_BONUS = 0.35;
 
 /** The universal model for a country without a profile: global spillover, hunger and water stress, distance to the shock. */
-function fallbackShocks(at: { lat: number; lon: number }, facts: CountryFacts | undefined): CountryExposure["shocks"] {
+function fallbackShocks(iso3: string, at: { lat: number; lon: number }, facts: CountryFacts | undefined): CountryExposure["shocks"] {
   const hunger = facts?.hunger?.value ?? 0;
   const foodExtra = (hunger > 10 ? Math.min(0.25, (hunger - 10) / 60) : 0) + ((facts?.water?.value ?? 0) > 40 ? 0.05 : 0);
   return Object.fromEntries(SHOCKS.map((s) => {
-    if (s.id === "solar-g5") return [s.id, solarExposure(at.lat)];
+    if (s.id === "solar-g5") return [s.id, solarExposure(at.lat, iso3)];
     const near = NEAR_BONUS * Math.max(0, 1 - haversineKm(at, s) / NEAR_KM);
     const e = Object.fromEntries(CHANNEL_IDS.map((c) => {
       const base = (s.globalSpillover[c] ?? 0) + near * s.channels[c].weight;
@@ -157,11 +167,11 @@ export function buildCountries(world: { features: WorldFeature[] }, facts: Count
   return world.features.flatMap((f): Country[] => {
     const mapName = f.properties.name;
     const p = profiles.get(mapName);
-    if (p) return [{ ...p, profiled: true, shocks: { ...p.shocks, "solar-g5": solarExposure(p.lat) } }];
+    if (p) return [{ ...p, profiled: true, shocks: { ...p.shocks, "solar-g5": solarExposure(p.lat, p.iso3) } }];
     const o = others.get(mapName);
     if (!o) return [];
     const own = facts?.countries[o.iso3];
     const at = own && Number.isFinite(own.lat) && Number.isFinite(own.lon) ? { lat: own.lat!, lon: own.lon! } : centroid(f.geometry);
-    return [{ iso3: o.iso3, mapName, name: localName(o.iso3, o.iso2, mapName), region: o.region, ...at, profiled: false, shocks: fallbackShocks(at, own) }];
+    return [{ iso3: o.iso3, mapName, name: localName(o.iso3, o.iso2, mapName), region: o.region, ...at, profiled: false, shocks: fallbackShocks(o.iso3, at, own) }];
   });
 }

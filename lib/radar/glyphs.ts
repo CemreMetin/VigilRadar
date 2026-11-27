@@ -1,5 +1,5 @@
 import type { Map as MlMap } from "maplibre-gl";
-import { COLOR } from "@/lib/palette";
+import { COLOR, MAP } from "@/lib/palette";
 
 // Procedural @2x Retina cartographic instrument glyphs (Braun / Taktil Minimalizm).
 // Zero external image requests, zero glyph/font server, GPU-composited at 60 FPS by MapLibre.
@@ -43,8 +43,14 @@ function drawPlant(stroke: string, core: string, active: boolean) {
         ctx.stroke();
       }
     }
+    // solid inner diamond: the ◈ mark
+    const d = active ? 4 : 3;
     ctx.beginPath();
-    ctx.arc(c, c, active ? 3.2 : 2.2, 0, Math.PI * 2);
+    ctx.moveTo(c, c - d);
+    ctx.lineTo(c + d, c);
+    ctx.lineTo(c, c + d);
+    ctx.lineTo(c - d, c);
+    ctx.closePath();
     ctx.fillStyle = core;
     ctx.fill();
   });
@@ -89,12 +95,12 @@ function drawConflict(size: number) {
     const len = Math.max(5, Math.round(s * 0.24));
     const a = pad;
     const b = s - pad;
-    // soft matte terracotta tint inside viewfinder
-    ctx.fillStyle = "rgba(224, 90, 43, 0.16)";
+    // soft coral tint inside viewfinder
+    ctx.fillStyle = "rgba(242, 95, 92, 0.16)";
     ctx.fillRect(a, a, b - a, b - a);
     // four architectural corner brackets
-    ctx.strokeStyle = COLOR.accent;
-    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = MAP.coral;
+    ctx.lineWidth = 2.4;
     const corners: [number, number, number, number][] = [
       [a, a, 1, 1],
       [b, a, -1, 1],
@@ -110,8 +116,8 @@ function drawConflict(size: number) {
     }
     // centre pip
     ctx.beginPath();
-    ctx.arc(s / 2, s / 2, 2.2, 0, Math.PI * 2);
-    ctx.fillStyle = COLOR.fg;
+    ctx.arc(s / 2, s / 2, 2.6, 0, Math.PI * 2);
+    ctx.fillStyle = MAP.cream;
     ctx.fill();
   });
 }
@@ -189,12 +195,12 @@ function drawLanding() {
 /** Registers every procedural @2x cartographic icon on a freshly loaded MapLibre map. */
 export function registerMapGlyphs(map: MlMap): void {
   const icons: Record<string, ReturnType<typeof makeIcon>> = {
-    "plant-idle": drawPlant(COLOR.dim, COLOR.stone, false),
-    "plant-chronic": drawPlant(COLOR.geo, COLOR.geo, true),
-    "plant-active": drawPlant(COLOR.accent, COLOR.fg, true),
-    "strait-idle": drawStrait(COLOR.stone, COLOR.dim, false),
-    "strait-chronic": drawStrait(COLOR.geo, COLOR.fg, true),
-    "strait-active": drawStrait(COLOR.accent, COLOR.fg, true),
+    "plant-idle": drawPlant(MAP.steel, MAP.steel, false),
+    "plant-chronic": drawPlant(MAP.steel, MAP.cream, true),
+    "plant-active": drawPlant(MAP.cream, MAP.hot, true),
+    "strait-idle": drawStrait(MAP.cream, MAP.gold, false),
+    "strait-chronic": drawStrait(MAP.gold, MAP.cream, true),
+    "strait-active": drawStrait(MAP.gold, MAP.hot, true),
     "conflict-sm": drawConflict(32),
     "conflict-md": drawConflict(40),
     "conflict-lg": drawConflict(50),

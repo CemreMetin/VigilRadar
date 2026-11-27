@@ -1,25 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { PROVINCES } from "@/core/build-state";
-import { agoText, reasonText } from "./format";
-import { filterProvinces, fold } from "./region";
+import { agoText, fold, reasonText } from "./format";
 import { UI } from "@/core/content/ui";
 
 const t = (k: keyof typeof UI.tr) => UI.tr[k];
 
-describe("region filter", () => {
+describe("search folding", () => {
   it("folds Turkish letters both ways", () => {
     expect(fold("İSTANBUL")).toBe("istanbul");
     expect(fold("Iğdır")).toBe("igdir");
     expect(fold("Şanlıurfa")).toBe("sanliurfa");
     expect(fold("ELAZIĞ")).toBe("elazig");
-  });
-  it("finds provinces without typing the Turkish characters", () => {
-    expect(filterProvinces("istanbul").map((p) => p.name)).toEqual(["İstanbul"]);
-    expect(filterProvinces("sanliurfa")[0].name).toBe("Şanlıurfa");
-    expect(filterProvinces("igdir")[0].name).toBe("Iğdır");
-    expect(filterProvinces("").length).toBe(81);
-    expect(filterProvinces("zzz")).toEqual([]);
-    expect(PROVINCES.length).toBe(81);
   });
 });
 

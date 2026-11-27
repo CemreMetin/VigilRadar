@@ -4,13 +4,13 @@ import { useState } from "react";
 import { SIM_UI } from "@/core/laplace/copy";
 import type { Country } from "@/core/laplace/types";
 import type { Lang } from "@/lib/lang";
-import { fold } from "@/lib/radar/region";
+import { fold } from "@/lib/radar/format";
 
-const QUICK: [string, string][] = [["TR", "TUR"], ["DE", "DEU"], ["JP", "JPN"], ["US", "USA"], ["EG", "EGY"], ["IN", "IND"]];
+const QUICK: [string, string][] = [["US", "USA"], ["DE", "DEU"], ["JP", "JPN"], ["CN", "CHN"], ["TR", "TUR"], ["IN", "IND"], ["EG", "EGY"], ["GB", "GBR"]];
 
 interface Props { countries: Country[]; lang: Lang; selected: string; onPick: (iso3: string) => void }
 
-/** All countries, filtered as you type (either language, or the three letter code), plus six shortcuts. */
+/** All countries, filtered as you type (either language, or the three letter code), plus eight shortcuts. */
 export default function CountryPicker({ countries, lang, selected, onPick }: Props) {
   const [q, setQ] = useState("");
   const needle = fold(q.trim());

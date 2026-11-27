@@ -42,9 +42,8 @@ function impact(c: Country, s: ShockDef, severity: number, day: number): Country
     channels[ch] = Math.round(100 * clamp(exposure(c, s, ch) * d.weight * severity * waveFactor(day, d.onsetDay, d.peakDay, d.persistence), 0, 1));
   }
   const sorted = [...CHANNEL_IDS].sort((a, b) => channels[b] - channels[a]);
-  const top3 = (channels[sorted[0]] + channels[sorted[1]] + channels[sorted[2]]) / 3;
   // the worst channel leads, so a country hit very hard through one channel is not averaged away
-  const total = Math.round(0.55 * channels[sorted[0]] + 0.45 * top3);
+  const total = Math.round(0.7 * channels[sorted[0]] + 0.2 * channels[sorted[1]] + 0.1 * channels[sorted[2]]);
   const peaks = ranked(c, s).slice(0, 3).map(({ ch }) => s.channels[ch].peakDay);
   return {
     iso3: c.iso3, mapName: c.mapName, name: c.name, lat: c.lat, lon: c.lon,
@@ -94,7 +93,7 @@ export function dominoChain(shockId: ShockId, c: Country): DominoStep[] {
   });
 }
 
-const DEFAULTS = { shock: "hormuz" as ShockId, severity: 0.75, day: 30 };
+const DEFAULTS = { shock: "hormuz" as ShockId, severity: 0.75 };
 
 export function encodeSimQuery(q: SimQuery): string {
   const p = new URLSearchParams({ mode: "sim", shock: q.shock, sev: String(Math.round(q.severity * 100)), day: String(q.day) });
@@ -111,10 +110,11 @@ export function decodeSimQuery(search: string): SimQuery {
   };
   const shock = p.get("shock") as ShockId;
   const country = p.get("country")?.toUpperCase() ?? "";
+  const id = SHOCK_IDS.includes(shock) ? shock : DEFAULTS.shock;
   return {
-    shock: SHOCK_IDS.includes(shock) ? shock : DEFAULTS.shock,
+    shock: id,
     severity: int("sev", 10, 100, DEFAULTS.severity * 100) / 100,
-    day: int("day", 1, MAX_DAY, DEFAULTS.day),
+    day: int("day", 1, MAX_DAY, shockById(id).defaultDay),
     country: /^[A-Z]{3}$/.test(country) ? country : null,
   };
 }

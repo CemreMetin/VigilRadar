@@ -3,6 +3,11 @@ import type { StatusReason } from "@/core/types";
 
 type T = (k: UiKey) => string;
 
+/** Lower case with Turkish letters folded, so "istanbul", "İSTANBUL" and "Istanbul" all match. */
+export function fold(s: string): string {
+  return s.replace(/İ/g, "i").replace(/I/g, "i").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ı/g, "i").replace(/ğ/g, "g");
+}
+
 /** "5 dk", "3 sa", "2 gün" and the matching English short forms. */
 export function agoText(ms: number, t: T): string {
   const m = Math.max(0, Math.round(ms / 60_000));

@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { PROFILES, buildCountries, type CountryFactsFile, type WorldFeature } from "../countries";
+import { PROFILES, buildCountries, solarExposure, type CountryFactsFile, type WorldFeature } from "../countries";
 import { decodeSimQuery, dominoChain, encodeSimQuery, simulate, tierOf, waveFactor } from "../engine";
-import { CHANNEL_IDS, SHOCK_IDS } from "../shocks";
+import { CHANNEL_IDS, SHOCKS, SHOCK_IDS } from "../shocks";
 import type { ChannelId, ShockId } from "../types";
 
 const read = (f: string) => JSON.parse(readFileSync(f, "utf8"));
@@ -12,9 +12,9 @@ const countries = buildCountries(world, facts);
 const run = (shock: ShockId, severity: number, day: number) => simulate({ shock, severity, day }, countries);
 
 describe("1. map integrity", () => {
-  it("has 44 profiles and every mapName is a feature of world.json", () => {
+  it("has 49 profiles and every mapName is a feature of world.json", () => {
     const names = new Set(world.features.map((f) => f.properties.name));
-    expect(PROFILES).toHaveLength(44);
+    expect(PROFILES).toHaveLength(49);
     expect(PROFILES.filter((p) => !names.has(p.mapName))).toEqual([]);
   });
 });
@@ -104,6 +104,29 @@ describe("4. real-world sense", () => {
       expect(digital(a), `digital ${a} > ${b}`).toBeGreaterThan(digital(b));
     }
   });
+  it("puts the directly hit country where the shock is", () => {
+    expect(run("panama", 0.8, 30).topAffected[0].iso3).toBe("PAN");
+    const hormuz = run("hormuz", 0.8, 30).byIso3;
+    expect(["high", "severe"]).toContain(hormuz.KWT.tier);
+    expect(["high", "severe"]).toContain(hormuz.OMN.tier);
+    for (const sev of [0.75, 0.8]) expect(run("blacksea", sev, 30).topAffected.slice(0, 3).map((i) => i.iso3), `sev ${sev}`).toContain("UKR");
+  });
+  it("reaches severe: Taiwan at 0.8 near its peak, Taiwan and Egypt at full severity on the default day", () => {
+    expect(run("taiwan", 0.8, 47).byIso3.TWN).toMatchObject({ tier: "severe" });
+    expect(run("taiwan", 1, 30).byIso3.TWN.tier).toBe("severe");
+    expect(run("suez", 1, 30).byIso3.EGY.tier).toBe("severe");
+  });
+  it("weighs the three strongest channels 70/20/10", () => {
+    const i = run("hormuz", 0.8, 30).byIso3.JPN;
+    const [a, b, c] = Object.values(i.channels).sort((x, y) => y - x);
+    expect(i.total).toBe(Math.round(0.7 * a + 0.2 * b + 0.1 * c));
+  });
+  it("keeps the empty polar grids below the continental ones, whatever their latitude", () => {
+    const r = run("solar-g5", 0.8, 3).byIso3;
+    for (const sparse of ["GRL", "ATF", "FLK"]) for (const grid of ["CAN", "NOR"]) expect(r[sparse].total, `${sparse} < ${grid}`).toBeLessThan(r[grid].total);
+    expect(countries.find((c) => c.iso3 === "USA")!.shocks["solar-g5"]).toEqual(solarExposure(54));
+    expect(countries.find((c) => c.iso3 === "CAN")!.shocks["solar-g5"]).toEqual(solarExposure(58));
+  });
   it("opens a documented chain with grade A, keeps the rest at B, and sorts the top list and the arcs", () => {
     const japan = countries.find((c) => c.iso3 === "JPN")!;
     expect(dominoChain("hormuz", japan).map((s) => s.evidence)).toEqual(["A", "B", "B"]);
@@ -121,6 +144,11 @@ describe("5. URL", () => {
     for (const q of [{ shock: "hormuz", severity: 0.75, day: 30, country: "TUR" }, { shock: "solar-g5", severity: 0.29, day: 180, country: null }] as const)
       expect(decodeSimQuery(encodeSimQuery(q))).toEqual(q);
     expect(encodeSimQuery({ shock: "hormuz", severity: 0.75, day: 30, country: "TUR" })).toBe("?mode=sim&shock=hormuz&sev=75&day=30&country=TUR");
+  });
+  it("opens each shock on its own default day when the address names none", () => {
+    for (const s of SHOCKS) expect(decodeSimQuery(`?mode=sim&shock=${s.id}`).day, s.id).toBe(s.defaultDay);
+    expect(SHOCKS.map((s) => s.defaultDay)).toEqual([30, 30, 30, 7, 30, 30, 90, 3]);
+    expect(decodeSimQuery("?mode=sim&shock=solar-g5&day=40").day).toBe(40);
   });
   it("falls back to safe defaults for a broken query", () => {
     const safe = { shock: "hormuz", severity: 0.75, day: 30, country: null };

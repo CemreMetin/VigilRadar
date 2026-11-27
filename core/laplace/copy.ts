@@ -122,13 +122,13 @@ export const SIM_UI = {
   fallbackModel: t("C — regional / global spillover model (no country profile)", "C — bölgesel / küresel yansıma modeli (ülke profili yok)"),
   profileModel: t("B — country dependency profile", "B — ülke bağımlılık profili"),
   loading: t("Loading the map…", "Harita yükleniyor…"),
-  simulateThis: t("Simulate in Laplace", "Laplace'ta simüle et"),
+  simulateThis: t("Run impact simulation", "Etkiyi simüle et"),
   mapLabel: t("World map coloured by the simulated impact on each country. The country picker is the keyboard alternative.", "Ülkeleri simüle edilen etkiye göre renklendiren dünya haritası. Klavye için ülke seçiciyi kullan."),
   legend: t("Impact colours", "Etki renkleri"),
 } as const;
 
 export const HUB_UI = {
-  simulations: t("Interactive Laplace Simulations", "Etkileşimli Laplace Simülasyonları"),
+  simulations: t("Interactive Impact Simulations", "Etkileşimli Etki Simülasyonları"),
   open: t("Simulate on map", "Haritada simüle et"),
   atlases: t("Reference Atlases", "Başvuru Atlasları"),
   links: t("Causal Web", "Nedensellik Ağı"),
