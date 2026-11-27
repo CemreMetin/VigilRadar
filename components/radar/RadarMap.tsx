@@ -3,11 +3,17 @@
 import { useEffect, useRef } from "react";
 import type { GeoJSONSource, Map as MlMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { EN } from "@/core/content/en";
+import { TR } from "@/core/content/tr";
+import { UI } from "@/core/content/ui";
+import { TIER_NAMES } from "@/core/laplace/copy";
 import type { SimulationResult } from "@/core/laplace/types";
 import type { State } from "@/core/types";
+import type { Lang } from "@/lib/lang";
 import { assetFeatures, chokepointPoints, chronicRings, conflictPoints, linkArcs, quakeFeatures, selectionPoint } from "@/lib/radar/geojson";
 import { registerMapGlyphs } from "@/lib/radar/glyphs";
 import { TIER_FILL, arcFeatures, fillExpression, graticuleFeatures, gridFeatures, landingFeatures, shockPoint, straitFeatures, volcanoFeatures } from "@/lib/radar/laplaceGeo";
+import { chokepointKey } from "@/lib/radar/triage";
 import { loadWorld } from "@/lib/radar/world";
 import { COLOR, MAP } from "@/lib/palette";
 
@@ -18,11 +24,14 @@ interface Props {
   state: State | null;
   nowMs: number;
   sim: SimView | null; // null: LIVE mode
+  lang: Lang;
   label: string;
-  onSelect: (s: Selection) => void;
+  onSelect: (s: Selection | null) => void;
   onCountry: (mapName: string | null) => void; // null: a click on open sea
   selected: Selection | null; // LIVE: ringed on the map, and the camera moves to it once
 }
+
+const WORLD_BOUNDS: [[number, number], [number, number]] = [[-168, -56], [174, 72]];
 
 const INTERACTIVE_LIVE = ["quakes", "plants", "chokepoints", "conflicts"];
 const KIND: Record<string, Selection["kind"]> = { quakes: "quake", plants: "plant", chokepoints: "chokepoint", conflicts: "conflict" };
@@ -39,14 +48,23 @@ const QUAKE_COLOR = ["step", ["get", "mag"], MAP.stone, 5.5, MAP.gold, 6.5, MAP.
 
 /** MapLibre without a tile or glyph server: Taktil Minimalizm palette, 30° graticule, and @2x procedural instrument glyphs. */
 export default function RadarMap(props: Props) {
-  const { state, nowMs, sim, label, selected } = props;
+  const { state, nowMs, sim, lang, label, selected } = props;
   const el = useRef<HTMLDivElement>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const readyRef = useRef(false);
   const markers = useRef<Marker[]>([]);
   const latest = useRef(props);
   const drawLive = useRef<() => void>(() => {});
   const drawSim = useRef<() => void>(() => {});
+
+  const resetView = () => {
+    const map = mapRef.current;
+    if (!map || !el.current) return;
+    const narrow = el.current.clientWidth < 700;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    map.fitBounds(WORLD_BOUNDS, { padding: narrow ? 8 : 16, duration: reduced ? 0 : 600 });
+  };
 
   useEffect(() => {
     let disposed = false;
@@ -188,7 +206,70 @@ export default function RadarMap(props: Props) {
           map.on("mouseenter", id, () => { if (wanted()) map.getCanvas().style.cursor = "pointer"; });
           map.on("mouseleave", id, () => { if (wanted()) map.getCanvas().style.cursor = ""; });
         }
+
+        const hideTip = () => {
+          const tip = tipRef.current;
+          if (tip) tip.style.opacity = "0";
+        };
+        const showTip = (text: string, x: number, y: number) => {
+          const tip = tipRef.current;
+          const box = el.current;
+          if (!tip || !box) return;
+          tip.textContent = text;
+          const maxX = Math.max(8, box.clientWidth - tip.offsetWidth - 10);
+          const tx = Math.min(maxX, Math.max(8, x + 12));
+          const ty = y > 44 ? y - 34 : y + 16;
+          tip.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+          tip.style.opacity = "1";
+        };
+        map.on("dragstart", hideTip);
+        map.on("mouseout", hideTip);
+        map.on("mousemove", (e) => {
+          const { sim: view, state: s, lang: lg } = latest.current;
+          const ui = UI[lg];
+          const notes = lg === "tr" ? TR.chokepointNotes : EN.chokepointNotes;
+          if (view) {
+            const { x, y } = e.point;
+            const infraLayers = ["sim-straits", "sim-volcanoes"].filter((id) => map.getLayer(id) && map.getLayoutProperty(id, "visibility") !== "none");
+            const pin = infraLayers.length ? map.queryRenderedFeatures([[x - 8, y - 8], [x + 8, y + 8]], { layers: infraLayers })[0] : undefined;
+            if (pin?.properties?.name) {
+              const rawName = String(pin.properties.name);
+              const k = chokepointKey(rawName);
+              showTip(k ? notes[k].name : rawName, x, y);
+              return;
+            }
+            const country = map.queryRenderedFeatures(e.point, { layers: ["world-fill"] })[0];
+            if (!country) { hideTip(); return; }
+            const hit = view.result.byMapName[String(country.properties?.name)];
+            if (!hit) { hideTip(); return; }
+            showTip(`${hit.name[lg]} · ${hit.total}/100 · ${TIER_NAMES[hit.tier][lg]}`, x, y);
+            return;
+          }
+          const { x, y } = e.point;
+          const hit = map.queryRenderedFeatures([[x - 6, y - 6], [x + 6, y + 6]], { layers: INTERACTIVE_LIVE })[0];
+          if (!hit) { hideTip(); return; }
+          const kind = KIND[hit.layer.id];
+          const id = String(hit.properties?.id ?? "");
+          if (kind === "quake") {
+            showTip(`M${hit.properties?.mag} · ${hit.properties?.place}`, x, y);
+          } else if (kind === "chokepoint") {
+            const cp = s?.chokepoints.find((c) => c.id === id);
+            const raw = String(hit.properties?.name ?? cp?.name ?? "");
+            const k = chokepointKey(raw);
+            const title = k ? notes[k].name : raw;
+            const status = !cp || cp.level === "stale" ? ui.flowOld : cp.level === "severe" ? ui.flowSevere : cp.level === "deviation" ? ui.flowDeviation : ui.flowNormal;
+            const count = cp && cp.recent !== null && cp.level !== "stale" ? ` · ${Math.round(cp.recent)}/${ui.day}` : "";
+            showTip(`${title}${count} · ${status}`, x, y);
+          } else if (kind === "plant") {
+            showTip(`${hit.properties?.name} · ${ui.plant}`, x, y);
+          } else {
+            const c = s?.conflicts.find((k) => k.id === id);
+            showTip(c ? `${c.label} · ${c.events} ${ui.events}` : ui.conflict, x, y);
+          }
+        });
+
         map.on("click", (e) => {
+          hideTip();
           if (latest.current.sim) {
             const country = map.queryRenderedFeatures(e.point, { layers: ["world-fill"] })[0];
             latest.current.onCountry(country ? String(country.properties?.name) : null);
@@ -196,7 +277,7 @@ export default function RadarMap(props: Props) {
           }
           const { x, y } = e.point; // a 16 px tap box for comfortable mobile touches
           const hit = map.queryRenderedFeatures([[x - 8, y - 8], [x + 8, y + 8]], { layers: INTERACTIVE_LIVE })[0];
-          if (hit) latest.current.onSelect({ kind: KIND[hit.layer.id], id: String(hit.properties?.id) });
+          latest.current.onSelect(hit ? { kind: KIND[hit.layer.id], id: String(hit.properties?.id) } : null);
         });
 
         // One loop for the ring and the arc growth. It runs only while one of them moves; an idle map schedules no frames.
@@ -327,10 +408,34 @@ export default function RadarMap(props: Props) {
   useEffect(() => { if (readyRef.current) drawLive.current(); }, [state, nowMs, live, selected]);
   useEffect(() => { if (readyRef.current) drawSim.current(); }, [sim]);
 
+  const ui = UI[lang];
   // maplibre-gl.css makes its container position:relative, so the sizing wrapper is a separate element
   return (
-    <div lang="en" className="absolute inset-0">
+    <div lang={lang} className="absolute inset-0">
       <div ref={el} className="h-full w-full" role="img" aria-label={label} />
+      <div
+        ref={tipRef}
+        aria-hidden
+        style={{ opacity: 0, transition: "opacity 120ms ease" }}
+        className="mono pointer-events-none absolute left-0 top-0 z-20 whitespace-nowrap rounded-lg border border-line-strong bg-panel-solid/95 px-2.5 py-1 text-label text-fg shadow-card"
+      />
+      <button
+        type="button"
+        onClick={resetView}
+        title={ui.resetView}
+        aria-label={ui.resetView}
+        className="btn mono absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-read text-fg shadow-card"
+      >
+        <span aria-hidden>⌖</span>
+      </button>
+      {live && (
+        <ul aria-hidden className="mono pointer-events-none absolute bottom-2.5 left-2.5 z-10 hidden items-center gap-3 rounded-lg border border-line bg-panel-solid/95 px-2.5 py-1 text-label text-dim shadow-card sm:flex">
+          <li className="flex items-center gap-1"><span style={{ color: MAP.gold }}>●</span>{ui.legQuake}</li>
+          <li className="flex items-center gap-1"><span style={{ color: MAP.steel }}>◈</span>{ui.legNuclear}</li>
+          <li className="flex items-center gap-1"><span style={{ color: MAP.cream }}>][</span>{ui.legStrait}</li>
+          <li className="flex items-center gap-1"><span style={{ color: MAP.hot }}>⌜⌝</span>{ui.legConflict}</li>
+        </ul>
+      )}
     </div>
   );
 }

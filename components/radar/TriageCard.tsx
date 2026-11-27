@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { readMoreFor, type ReadMore } from "@/core/content/readmore";
 import type { ChokepointFlow, ConflictCluster, MergedQuake, State } from "@/core/types";
 import { PLANTS } from "@/core/build-state";
+import plantsData from "@/public/data/static/plants.json";
 import { agoText } from "@/lib/radar/format";
 import { chokepointKey, chokepointKeys, linkRadiusKm, namedLinks, type ChokepointKey, type NamedLink } from "@/lib/radar/triage";
 import { useT } from "@/lib/radar/useT";
@@ -14,6 +15,8 @@ import { shockForStrait } from "@/lib/radar/laplaceGeo";
 import type { Selection } from "./RadarMap";
 
 const SRC = { usgs: "USGS", emsc: "EMSC", afad: "AFAD", kandilli: "B.Ü. KRDAE" } as const;
+interface PlantMeta { id: string; country: string; status: string; reactors: number }
+const PLANT_META = new Map((plantsData.plants as PlantMeta[]).map((p) => [p.id, p]));
 
 interface Props { state: State; sel: Selection; now: number; onClose: () => void; onSimulate: (shock: ShockId) => void }
 
@@ -106,11 +109,17 @@ export default function TriageCard({ state, sel, now, onClose, onSimulate }: Pro
   } else if (sel.kind === "plant") {
     const p = PLANTS.find((x) => x.id === sel.id);
     if (!p) return null;
+    const meta = PLANT_META.get(p.id);
     const links = namedLinks(state, state.links.filter((l) => l.toId === p.id));
-    title = t("plant");
+    title = `${t("plant")}: ${p.name}`;
+    const statusLabel = meta?.status === "Under Construction" ? t("plantConstruction") : meta?.status === "Operational" ? t("plantOperational") : meta?.status;
     body = (
       <>
-        <Block title={t("qWhat")}><p className="font-bold">{p.name}</p><p className="text-dim">{t("plant")} · {t("approx")}</p></Block>
+        <Block title={t("qWhat")}>
+          <p className="font-bold">{p.name}</p>
+          {meta && <p className="mono text-body text-dim">{meta.country} · {meta.reactors} {t("reactors")}{statusLabel ? ` · ${statusLabel}` : ""}</p>}
+          <p className="text-label text-dim">{t("approx")}</p>
+        </Block>
         <Block title={t("qNearby")}>
           {links.length === 0 ? <p className="text-dim">{t("noLinks")}</p> : <ul>{links.map(({ link }) => <li key={link.id}>{link.rule.replace("→", " → ")} · {Math.round(link.distanceKm)} {t("km")}{link.chronic ? ` · ${t("chronic")}` : ""}</li>)}</ul>}
         </Block>
@@ -121,13 +130,14 @@ export default function TriageCard({ state, sel, now, onClose, onSimulate }: Pro
     const cp = state.chokepoints.find((x) => x.id === sel.id) as ChokepointFlow | undefined;
     if (!cp) return null;
     const key = chokepointKey(cp.name);
+    const note = key ? c.chokepointNotes[key] : null;
     const links = namedLinks(state, state.links.filter((l) => l.toId === cp.id));
-    title = `${t("chokepoint")}: ${cp.name}`;
+    title = `${t("chokepoint")}: ${note?.name ?? cp.name}`;
     straits = key ? [key] : [];
     body = (
       <>
         <Block title={t("qWhat")}>
-          <p className="font-bold">{cp.name}</p>
+          <p className="font-bold">{note?.name ?? cp.name}</p>
           {cp.level === "stale" || cp.recent === null || cp.baseline === null || cp.dev === null ? <p className="text-dim">{t("flowOld")}</p> : (
             <dl className="mono grid grid-cols-2 gap-x-3 text-body">
               <dt className="text-dim">{t("avg7")}</dt><dd>{Math.round(cp.recent)} {t("perDay")}</dd>
@@ -138,8 +148,19 @@ export default function TriageCard({ state, sel, now, onClose, onSimulate }: Pro
           {cp.dataThrough && <p className="text-dim">{t("dataThrough")}: {new Date(cp.dataThrough).toLocaleDateString(locale, { day: "numeric", month: "short" })}</p>}
           {cp.series && cp.series.length > 1 ? <MiniLine values={cp.series} /> : <p className="text-label text-dim">{t("noSeries")}</p>}
         </Block>
+        {note && (
+          <Block title={t("qContext")}>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-body">
+              <dt className="mono text-dim">{t("cpShare")}</dt><dd>{note.share}</dd>
+              <dt className="mono text-dim">{t("cpCargo")}</dt><dd>{note.cargo}</dd>
+              <dt className="mono text-dim">{t("cpWidth")}</dt><dd>{note.width}</dd>
+              <dt className="mono text-dim">{t("cpDetour")}</dt><dd>{note.detour}</dd>
+            </dl>
+            <p className="pt-1">{note.text}</p>
+            <p className="mono text-label text-dim">{note.evidence} · {note.source}</p>
+          </Block>
+        )}
         <Block title={t("qNearby")}>{linkList(links)}</Block>
-        <Block title={t("qContext")}>{context(key ? [key] : [])}</Block>
       </>
     );
   }

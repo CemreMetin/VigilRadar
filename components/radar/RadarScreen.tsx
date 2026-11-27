@@ -9,6 +9,7 @@ import { decodeSimQuery, encodeSimQuery, phaseForDay, simulate } from "@/core/la
 import { shockById } from "@/core/laplace/shocks";
 import type { ShockId, SimQuery } from "@/core/laplace/types";
 import { agoText } from "@/lib/radar/format";
+import { chokepointKey } from "@/lib/radar/triage";
 import { useCountries } from "@/lib/radar/useCountries";
 import { useNow } from "@/lib/radar/useNow";
 import { useRadar } from "@/lib/radar/useRadar";
@@ -45,6 +46,7 @@ export default function RadarScreen() {
   const [drawerOpen, setDrawerOpen] = useState(true);
   const state = loaded?.state ?? null;
   const recent = (state?.quakes ?? []).filter((q) => !q.retracted).slice(0, 10);
+  const straits = (state?.chokepoints ?? []).filter((cp) => cp.available);
   const asideRef = useRef<HTMLElement>(null);
 
   const change = useCallback((patch: Partial<SimQuery>) => setScreen((s) => ({ ...s, sim: { ...s.sim, ...patch } })), []);
@@ -95,7 +97,7 @@ export default function RadarScreen() {
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           {simulating && <ShockChips shock={query.shock} lang={lang} onPick={pickShock} />}
           <div className="relative min-h-0 flex-1">
-            <RadarMap state={state} nowMs={loaded?.lastOkMs ?? 0} sim={view} selected={selected} onSelect={select} onCountry={pickByName}
+            <RadarMap state={state} nowMs={loaded?.lastOkMs ?? 0} sim={view} lang={lang} selected={selected} onSelect={select} onCountry={pickByName}
               label={simulating ? SIM_UI.mapLabel[lang] : "World map of recent earthquakes and the assets they may affect. The list of recent events is the keyboard alternative."} />
           </div>
         </div>
@@ -133,6 +135,29 @@ export default function RadarScreen() {
                   {state && recent.length === 0 && <li className="p-3 text-body text-dim">{t("noEvents")}</li>}
                 </ul>
               </details>
+              {straits.length > 0 && (
+                <details open={!selected} key={selected ? "cp-closed" : "cp-open"} className="border-t border-line">
+                  <summary className="label cursor-pointer p-3">{t("chokepointsList")}</summary>
+                  <ul className="divide-y divide-line" aria-label={t("chokepointsList")}>
+                    {straits.map((cp) => {
+                      const k = chokepointKey(cp.name);
+                      const label = k ? c.chokepointNotes[k].name : cp.name;
+                      const dot = cp.level === "severe" ? "var(--accent-raw)" : cp.level === "deviation" ? "var(--geo)" : cp.level === "stale" ? "var(--fg-dim)" : "var(--safe)";
+                      const right = cp.recent !== null && cp.level !== "stale" ? `${Math.round(cp.recent)}/${t("day")}` : t("flowOld");
+                      return (
+                        <li key={cp.id}>
+                          <button type="button" onClick={() => select({ kind: "chokepoint", id: cp.id })} aria-pressed={selected?.kind === "chokepoint" && selected.id === cp.id}
+                            className={`mono flex w-full items-center gap-2 px-3 py-2 text-left text-body hover:bg-panel-solid ${selected?.kind === "chokepoint" && selected.id === cp.id ? "text-accent" : ""}`}>
+                            <span aria-hidden className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: dot }} />
+                            <span className="min-w-0 flex-1 truncate">{label}</span>
+                            <span className="shrink-0 text-label text-dim">{right}</span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </details>
+              )}
               <p className="border-t border-line p-3 text-label text-dim">{c.disclaimer}</p>
             </>
           )}

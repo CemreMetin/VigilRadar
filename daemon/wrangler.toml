@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2026-10-01"
 
 [vars]
-ALLOWED_ORIGINS = "http://localhost:3000,https://vigilradar.pages.dev,https://monitoring-9l7.pages.dev"
+ALLOWED_ORIGINS = "http://localhost:3000,https://vigilradar.pages.dev"
 SITE_URL = "https://vigilradar.pages.dev"
 
 [triggers]
