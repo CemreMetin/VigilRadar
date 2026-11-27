@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import GitHubLink from "@/components/GitHubLink";
 import LangSwitch from "@/components/LangSwitch";
+import LogoMark from "@/components/LogoMark";
 import { useLang } from "@/lib/lang";
 
 type PageLink = { href: string; label: string; blurb: string };
@@ -64,7 +65,7 @@ export default function SiteNav() {
   return (
     <header className="no-print border-b border-line bg-panel-solid">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-1 px-3 py-1.5 md:h-[52px] md:flex-nowrap md:py-0">
-        <Link href="/" className="mono text-read font-bold tracking-[0.16em] text-fg">VIGILRADAR</Link>
+        <Link href="/" className="mono flex items-center gap-2 text-read font-bold tracking-[0.16em] text-fg"><LogoMark />VIGILRADAR</Link>
         <MainNav current={current} />
         <div className="ml-auto flex items-center md:gap-2"><GitHubLink /><LangSwitch /></div>
       </div>

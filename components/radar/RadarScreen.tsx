@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LaplacePanel from "@/components/laplace/LaplacePanel";
 import ShockChips from "@/components/laplace/ShockChips";
 import SimControls from "@/components/laplace/SimControls";
-import { SIM_UI } from "@/core/laplace/copy";
-import { decodeSimQuery, encodeSimQuery, simulate } from "@/core/laplace/engine";
+import { SHOCK_COPY, SIM_UI } from "@/core/laplace/copy";
+import { decodeSimQuery, encodeSimQuery, phaseForDay, simulate } from "@/core/laplace/engine";
 import { shockById } from "@/core/laplace/shocks";
 import type { ShockId, SimQuery } from "@/core/laplace/types";
 import { agoText } from "@/lib/radar/format";
@@ -54,10 +54,23 @@ export default function RadarScreen() {
   const pickShock = (shock: ShockId) => { if (shock !== query.shock) change({ shock, day: shockById(shock).defaultDay }); };
 
   const result = useMemo(() => (simulating && countries ? simulate({ shock: query.shock, severity: query.severity, day: query.day }, countries) : null), [simulating, countries, query.shock, query.severity, query.day]);
-  const iso3 = result && query.country && result.byIso3[query.country] ? query.country : lang === "tr" ? "TUR" : "USA";
-  const selectedName = result?.byIso3[iso3]?.mapName ?? "";
+  const iso3 = result && query.country && result.byIso3[query.country] ? query.country : null; // null: the global overview
+  const selectedName = (iso3 && result?.byIso3[iso3]?.mapName) || null;
   const view = useMemo(() => (result ? { result, selected: selectedName } : null), [result, selectedName]);
-  const pickByName = useCallback((name: string) => { const hit = countries?.find((x) => x.mapName === name); if (hit) change({ country: hit.iso3 }); }, [countries, change]);
+  const pickByName = useCallback((name: string | null) => {
+    if (!name) return change({ country: null });
+    const hit = countries?.find((x) => x.mapName === name);
+    if (hit) change({ country: hit.iso3 });
+  }, [countries, change]);
+  const phase = phaseForDay(query.shock, query.day);
+
+  useEffect(() => {
+    if (!simulating || !query.country) return;
+    // Escape inside a field belongs to that field
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape" && !(e.target instanceof HTMLInputElement)) change({ country: null }); };
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [simulating, query.country, change]);
 
   useEffect(() => {
     if (!selected) return;
@@ -86,7 +99,7 @@ export default function RadarScreen() {
               label={simulating ? SIM_UI.mapLabel[lang] : "World map of recent earthquakes and the assets they may affect. The list of recent events is the keyboard alternative."} />
           </div>
         </div>
-        <aside ref={asideRef} className={`scroll-thin overflow-auto border-t border-line bg-panel-solid md:max-h-none md:w-[380px] md:shrink-0 md:border-l md:border-t-0 ${simulating ? (drawerOpen ? "h-[46dvh] md:h-auto" : "h-auto md:h-auto") : open ? "max-h-[58dvh]" : "max-h-[40dvh]"}`}>
+        <aside ref={asideRef} className={`scroll-thin overflow-auto border-t border-line bg-panel-solid md:max-h-none md:w-[380px] md:shrink-0 md:border-l md:border-t-0 ${simulating ? (drawerOpen ? "h-[34dvh] md:h-auto" : "h-auto md:h-auto") : open ? "max-h-[58dvh]" : "max-h-[40dvh]"}`}>
           {simulating ? (
             <>
               <button
@@ -95,7 +108,7 @@ export default function RadarScreen() {
                 aria-expanded={drawerOpen}
                 className="mono flex min-h-9 w-full items-center justify-between border-b border-line px-3 py-1.5 text-body text-fg md:hidden"
               >
-                <span>{result ? `${result.byIso3[iso3]?.name[lang]} · ${result.byIso3[iso3]?.total}/100` : SIM_UI.loading[lang]}</span>
+                <span>{!result ? SIM_UI.loading[lang] : iso3 ? `${result.byIso3[iso3].name[lang]} · ${result.byIso3[iso3].total}/100` : `${SHOCK_COPY[query.shock].chip[lang]} · ${SIM_UI.globalIndex[lang]} ${result.globalIndex}/100`}</span>
                 <span className="text-dim" aria-hidden>{drawerOpen ? "▾" : "▴"}</span>
               </button>
               <div className={drawerOpen ? "block" : "hidden md:block"}>
@@ -126,7 +139,18 @@ export default function RadarScreen() {
         </aside>
       </main>
       <footer className="border-t border-line">
-        {simulating ? <SimControls query={{ ...query, country: iso3 }} lang={lang} onChange={change} /> : <StatusLine loaded={loaded} done={done} now={now} />}
+        {simulating ? (
+          <>
+            <p className="mono border-b border-line bg-panel-solid px-3 py-1.5 text-body leading-snug text-fg">
+              <span className="font-bold uppercase text-accent">{SIM_UI.day[lang]} {query.day} · </span>
+              {/* only this part is announced: it changes four times, the day changes on every tick of the player */}
+              <span aria-live="polite">
+                <span className="font-bold uppercase text-accent">{phase.label[lang]}</span> · {phase.text[lang]}
+              </span>
+            </p>
+            <SimControls query={{ ...query, country: iso3 }} lang={lang} onChange={change} />
+          </>
+        ) : <StatusLine loaded={loaded} done={done} now={now} />}
       </footer>
     </div>
   );

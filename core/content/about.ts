@@ -84,4 +84,4 @@ export const ABOUT = {
 } satisfies Record<"tr" | "en", About>;
 
 /** The localStorage keys the site really uses (VIGIL.md 11); the test in lib/radar keeps this list true. */
-export const STORAGE_KEYS = ["vigil.lang", "vigil.lastState", "vigil.precached.v2"] as const;
+export const STORAGE_KEYS = ["vigil.lang", "vigil.lastState", "vigil.precached.v3"] as const;

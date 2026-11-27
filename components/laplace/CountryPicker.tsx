@@ -8,7 +8,7 @@ import { fold } from "@/lib/radar/format";
 
 const QUICK: [string, string][] = [["US", "USA"], ["DE", "DEU"], ["JP", "JPN"], ["CN", "CHN"], ["TR", "TUR"], ["IN", "IND"], ["EG", "EGY"], ["GB", "GBR"]];
 
-interface Props { countries: Country[]; lang: Lang; selected: string; onPick: (iso3: string) => void }
+interface Props { countries: Country[]; lang: Lang; selected: string | null; onPick: (iso3: string) => void }
 
 /** All countries, filtered as you type (either language, or the three letter code), plus eight shortcuts. */
 export default function CountryPicker({ countries, lang, selected, onPick }: Props) {

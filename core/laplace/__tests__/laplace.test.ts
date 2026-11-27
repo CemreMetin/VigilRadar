@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { PROFILES, buildCountries, solarExposure, type CountryFactsFile, type WorldFeature } from "../countries";
-import { decodeSimQuery, dominoChain, encodeSimQuery, simulate, tierOf, waveFactor } from "../engine";
+import { SHOCK_PHASES } from "../copy";
+import { decodeSimQuery, dominoChain, encodeSimQuery, phaseForDay, simulate, tierOf, waveFactor } from "../engine";
 import { CHANNEL_IDS, SHOCKS, SHOCK_IDS } from "../shocks";
 import type { ChannelId, ShockId } from "../types";
 
@@ -116,6 +117,16 @@ describe("4. real-world sense", () => {
     expect(run("taiwan", 1, 30).byIso3.TWN.tier).toBe("severe");
     expect(run("suez", 1, 30).byIso3.EGY.tier).toBe("severe");
   });
+  it("lets the canal's own country reach high at 0.8 while the rest stay below", () => {
+    const r = run("panama", 0.8, 30);
+    expect(r.byIso3.PAN.tier).toBe("high");
+    expect(r.topAffected.slice(1).every((i) => ["low", "moderate"].includes(i.tier))).toBe(true);
+  });
+  it("peaks the solar grid damage on day 3, with the satellites", () => {
+    const energy = (day: number) => run("solar-g5", 0.8, day).byIso3.NOR.channels.energy;
+    expect(energy(3)).toBeGreaterThan(energy(2));
+    expect(energy(3)).toBeGreaterThan(energy(7));
+  });
   it("weighs the three strongest channels 70/20/10", () => {
     const i = run("hormuz", 0.8, 30).byIso3.JPN;
     const [a, b, c] = Object.values(i.channels).sort((x, y) => y - x);
@@ -147,7 +158,7 @@ describe("5. URL", () => {
   });
   it("opens each shock on its own default day when the address names none", () => {
     for (const s of SHOCKS) expect(decodeSimQuery(`?mode=sim&shock=${s.id}`).day, s.id).toBe(s.defaultDay);
-    expect(SHOCKS.map((s) => s.defaultDay)).toEqual([30, 30, 30, 7, 30, 30, 90, 3]);
+    expect(SHOCKS.map((s) => s.defaultDay)).toEqual([30, 30, 30, 7, 30, 30, 135, 3]);
     expect(decodeSimQuery("?mode=sim&shock=solar-g5&day=40").day).toBe(40);
   });
   it("falls back to safe defaults for a broken query", () => {
@@ -156,4 +167,24 @@ describe("5. URL", () => {
   });
 });
 
-// 6. The retraction test lives with the merge it tests: core/__tests__/quakes.test.ts ("retraction").
+describe("6. day narrative", () => {
+  it("walks all four phases of every shock once, in order, across days 1..180", () => {
+    for (const shock of SHOCK_IDS) {
+      const phases = SHOCK_PHASES[shock];
+      expect(phases, shock).toHaveLength(4);
+      expect(phases[3].untilDay, shock).toBe(180);
+      for (const p of phases) expect(p.label.en && p.label.tr && p.text.en && p.text.tr, shock).toBeTruthy();
+      const walked = Array.from({ length: 180 }, (_, i) => phases.indexOf(phaseForDay(shock, i + 1)));
+      expect(walked, shock).toEqual([...walked].sort((a, b) => a - b));
+      expect([...new Set(walked)], shock).toEqual([0, 1, 2, 3]);
+    }
+  });
+  it("clamps a day outside the range", () => {
+    const [first, , , last] = SHOCK_PHASES.hormuz;
+    expect(phaseForDay("hormuz", 0)).toBe(first);
+    expect(phaseForDay("hormuz", 999)).toBe(last);
+    expect(phaseForDay("hormuz", Number.NaN)).toBe(last);
+  });
+});
+
+// 7. The retraction test lives with the merge it tests: core/__tests__/quakes.test.ts ("retraction").

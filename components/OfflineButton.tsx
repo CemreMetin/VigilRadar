@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { SCENARIOS } from "@/data/scenarios";
 import { PAGE_GROUPS } from "./SiteNav";
 
-const FLAG = "monitoring.offline.v1";
+const FLAG = "monitoring.offline.v2";
 const PAGES_TO_SAVE = [
   ...PAGE_GROUPS.flatMap((g) => g.pages.map((p) => p.href)),
   ...SCENARIOS.map((s) => `/library/${s.id}`),

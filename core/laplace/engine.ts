@@ -1,4 +1,4 @@
-import { STEP_COPY, dayRange } from "./copy";
+import { SHOCK_PHASES, STEP_COPY, dayRange } from "./copy";
 import { CHANNEL_IDS, SHOCK_IDS, shockById } from "./shocks";
 import type { CascadeArc, ChannelId, Country, CountryImpact, DominoStep, ImpactTier, ShockDef, ShockId, SimQuery, SimulationResult } from "./types";
 
@@ -22,6 +22,12 @@ export function waveFactor(day: number, onsetDay: number, peakDay: number, persi
 }
 
 export const tierOf = (total: number): ImpactTier => (total >= 75 ? "severe" : total >= 55 ? "high" : total >= 30 ? "moderate" : total >= 12 ? "low" : "none");
+
+/** The narrative phase a day falls in; a day outside 1..180 gets the nearest end. */
+export function phaseForDay(shockId: ShockId, day: number) {
+  const phases = SHOCK_PHASES[shockId];
+  return phases.find((p) => day <= p.untilDay) ?? phases[phases.length - 1];
+}
 
 /** Structural exposure of a country to one channel of a shock: its own figure, never below the global floor. */
 const exposure = (c: Country, s: ShockDef, ch: ChannelId) => Math.max(c.shocks[s.id]?.[ch] ?? 0, s.globalSpillover[ch] ?? 0);

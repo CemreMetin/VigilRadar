@@ -36,6 +36,60 @@ export const SHOCK_COPY: Record<ShockId, { chip: Bilingual; name: Bilingual; sum
   "solar-g5": { chip: t("G5 solar storm", "G5 güneş fırtınası"), name: t("Carrington-scale solar storm", "Carrington ölçeğinde güneş fırtınası"), summary: t("A G5 geomagnetic storm strains high-latitude grids and disrupts satellites, GNSS and HF radio.", "G5 jeomanyetik fırtına yüksek enlem şebekelerini zorlar; uydu, GNSS ve HF haberleşmeyi bozar.") },
 };
 
+const phase = (untilDay: number, label: Bilingual, text: Bilingual) => ({ untilDay, label, text });
+
+/** Four phases per shock: what happens up to `untilDay`. The boundaries follow the channel onset and peak days in shocks.ts. */
+export const SHOCK_PHASES: Record<ShockId, { untilDay: number; label: Bilingual; text: Bilingual }[]> = {
+  hormuz: [
+    phase(3, t("Shock", "İlk şok"), t("Tankers stop at the strait; spot oil and LNG prices jump and Gulf voyages are re-insured.", "Tankerler boğazda durur; spot petrol ve LNG fiyatı sıçrar, Körfez seferlerinin sigortası yeniden fiyatlanır.")),
+    phase(14, t("Buffer drain", "Stok erimesi"), t("Cargoes already at sea arrive, then gaps open; importers draw down stocks, Asia first.", "Yoldaki yükler varır, sonra boşluk başlar; ithalatçılar stok eritir, önce Asya.")),
+    phase(45, t("Price pass-through", "Fiyat yansıması"), t("Fuel, power and freight costs rise and press on inflation and trade balances.", "Yakıt, elektrik ve navlun maliyeti artar; enflasyonu ve dış ticaret dengesini zorlar.")),
+    phase(180, t("Adjustment", "Uyum"), t("Fertiliser and diesel costs reach food prices; buyers switch suppliers and cut demand.", "Gübre ve mazot maliyeti gıda fiyatına ulaşır; alıcılar tedarikçi değiştirir, talebi kısar.")),
+  ],
+  suez: [
+    phase(5, t("Diversion", "Rota sapması"), t("Ships queue or turn towards the Cape of Good Hope; war-risk and freight quotes rise.", "Gemiler bekler veya Ümit Burnu'na döner; savaş riski primi ve navlun teklifleri yükselir.")),
+    phase(21, t("Longer route", "Uzayan rota"), t("Asia–Europe sailings take 10–14 days longer; arrivals at European ports show gaps.", "Asya–Avrupa seferleri 10–14 gün uzar; Avrupa limanlarında varışlar seyrekleşir.")),
+    phase(60, t("Capacity squeeze", "Kapasite daralması"), t("More ships are tied up per cargo; freight and delivery times climb and canal revenue falls.", "Aynı yük için daha çok gemi gerekir; navlun ve teslim süresi artar, kanal geliri düşer.")),
+    phase(180, t("New schedules", "Yeni tarifeler"), t("Carriers rebuild timetables around Africa; the added cost passes into consumer prices.", "Hatlar tarifeleri Afrika rotasına göre kurar; ek maliyet tüketici fiyatlarına geçer.")),
+  ],
+  taiwan: [
+    phase(5, t("Shock", "İlk şok"), t("Advanced wafer fabs halt and East Asian shipping freezes; freight risk spikes across Taiwan, Japan and South Korea.", "İleri yonga fabrikaları durur, Doğu Asya deniz trafiği kilitlenir; Tayvan, Japonya ve Güney Kore'de navlun riski sıçrar.")),
+    phase(25, t("Buffer drain", "Stok erimesi"), t("Semiconductor buffers deplete across US, Chinese and European cloud, electronics and automotive factories.", "ABD, Çin ve Avrupa'da bulut, elektronik ve otomotiv tesislerinin yonga stokları erir.")),
+    phase(75, t("Production squeeze", "Üretim daralması"), t("Server, phone and vehicle assembly slows globally as replacement capacity cannot cover leading-edge nodes.", "En ileri üretim süreçlerinin yerini dolduracak kapasite olmadığı için sunucu, telefon ve araç montajı dünya genelinde yavaşlar.")),
+    phase(180, t("Rerouting", "Yeniden yönlendirme"), t("Firms ration chips and redesign around legacy nodes; higher hardware costs pass into global prices.", "Şirketler yongayı paylaştırır, eski süreçlere göre yeniden tasarlar; artan donanım maliyeti fiyatlara geçer.")),
+  ],
+  "redsea-cables": [
+    phase(3, t("Cable cut", "Kablo kopması"), t("Europe–Asia and East Africa traffic reroutes; latency rises and backup links congest.", "Avrupa–Asya ve Doğu Afrika trafiği yön değiştirir; gecikme artar, yedek hatlar tıkanır.")),
+    phase(14, t("Congestion", "Tıkanma"), t("Operators buy capacity on longer paths; banking, cloud and logistics systems run slower.", "İşletmeciler uzun yollardan kapasite alır; banka, bulut ve lojistik sistemleri yavaşlar.")),
+    phase(45, t("Repair", "Onarım"), t("Repair ships need permits and safe access; faults are spliced one segment at a time.", "Onarım gemileri izin ve güvenli erişim bekler; arızalar kesim kesim eklenir.")),
+    phase(180, t("Restoration", "Geri dönüş"), t("Repaired segments return to service; operators add routes that avoid the narrow corridor.", "Onarılan kesimler devreye döner; işletmeciler dar koridordan kaçınan yeni rotalar ekler.")),
+  ],
+  blacksea: [
+    phase(5, t("Closure", "Kapanma"), t("Black Sea loadings stop; ships wait on both sides of the straits and war-risk cover reprices.", "Karadeniz yüklemeleri durur; gemiler boğazların iki yanında bekler, savaş riski sigortası pahalanır.")),
+    phase(30, t("Supply gap", "Arz açığı"), t("Grain, sunflower oil and fertiliser shipments are missed; importers draw down stocks.", "Tahıl, ayçiçek yağı ve gübre sevkiyatı gelmez; ithalatçılar stok eritir.")),
+    phase(75, t("Price pressure", "Fiyat baskısı"), t("Bread, oil and feed prices rise; food import and subsidy bills grow.", "Ekmek, yağ ve yem fiyatı yükselir; gıda ithalat ve sübvansiyon faturası büyür.")),
+    phase(180, t("Substitution", "İkame"), t("Cargo shifts to rail, road and river, and buyers turn to other origins at higher cost.", "Yük demiryolu, karayolu ve nehre kayar; alıcılar daha yüksek maliyetle başka kaynaklara döner.")),
+  ],
+  panama: [
+    phase(7, t("Draft limits", "Draft kısıtı"), t("Low water in Gatún Lake cuts daily transit slots and the allowed draft.", "Gatún Gölü'nde su azalır; günlük geçiş hakkı ve izin verilen draft düşer.")),
+    phase(30, t("Queues", "Kuyruk"), t("Slot auctions grow expensive; ships load lighter, wait or take other routes.", "Geçiş ihaleleri pahalanır; gemiler daha az yükler, bekler veya başka rotaya döner.")),
+    phase(75, t("Delayed exports", "Geciken ihracat"), t("Grain, soybean and LNG cargoes from the Americas reach Asia later and cost more.", "Amerika'dan tahıl, soya ve LNG yükleri Asya'ya geç ve pahalı ulaşır.")),
+    phase(180, t("Rationing", "Paylaştırma"), t("Limits last until rain refills the lake; higher shipping costs pass slowly into prices.", "Kısıt yağışlar gölü doldurana kadar sürer; taşıma maliyeti fiyatlara yavaşça geçer.")),
+  ],
+  "volcano-vei7": [
+    phase(14, t("Eruption", "Patlama"), t("Ash and pyroclastic flows hit the region; nearby airspace and ports close.", "Kül ve piroklastik akıntılar bölgeyi vurur; yakındaki hava sahası ve limanlar kapanır.")),
+    phase(30, t("Sulphate veil", "Sülfat örtüsü"), t("Sulphate aerosol spreads through the stratosphere and starts to dim sunlight.", "Sülfat aerosolü stratosfere yayılır ve güneş ışığını azaltmaya başlar.")),
+    phase(120, t("Cooling", "Soğuma"), t("Temperatures fall and monsoon rain weakens; growing crops suffer and markets price it in.", "Sıcaklık düşer, muson yağışı zayıflar; tarladaki ürün zarar görür ve piyasa bunu fiyatlar.")),
+    phase(180, t("Harvest loss", "Hasat kaybı"), t("Harvests come in short; food prices climb, hardest for import-dependent countries.", "Hasat eksik kalır; gıda fiyatı yükselir, en çok ithalata bağımlı ülkeler zorlanır.")),
+  ],
+  "solar-g5": [
+    phase(1, t("Impact", "Çarpma"), t("Induced currents hit high-latitude grids; HF radio fades and GNSS positioning degrades.", "İndüklenen akımlar yüksek enlem şebekelerini vurur; HF radyo zayıflar, GNSS konumu bozulur.")),
+    phase(3, t("Grid stress", "Şebeke zorlanması"), t("Operators shed load; damaged transformers cause regional blackouts and satellites report faults.", "İşletmeciler yük atar; hasarlı trafolar bölgesel kesintiye yol açar, uydular arıza bildirir.")),
+    phase(30, t("Recovery", "Toparlanma"), t("Most lines return; areas with damaged transformers wait, and cold chains and logistics catch up.", "Hatların çoğu döner; trafosu hasarlı bölgeler bekler, soğuk zincir ve lojistik toparlanır.")),
+    phase(180, t("Repair backlog", "Onarım kuyruğu"), t("Large transformers take months to replace; losses are tallied and grids are hardened.", "Büyük trafoların değişimi aylar alır; kayıplar hesaplanır, şebekeler güçlendirilir.")),
+  ],
+};
+
 /** [English, Turkish, source] for one step of the domino chain: the mechanism through which the shock arrives. */
 export const STEP_COPY: Record<ShockId, Record<ChannelId, [string, string, string]>> = {
   hormuz: {
@@ -123,6 +177,10 @@ export const SIM_UI = {
   profileModel: t("B — country dependency profile", "B — ülke bağımlılık profili"),
   loading: t("Loading the map…", "Harita yükleniyor…"),
   simulateThis: t("Run impact simulation", "Etkiyi simüle et"),
+  globalIndex: t("Global Impact Index", "Küresel Etki Endeksi"),
+  pickHint: t("Click any country on the map to inspect its domino chain", "Domino zincirini görmek için haritada bir ülkeye tıkla"),
+  clear: t("Global", "Küresel"),
+  clearLabel: t("Clear the country and show the global overview", "Ülke seçimini kaldır ve küresel görünüme dön"),
   mapLabel: t("World map coloured by the simulated impact on each country. The country picker is the keyboard alternative.", "Ülkeleri simüle edilen etkiye göre renklendiren dünya haritası. Klavye için ülke seçiciyi kullan."),
   legend: t("Impact colours", "Etki renkleri"),
 } as const;

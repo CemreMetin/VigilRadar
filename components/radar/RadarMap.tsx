@@ -13,14 +13,14 @@ import { COLOR, MAP } from "@/lib/palette";
 
 export type Selection = { kind: "quake" | "plant" | "chokepoint" | "conflict"; id: string };
 /** What the SIMULATE mode draws: the result and the map name of the selected country. */
-export interface SimView { result: SimulationResult; selected: string }
+export interface SimView { result: SimulationResult; selected: string | null }
 interface Props {
   state: State | null;
   nowMs: number;
   sim: SimView | null; // null: LIVE mode
   label: string;
   onSelect: (s: Selection) => void;
-  onCountry: (mapName: string) => void;
+  onCountry: (mapName: string | null) => void; // null: a click on open sea
   selected: Selection | null; // LIVE: ringed on the map, and the camera moves to it once
 }
 
@@ -77,8 +77,11 @@ export default function RadarMap(props: Props) {
         },
         center: [15, 25],
         zoom: narrow ? 0.4 : 1.3,
-        minZoom: 0.3,
+        minZoom: narrow ? 0.35 : 0.75,
         maxZoom: 9,
+        renderWorldCopies: false, // one flat world: no second pair of Americas
+        // just inside ±180: MapLibre 6 reads an exact -180..180 as a zero-width range and the map goes blank
+        maxBounds: [[-179.999, -76], [179.999, 82]],
         attributionControl: false,
         dragRotate: false,
         pitchWithRotate: false,
@@ -88,6 +91,7 @@ export default function RadarMap(props: Props) {
 
       map.on("load", () => {
         registerMapGlyphs(map);
+        map.fitBounds([[-168, -56], [174, 72]], { padding: narrow ? 8 : 16, duration: 0 });
         const set = (id: string, data: unknown) => (map.getSource(id) as GeoJSONSource | undefined)?.setData(data as never);
         const show = (id: string, on: boolean) => { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none"); };
         world.then((w) => { if (!disposed) set("world", w); }, () => { /* no outlines; the lists beside the map still work */ });
@@ -187,7 +191,7 @@ export default function RadarMap(props: Props) {
         map.on("click", (e) => {
           if (latest.current.sim) {
             const country = map.queryRenderedFeatures(e.point, { layers: ["world-fill"] })[0];
-            if (country) latest.current.onCountry(String(country.properties?.name));
+            latest.current.onCountry(country ? String(country.properties?.name) : null);
             return;
           }
           const { x, y } = e.point; // a 16 px tap box for comfortable mobile touches
@@ -290,7 +294,7 @@ export default function RadarMap(props: Props) {
           }
           const { result, selected } = view;
           map.setPaintProperty("world-fill", "fill-color", fillExpression(result) as never);
-          map.setFilter("world-selected-line", ["==", ["get", "name"], selected]);
+          map.setFilter("world-selected-line", ["==", ["get", "name"], selected ?? ""]);
           set("sim-landings", landingFeatures(result));
           if (shownShock !== result.shock.id) {
             shownShock = result.shock.id;
@@ -301,7 +305,9 @@ export default function RadarMap(props: Props) {
             set("sim-center", shockPoint(result.shock));
             growFrom = reduced ? null : performance.now();
             halo(shockPoint(result.shock), true);
-            map.easeTo({ center: [result.shock.lon, 25], zoom: map.getContainer().clientWidth < 700 ? 0.6 : 1.4, duration: reduced ? 0 : 900 });
+            // lean towards the shock, but stay clear of the dateline edge of the single world
+            const lon = Math.max(-55, Math.min(55, result.shock.lon * 0.45));
+            map.easeTo({ center: [lon, 20], zoom: map.getContainer().clientWidth < 700 ? 0.55 : 1.15, duration: reduced ? 0 : 900 });
           }
           if (growFrom === null) set("sim-arcs", arcFeatures(result));
           animate();

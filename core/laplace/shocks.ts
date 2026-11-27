@@ -39,19 +39,19 @@ export const SHOCKS: readonly ShockDef[] = [
   },
   {
     id: "panama", defaultDay: 30, lat: 9.08, lon: -79.9, infra: "chokepoint", chokepointKey: "panama",
-    channels: { energy: ch(0.5, 7, 30, 0.45), trade: ch(0.85, 3, 30, 0.5), food: ch(0.6, 10, 45, 0.5), digital: ch(0.02, 7, 30, 0.3), macro: ch(0.5, 14, 60, 0.5) },
+    channels: { energy: ch(0.5, 7, 30, 0.45), trade: ch(0.95, 3, 30, 0.5), food: ch(0.6, 10, 45, 0.5), digital: ch(0.02, 7, 30, 0.3), macro: ch(0.5, 14, 60, 0.5) },
     globalSpillover: { trade: 0.12, macro: 0.1, food: 0.08, energy: 0.05 },
     sources: ["Panama Canal Authority", "IMF PortWatch", "UNCTAD"],
   },
   {
-    id: "volcano-vei7", defaultDay: 90, lat: -8.25, lon: 118.0, infra: "volcano", libraryId: "supervolcano",
+    id: "volcano-vei7", defaultDay: 135, lat: -8.25, lon: 118.0, infra: "volcano", libraryId: "supervolcano",
     channels: { energy: ch(0.6, 45, 150, 0.75), trade: ch(0.75, 1, 14, 0.3), food: ch(1, 30, 150, 0.85), digital: ch(0.2, 1, 14, 0.3), macro: ch(0.8, 21, 120, 0.8) },
     globalSpillover: { food: 0.4, macro: 0.35, energy: 0.25, trade: 0.2 },
     sources: ["Robock (2000)", "Raible et al. (2016)", "FAO"],
   },
   {
     id: "solar-g5", defaultDay: 3, lat: 62.0, lon: 0.0, infra: "grid", libraryId: "solar-superstorm",
-    channels: { energy: ch(1, 1, 7, 0.55), trade: ch(0.6, 1, 10, 0.35), food: ch(0.25, 7, 30, 0.4), digital: ch(0.95, 1, 3, 0.35), macro: ch(0.7, 3, 30, 0.55) },
+    channels: { energy: ch(1, 1, 3, 0.55), trade: ch(0.6, 1, 10, 0.35), food: ch(0.25, 7, 30, 0.4), digital: ch(0.95, 1, 3, 0.35), macro: ch(0.7, 3, 30, 0.55) },
     globalSpillover: { digital: 0.35, macro: 0.2, trade: 0.2, energy: 0.05, food: 0.05 },
     sources: ["NOAA SWPC", "Lloyd's / AER", "USGS Geomagnetism"],
   },

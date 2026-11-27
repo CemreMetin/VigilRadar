@@ -8,8 +8,9 @@
  * "Save for offline" on /survive/ sends a CACHE_PAGES message; we then download those pages and every
  * script/style/font they reference, so they work even if you never opened them online.
  */
-// The cache names keep their first spelling on purpose: renaming them would delete the copies people saved for offline use.
-const VERSION = "v1";
+// The cache names keep their first spelling. Raising VERSION drops every older cache, saved offline copies included, so
+// raise the "precached" flag (PwaRegister) and the "offline" flag (OfflineButton) with it.
+const VERSION = "v2";
 const PAGES = `monitoring-pages-${VERSION}`;
 const RUNTIME = `monitoring-runtime-${VERSION}`;
 const DATA = `monitoring-data-${VERSION}`;

@@ -13,9 +13,16 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "VigilRadar",
   description:
-    "A calm, static analysis desk for large earthquakes and conflict events and their possible effect on nuclear plants and sea straits. Not an official warning system.",
+    "A calm global risk monitor for earthquakes, conflict reports and sea straits, with a deterministic impact simulator. Not an official warning system.",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icons/icon-192.png", apple: "/icons/icon-192.png" },
+  // /icons/* is cached for a year (public/_headers): raise ?v= whenever an icon changes
+  icons: {
+    icon: [
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png?v=2", type: "image/png", sizes: "192x192" },
+    ],
+    apple: "/icons/icon-192.png?v=2",
+  },
   appleWebApp: { capable: true, title: "VigilRadar", statusBarStyle: "black" },
 };
 
