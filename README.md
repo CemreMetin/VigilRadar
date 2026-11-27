@@ -1,9 +1,12 @@
 # VigilRadar
 
+![Live](https://img.shields.io/badge/Live-vigilradar.pages.dev-E05A2B)
 ![Next.js](https://img.shields.io/badge/Next.js-16%20Static-000000?logo=nextdotjs&logoColor=white)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers%20%2B%20Pages-F38020?logo=cloudflare&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-30m%20Autopilot-2088FF?logo=githubactions&logoColor=white)
 ![Cost](https://img.shields.io/badge/Cost-%240%2Fmonth-2ea44f)
+
+**Live:** [vigilradar.pages.dev](https://vigilradar.pages.dev)
 
 This started two months ago as a private side project called **Monitoring** that has been quietly running online ever since. The problem was that I got way too carried away: twenty map layers, satellites, military bases, eighteen live counters, twenty-three apocalypse essays... opening my own dashboard exhausted even me.
 
@@ -12,13 +15,6 @@ While dusting off old projects from my private archive to clean up my portfolio 
 A calm, **$0/month** live global risk desk paired with a **Global Impact Simulator** — a deterministic domino-effect model where you can clog a strait, cut a subsea cable corridor, or trigger a volcanic winter, drag time forward from Day 1 to Day 180, and see *which* countries get hit, *through which channels*, and *why*.
 
 > **Yes, an EE student shipped a Next.js app:** I usually live in Python and signal/data pipelines, so turning this into a fast web app took some teamwork. The vision, architecture, data rules, and ruthless simplification are mine — **Antigravity** and **Claude Code** handled the TypeScript grind, map optimization, and Cloudflare wiring while I kept yelling at them to make the UI simpler.
-
-| Project | What it hunts |
-|---|---|
-| [TESS Planet Hunter](https://github.com/CemreMetin/tess-planet-hunter) | Part I of the Sunday Hunter trilogy: exoplanet candidates in NASA TESS light curves |
-| [Subsurface Ghost Hunter](https://github.com/CemreMetin/subsurface-ghost-hunter) | Part II: buried archaeology around Niğde in stacked Sentinel-2 imagery |
-| [ZTF Shadow & Blindspot Hunter](https://github.com/CemreMetin/ztf-shadow-hunter) | Part III: stars that suddenly go dark, and events two classifiers disagree on |
-| [VigilRadar](https://github.com/CemreMetin/VigilRadar) | Same house rules: a free cloud that runs itself, and a two-minute check over Sunday coffee |
 
 ### My Twist on Global Risk Monitoring
 
@@ -135,7 +131,7 @@ Pull requests with a source attached are the best kind.
 **Add a shock**
 
 1. Add its id to `ShockId` in `types.ts` and its definition (position, channel weights and timing, spillover floor, sources) to `shocks.ts`.
-2. Add its texts in English and Turkish to `copy.ts` (`SHOCK_COPY` and `STEP_COPY`).
+2. Add its texts in English and Turkish to `copy.ts` (`SHOCK_COPY`, `SHOCK_PHASES`, and `STEP_COPY`).
 3. Give the 49 profiles their exposure (the `ORDER` list in `countries.ts`).
 4. Add one test that states what should be true in the real world.
 
